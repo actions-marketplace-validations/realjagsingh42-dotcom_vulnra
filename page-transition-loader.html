@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VULNRA — Page Transition Loader</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --acid: #b8ff57;
+      --acid-dim: rgba(184,255,87,0.10);
+      --bg: #080a08;
+      --surface: #0d110d;
+      --border: rgba(184,255,87,0.12);
+      --text: #e8f0e8;
+      --muted: #5a6b5a;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.15; pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: var(--acid); top: -150px; left: -150px; animation: drift 20s ease-in-out infinite alternate; }
+    .orb-2 { width: 350px; height: 350px; background: #ff4545; bottom: -100px; right: -80px; animation: drift 17s ease-in-out 3s infinite alternate-reverse; }
+    @keyframes drift { from { transform: translate(0,0); } to { transform: translate(30px,20px); } }
+
+    .demo {
+      position: relative; z-index: 1;
+      text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 48px;
+      padding: 40px 24px;
+      animation: pageIn 0.6s ease forwards;
+    }
+    @keyframes pageIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 18px; font-weight: 700; letter-spacing: 0.2em; color: var(--acid);
+    }
+
+    .heading {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: clamp(26px, 5vw, 46px);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+    }
+    .heading span { color: var(--acid); }
+    .sub {
+      font-size: 14px; font-weight: 300; color: var(--muted);
+      margin-top: 10px; line-height: 1.65;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px; width: 100%; max-width: 660px;
+    }
+    .btn {
+      position: relative; overflow: hidden;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 15px 22px; border-radius: 3px;
+      cursor: pointer; border: none;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(0.98); }
+    .btn::after {
+      content: ''; position: absolute; top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.13), transparent);
+      transition: left 0.4s ease;
+    }
+    .btn:hover::after { left: 150%; }
+    .btn-primary { background: var(--acid); color: #080a08; }
+    .btn-primary:hover { box-shadow: 0 8px 30px rgba(184,255,87,0.32); }
+    .btn-outline { background: transparent; color: var(--acid); border: 1px solid rgba(184,255,87,0.35); }
+    .btn-outline:hover { border-color: var(--acid); background: var(--acid-dim); }
+    .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: rgba(184,255,87,0.3); }
+
+    .divider {
+      width: 100%; max-width: 660px;
+      display: flex; align-items: center; gap: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em; color: var(--muted);
+    }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--border); }
+
+    .nav-links { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .nav-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; letter-spacing: 0.08em; color: var(--muted);
+      text-decoration: none; padding: 8px 14px;
+      border: 1px solid var(--border); border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { color: var(--acid); border-color: rgba(184,255,87,0.4); background: var(--acid-dim); }
+
+    /* ── LOADER ── */
+    #vx-loader {
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    #vx-loader.active { pointer-events: all; opacity: 1; }
+
+    .vx-backdrop {
+      position: absolute; inset: 0; background: #080a08; opacity: 0;
+      transition: opacity 0.28s ease;
+    }
+    #vx-loader.active .vx-backdrop { opacity: 0.97; }
+
+    .vx-scanlines {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0.35;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px);
+    }
+
+    .vx-panel {
+      position: relative; z-index: 1;
+      width: 300px; padding: 44px 36px 40px;
+      display: flex; flex-direction: column; align-items: center; gap: 28px;
+      opacity: 0; transform: translateY(16px) scale(0.97);
+      transition: opacity 0.35s ease 0.08s, transform 0.4s cubic-bezier(0.22,1,0.36,1) 0.08s;
+    }
+    #vx-loader.active .vx-panel { opacity: 1; transform: translateY(0) scale(1); }
+
+    .vx-corner { position: absolute; width: 14px; height: 14px; }
+    .vx-corner.tl { top:0; left:0;     border-top:1.5px solid rgba(184,255,87,.5); border-left:1.5px solid rgba(184,255,87,.5); }
+    .vx-corner.tr { top:0; right:0;    border-top:1.5px solid rgba(184,255,87,.5); border-right:1.5px solid rgba(184,255,87,.5); }
+    .vx-corner.bl { bottom:0; left:0;  border-bottom:1.5px solid rgba(184,255,87,.5); border-left:1.5px solid rgba(184,255,87,.5); }
+    .vx-corner.br { bottom:0; right:0; border-bottom:1.5px solid rgba(184,255,87,.5); border-right:1.5px solid rgba(184,255,87,.5); }
+
+    .vx-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 15px; font-weight: 700; letter-spacing: 0.2em; color: #b8ff57;
+      animation: vxFlicker 4s ease-in-out infinite;
+    }
+    @keyframes vxFlicker {
+      0%,93%,100% { opacity:1; }
+      94% { opacity:.45; }
+      96% { opacity:1; }
+      98% { opacity:.7; }
+    }
+
+    .vx-bar-track {
+      width: 100%; height: 3px;
+      background: rgba(184,255,87,.1); border-radius: 2px; position: relative;
+    }
+    .vx-bar-fill {
+      height: 100%; width: 0%; background: #b8ff57; border-radius: 2px;
+      box-shadow: 0 0 10px rgba(184,255,87,.7);
+      position: relative; z-index: 1;
+    }
+    .vx-bar-glow {
+      position: absolute; top: 50%; left: 0;
+      width: 50px; height: 24px;
+      background: radial-gradient(ellipse, rgba(184,255,87,.6) 0%, transparent 70%);
+      transform: translate(-50%,-50%); pointer-events: none;
+    }
+
+    .vx-status {
+      display: flex; align-items: center; gap: 9px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; letter-spacing: 0.13em; color: rgba(184,255,87,.72);
+    }
+    .vx-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #b8ff57;
+      animation: vxPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes vxPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(184,255,87,.6); }
+      50%      { box-shadow: 0 0 0 5px rgba(184,255,87,0); }
+    }
+    .vx-status-text { min-width: 165px; }
+
+    .vx-hex {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; letter-spacing: 0.06em; color: rgba(184,255,87,.25);
+    }
+
+    #vx-flash {
+      position: fixed; inset: 0; z-index: 99998;
+      background: #b8ff57; opacity: 0; pointer-events: none;
+    }
+    #vx-flash.flash-in { animation: vxFlashIn 0.6s ease forwards; }
+    @keyframes vxFlashIn {
+      0% { opacity:.28; } 40% { opacity:.07; } 100% { opacity:0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="demo">
+
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+      <polygon points="16,2 30,28 2,28" stroke="#b8ff57" stroke-width="1.5" fill="none"/>
+      <polygon points="16,9 24,24 8,24" fill="#b8ff57" opacity="0.2"/>
+      <line x1="16" y1="9" x2="16" y2="21" stroke="#b8ff57" stroke-width="1.5"/>
+    </svg>
+    VULNRA
+  </div>
+
+  <div>
+    <div class="heading">Page Transition <span>Loader</span></div>
+    <div class="sub">Click any button or link below to trigger the animated loader.</div>
+  </div>
+
+  <div class="btn-grid">
+    <button class="btn btn-primary"  onclick="triggerLoader('scanner.html')">⚡ Launch Scanner →</button>
+    <button class="btn btn-outline"  onclick="triggerLoader('signup.html')">Get Started Free</button>
+    <button class="btn btn-ghost"    onclick="triggerLoader('signin.html')">Sign In</button>
+    <button class="btn btn-outline"  onclick="triggerLoader('signup.html?plan=pro')">Upgrade to Pro →</button>
+    <button class="btn btn-ghost"    onclick="triggerLoader('signup.html?plan=enterprise')">Contact Sales</button>
+    <button class="btn btn-primary"  onclick="triggerLoader('index.html')">← Back to Home</button>
+  </div>
+
+  <div class="divider">OR USE LINKS</div>
+
+  <div class="nav-links">
+    <a href="scanner.html" class="nav-link">scanner.html</a>
+    <a href="signin.html"  class="nav-link">signin.html</a>
+    <a href="signup.html"  class="nav-link">signup.html</a>
+    <a href="index.html"   class="nav-link">index.html</a>
+    <a href="https://railway.app" class="nav-link" target="_blank">external ↗ (skipped)</a>
+  </div>
+
+</div>
+
+<!-- LOADER HTML -->
+<div id="vx-loader" aria-hidden="true">
+  <div class="vx-backdrop"></div>
+  <div class="vx-panel">
+    <span class="vx-corner tl"></span>
+    <span class="vx-corner tr"></span>
+    <span class="vx-corner bl"></span>
+    <span class="vx-corner br"></span>
+    <div class="vx-logo">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+        <polygon points="16,2 30,28 2,28" stroke="#b8ff57" stroke-width="1.5" fill="none"/>
+        <polygon points="16,9 24,24 8,24" fill="#b8ff57" opacity="0.15"/>
+        <line x1="16" y1="9" x2="16" y2="21" stroke="#b8ff57" stroke-width="1.5"/>
+      </svg>
+      VULNRA
+    </div>
+    <div class="vx-bar-track">
+      <div class="vx-bar-fill" id="vx-bar"></div>
+      <div class="vx-bar-glow" id="vx-glow"></div>
+    </div>
+    <div class="vx-status">
+      <span class="vx-dot"></span>
+      <span class="vx-status-text" id="vx-status-text">INITIALIZING</span>
+    </div>
+    <div class="vx-hex" id="vx-hex">0x00</div>
+  </div>
+  <div class="vx-scanlines"></div>
+</div>
+<div id="vx-flash"></div>
+
+<script>
+(function () {
+  const loader   = document.getElementById('vx-loader');
+  const barEl    = document.getElementById('vx-bar');
+  const glowEl   = document.getElementById('vx-glow');
+  const statusEl = document.getElementById('vx-status-text');
+  const hexEl    = document.getElementById('vx-hex');
+  const flash    = document.getElementById('vx-flash');
+
+  const MSGS = ['INITIALIZING','LOADING MODULES','VERIFYING SESSION','RESOLVING ROUTES','BUILDING CONTEXT','READY'];
+  let hexTimer, msgTimer, rafId, isActive = false;
+
+  function startHex() {
+    let v = 0;
+    hexTimer = setInterval(() => {
+      v = (v + Math.floor(Math.random() * 18 + 4)) & 0xFF;
+      hexEl.textContent = '0x' + v.toString(16).padStart(2,'0').toUpperCase();
+    }, 72);
+  }
+
+  function reset() {
+    clearInterval(hexTimer); clearInterval(msgTimer); cancelAnimationFrame(rafId);
+    barEl.style.width = '0%'; glowEl.style.left = '0%';
+    statusEl.textContent = MSGS[0]; hexEl.textContent = '0x00';
+    isActive = false;
+  }
+
+  function runProgress(onDone) {
+    let msgIdx = 0;
+    statusEl.textContent = MSGS[0];
+    msgTimer = setInterval(() => {
+      msgIdx = Math.min(msgIdx + 1, MSGS.length - 1);
+      statusEl.textContent = MSGS[msgIdx];
+    }, 150);
+
+    const start = performance.now(), DURATION = 920;
+    function tick(now) {
+      const t = Math.min((now - start) / DURATION, 1);
+      const pct = (1 - Math.pow(2, -10 * t)) * 92;
+      barEl.style.width = pct + '%';
+      glowEl.style.left = pct + '%';
+      if (t < 1) { rafId = requestAnimationFrame(tick); }
+      else {
+        clearInterval(msgTimer);
+        statusEl.textContent = 'READY';
+        barEl.style.width = '100%'; glowEl.style.left = '100%';
+        clearInterval(hexTimer); hexEl.textContent = '0xFF';
+        setTimeout(onDone, 130);
+      }
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function show(href) {
+    if (isActive) return;
+    isActive = true;
+    reset(); isActive = true;
+    loader.classList.add('active');
+    startHex();
+    runProgress(() => {
+      // In demo: hide after completing. In real pages: window.location.href = href
+      setTimeout(() => { loader.classList.remove('active'); reset(); }, 400);
+    });
+  }
+
+  // Expose for onclick= usage
+  window.triggerLoader = show;
+
+  // Auto-intercept <a href> clicks
+  document.addEventListener('click', function(e) {
+    let node = e.target;
+    while (node && node !== document.body) {
+      if (node.tagName === 'A' && node.href && !node.target) {
+        try {
+          const url = new URL(node.href, window.location.href);
+          if (url.hostname !== window.location.hostname) return;
+          if (url.hash && url.pathname === window.location.pathname) return;
+          if (node.dataset.noLoader !== undefined) return;
+          e.preventDefault();
+          show(node.href);
+          return;
+        } catch(_) { return; }
+      }
+      node = node.parentElement;
+    }
+  }, true);
+
+  // Page-in flash
+  requestAnimationFrame(() => flash.classList.add('flash-in'));
+})();
+</script>
+
+</body>
+</html>
