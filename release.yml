@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────
+#  VULNRA — Release Pipeline
+#  Triggers when you push a version tag: v1.0.0
+#  Creates a GitHub Release automatically
+# ─────────────────────────────────────────────
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          # Strip the leading 'v' for changelog lookup
+          VERSION_NUM=${VERSION#v}
+
+          # Extract the section between this version and the previous one
+          NOTES=$(awk "/^## \[$VERSION_NUM\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+
+          # Write to file to handle multiline safely
+          echo "$NOTES" > release_notes.txt
+          echo "Notes extracted for $VERSION_NUM"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: VULNRA ${{ steps.version.outputs.VERSION }}
+          body_path: release_notes.txt
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
