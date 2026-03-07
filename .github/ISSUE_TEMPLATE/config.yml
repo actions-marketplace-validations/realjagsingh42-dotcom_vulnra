@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question
+    about: Ask a question about VULNRA
+    url: https://github.com/realjags/vulnra/discussions
+  - name: VULNRA Documentation
+    about: Check the internal documentation and setup guides
+    url: https://github.com/realjags/vulnra
