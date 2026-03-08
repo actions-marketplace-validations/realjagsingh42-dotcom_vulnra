@@ -1791,7 +1791,27 @@
       const line = document.createElement('div');
       line.className = 'log-line';
       line.style.animationDelay = '0s';
-      line.innerHTML = `<span class="log-ts">${ts()}</span><span class="log-tag ${tagClass}">[${tag}]</span><span class="log-msg ${msgClass}">${msg}</span>`;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'log-ts';
+      timeSpan.textContent = ts();
+
+      const tagSpan = document.createElement('span');
+      tagSpan.className = `log-tag ${tagClass}`;
+      tagSpan.textContent = `[${tag}]`;
+
+      const msgSpan = document.createElement('span');
+      msgSpan.className = `log-msg ${msgClass}`;
+      // Basic support for our own harmless <span> tags used in logging
+      if (msg.includes('<span')) {
+        msgSpan.innerHTML = msg; // Internal trusted usage
+      } else {
+        msgSpan.textContent = msg;
+      }
+
+      line.appendChild(timeSpan);
+      line.appendChild(tagSpan);
+      line.appendChild(msgSpan);
       out.appendChild(line);
       out.scrollTop = out.scrollHeight;
 
@@ -1805,14 +1825,23 @@
 
     function clearLog() {
       const out = document.getElementById('log-output');
-      out.innerHTML = '<div class="idle-state" id="idle-state"><div class="idle-ring"><svg class="idle-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><div class="idle-label">AWAITING TARGET</div></div>';
+      out.innerHTML = ''; // Safe to clear
+      const idle = document.createElement('div');
+      idle.className = 'idle-state';
+      idle.id = 'idle-state';
+      idle.innerHTML = '<div class="idle-ring"><svg class="idle-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><div class="idle-label">AWAITING TARGET</div>';
+      out.appendChild(idle);
       statCounts = { probes: 0, fail: 0, warn: 0, pass: 0 };
-      ['probes', 'fail', 'warn', 'pass'].forEach(k => document.getElementById('stat-' + k).textContent = '0');
+      ['probes', 'fail', 'warn', 'pass'].forEach(k => {
+        const el = document.getElementById('stat-' + k);
+        if (el) el.textContent = '0';
+      });
     }
 
     // ── Progress ───────────────────────────────────────────────────
     function setProgress(pct) {
-      document.getElementById('progress-wrap').classList.toggle('show', pct > 0 && pct < 100);
+      const wrap = document.getElementById('progress-wrap');
+      wrap.classList.toggle('show', pct > 0 && pct < 100);
       document.getElementById('progress-bar').style.width = pct + '%';
     }
 
@@ -1844,7 +1873,6 @@
         btn.disabled = true;
         btn.classList.add('scanning');
         icon.innerHTML = '<circle cx="12" cy="12" r="10" stroke-dasharray="20 40" style="animation:spin .9s linear infinite"/>';
-        icon.style.animation = '';
         label.textContent = 'SCANNING…';
       } else {
         btn.disabled = false;
@@ -1860,7 +1888,6 @@
       const engine = data.scan_engine ?? '?';
       const findings = data.findings ?? [];
 
-      // ring
       const fill = document.getElementById('ring-fill');
       const num = document.getElementById('score-num');
       const color = score >= 7 ? 'var(--red)' : score >= 4 ? 'var(--amber)' : 'var(--green)';
@@ -1872,7 +1899,6 @@
       document.getElementById('score-engine').textContent = `ENGINE: ${engine.toUpperCase()}`;
       document.getElementById('score-empty').style.display = 'none';
 
-      // metrics
       document.getElementById('metrics-grid').style.display = 'grid';
       document.getElementById('m-findings').textContent = findings.filter(f => !f.blurred).length;
       document.getElementById('m-probes').textContent = statCounts.probes || data.probes_run || '—';
@@ -1885,7 +1911,10 @@
       const empty = document.getElementById('findings-empty');
       list.innerHTML = '';
       const findings = data.findings ?? [];
-      if (!findings.length) return;
+      if (!findings.length) {
+        empty.style.display = 'flex';
+        return;
+      }
       empty.style.display = 'none';
 
       findings.forEach((f, i) => {
@@ -1894,22 +1923,45 @@
 
         if (f.blurred) {
           div.className = 'finding-item locked';
-          div.innerHTML = `
-          <div class="finding-head">
-            <div class="finding-sev sev-locked">LOCKED</div>
-            <div class="finding-cat">Upgrade to Pro</div>
-          </div>
-          <div class="finding-detail">Full finding details available on Pro plan.</div>`;
+          const head = document.createElement('div');
+          head.className = 'finding-head';
+          head.innerHTML = '<div class="finding-sev sev-locked">LOCKED</div><div class="finding-cat">Upgrade to Pro</div>';
+          const detail = document.createElement('div');
+          detail.className = 'finding-detail';
+          detail.textContent = 'Full finding details available on Pro plan.';
+          div.appendChild(head);
+          div.appendChild(detail);
         } else {
           const sev = (f.severity || 'LOW').toLowerCase();
           div.className = `finding-item ${sev}`;
-          div.innerHTML = `
-          <div class="finding-head">
-            <div class="finding-sev sev-${sev}">${f.severity}</div>
-            <div class="finding-cat">${f.category}</div>
-            ${f.score ? `<div class="finding-score">${f.score}/10</div>` : ''}
-          </div>
-          <div class="finding-detail">${f.detail}</div>`;
+
+          const head = document.createElement('div');
+          head.className = 'finding-head';
+
+          const sevDiv = document.createElement('div');
+          sevDiv.className = `finding-sev sev-${sev}`;
+          sevDiv.textContent = f.severity;
+
+          const catDiv = document.createElement('div');
+          catDiv.className = 'finding-cat';
+          catDiv.textContent = f.category;
+
+          head.appendChild(sevDiv);
+          head.appendChild(catDiv);
+
+          if (f.score) {
+            const scoreDiv = document.createElement('div');
+            scoreDiv.className = 'finding-score';
+            scoreDiv.textContent = `${f.score}/10`;
+            head.appendChild(scoreDiv);
+          }
+
+          const detail = document.createElement('div');
+          detail.className = 'finding-detail';
+          detail.textContent = f.detail;
+
+          div.appendChild(head);
+          div.appendChild(detail);
         }
         list.appendChild(div);
       });
@@ -1922,16 +1974,14 @@
       list.innerHTML = '';
 
       if (comp.blurred) {
-        empty.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Compliance mapping locked<br>— upgrade to Pro`;
+        empty.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Compliance mapping locked<br>— upgrade to Pro';
         return;
       }
 
       const frameworks = [
-        comp.eu_ai_act && { id: 'eu', fw: 'EU AI ACT', full: 'EU Artificial Intelligence Act', articles: comp.eu_ai_act.articles?.join(', '), fine: comp.eu_ai_act.fine_eur ? `Up to €${(comp.eu_ai_act.fine_eur / 1e6).toFixed(0)}M fine` : null },
-        comp.dpdp && { id: 'dpdp', fw: 'INDIA DPDP', full: 'Digital Personal Data Protection Act', articles: comp.dpdp.sections?.join(', '), fine: comp.dpdp.fine_inr ? `Up to ₹${(comp.dpdp.fine_inr / 1e7).toFixed(0)}Cr fine` : null },
-        comp.nist_ai_rmf && { id: 'nist', fw: 'NIST AI RMF', full: 'NIST AI Risk Management Framework', articles: comp.nist_ai_rmf.functions?.join(', '), fine: null },
-        comp.iso_42001 && { id: 'iso', fw: 'ISO 42001', full: 'ISO/IEC 42001:2023 AI Management', articles: comp.iso_42001.clauses?.join(', '), fine: null },
-        comp.owasp_llm && { id: 'owasp', fw: 'OWASP LLM', full: 'OWASP LLM Top 10', articles: comp.owasp_llm.items?.join(', '), fine: null },
+        comp.eu_ai_act && { fw: 'EU AI ACT', full: 'EU Artificial Intelligence Act', articles: comp.eu_ai_act.articles?.join(', '), fine: comp.eu_ai_act.fine_eur ? `Up to €${(comp.eu_ai_act.fine_eur / 1e6).toFixed(0)}M fine` : null },
+        comp.dpdp && { fw: 'INDIA DPDP', full: 'Digital Personal Data Protection Act', articles: comp.dpdp.sections?.join(', '), fine: comp.dpdp.fine_inr ? `Up to ₹${(comp.dpdp.fine_inr / 1e7).toFixed(0)}Cr fine` : null },
+        comp.nist_ai_rmf && { fw: 'NIST AI RMF', full: 'NIST AI Risk Management Framework', articles: comp.nist_ai_rmf.functions?.join(', '), fine: null },
       ].filter(Boolean);
 
       if (!frameworks.length) return;
@@ -1941,18 +1991,39 @@
       frameworks.forEach(f => {
         const item = document.createElement('div');
         item.className = 'comp-item';
-        item.innerHTML = `
-        <div class="comp-head-row">
-          <span class="comp-fw" style="color:var(--acid)">${f.fw}</span>
-          <span class="comp-arrow">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
-          </span>
-        </div>
-        <div class="comp-body-wrap">
-          <div style="font-size:10px;color:var(--muted2);font-family:var(--mono);letter-spacing:.06em;margin-bottom:6px">${f.full}</div>
-          ${f.articles ? `<div class="comp-articles">${f.articles}</div>` : ''}
-          ${f.fine ? `<div class="comp-fine">${f.fine}</div>` : ''}
-        </div>`;
+
+        const head = document.createElement('div');
+        head.className = 'comp-head-row';
+        head.innerHTML = `<span class="comp-fw" style="color:var(--acid)">${f.fw}</span><span class="comp-arrow"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></span>`;
+
+        const bodyWrap = document.createElement('div');
+        bodyWrap.className = 'comp-body-wrap';
+
+        const full = document.createElement('div');
+        full.style.fontSize = '10px';
+        full.style.color = 'var(--muted2)';
+        full.style.fontFamily = 'var(--mono)';
+        full.style.letterSpacing = '.06em';
+        full.style.marginBottom = '6px';
+        full.textContent = f.full;
+
+        bodyWrap.appendChild(full);
+
+        if (f.articles) {
+          const arts = document.createElement('div');
+          arts.className = 'comp-articles';
+          arts.textContent = f.articles;
+          bodyWrap.appendChild(arts);
+        }
+        if (f.fine) {
+          const fine = document.createElement('div');
+          fine.className = 'comp-fine';
+          fine.textContent = f.fine;
+          bodyWrap.appendChild(fine);
+        }
+
+        item.appendChild(head);
+        item.appendChild(bodyWrap);
         list.appendChild(item);
       });
     }
@@ -1969,7 +2040,10 @@
       const findings = data.findings ?? [];
       const engine = data.scan_engine ?? '?';
       const scoreClass = score >= 7 ? 'tag-fail' : score >= 4 ? 'tag-warn' : 'tag-pass';
-      addLog('SCORE', scoreClass, `Risk Score: <span class="val">${score}/10</span>  [ engine: ${engine} ]`);
+
+      const scoreMsg = document.createElement('span');
+      scoreMsg.innerHTML = `Risk Score: <span class="val">${score}/10</span>  [ engine: ${engine} ]`;
+      addLog('SCORE', scoreClass, scoreMsg.innerHTML);
 
       if (!findings.length) {
         addLog('PASS', 'tag-pass', 'No vulnerabilities detected — endpoint appears safe', 'pass');

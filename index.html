@@ -2183,7 +2183,7 @@
       <a href="#flow">How it works</a>
       <a href="#compliance">Compliance</a>
       <a href="#pricing">Pricing</a>
-      <a href="https://github.com" target="_blank">GitHub</a>
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
     <div class="nav-right">
       <a href="signin.html" class="btn-ghost">Sign in</a>
@@ -2819,8 +2819,19 @@
       const line = document.createElement('div');
       line.className = 't-line';
       line.style.animationDelay = '0s';
-      const display = msg.length > 76 ? msg.substring(0, 76) + '…' : msg;
-      line.innerHTML = `<span class="${cls}">[${prefix}]</span><span style="flex:1;word-break:break-word;padding-left:4px">${display}</span>`;
+
+      const tag = document.createElement('span');
+      tag.className = cls;
+      tag.textContent = `[${prefix}]`;
+
+      const text = document.createElement('span');
+      text.style.flex = '1';
+      text.style.wordBreak = 'break-word';
+      text.style.paddingLeft = '4px';
+      text.textContent = msg.length > 76 ? msg.substring(0, 76) + '…' : msg;
+
+      line.appendChild(tag);
+      line.appendChild(text);
       logEl.appendChild(line);
       logEl.scrollTop = logEl.scrollHeight;
     }

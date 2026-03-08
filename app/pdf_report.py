@@ -495,230 +495,201 @@ def _findings_section(scan: dict, S: dict, story: list):
             ("LINEBEFORE",    (0, 0), (0, -1), 3, sev_ink),
         ]))
         story.append(body_t)
-        story.append(Spacer(1, 4 * mm))
+"""
+app/pdf_report.py - Professional PDF report generator for VULNRA.
+Hardened version with path security and memory optimization.
+"""
 
+import io
+import time
+import logging
+import pathlib
+from typing import Dict, Any, Optional
 
-def _compliance_section(scan: dict, S: dict, story: list):
-    compliance = scan.get("compliance", {})
-    if not compliance or compliance.get("blurred"):
-        story.append(Spacer(1, 6 * mm))
-        story.append(Paragraph("COMPLIANCE MAPPING", S["section_label"]))
-        story.append(ColoredBar(C_ACCENT_BLUE, 2))
-        story.append(Spacer(1, 4 * mm))
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
-        locked_data = [[Paragraph(
-            "🔒  Compliance mapping is available on the <b>Pro</b> tier. "
-            "Upgrade at <b>vulnra.ai</b> to see EU AI Act articles, DPDP sections, "
-            "NIST AI RMF functions, and estimated fine exposure.",
-            ParagraphStyle("lck", fontName="Helvetica", fontSize=9.5,
-                           textColor=colors.HexColor("#374151"), leading=14))]]
-        lt = Table(locked_data, colWidths=[CONTENT_W])
-        lt.setStyle(TableStyle([
-            ("BACKGROUND",    (0, 0), (-1, -1), colors.HexColor("#F9FAFB")),
-            ("BOX",           (0, 0), (-1, -1), 0.5, C_BORDER),
-            ("LEFTPADDING",   (0, 0), (-1, -1), 12),
-            ("RIGHTPADDING",  (0, 0), (-1, -1), 12),
-            ("TOPPADDING",    (0, 0), (-1, -1), 10),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-        ]))
-        story.append(lt)
-        return
+# ── Logging Setup ─────────────────────────────────────────────────────────────
+logger = logging.getLogger("vulnra.pdf")
 
-    story.append(Spacer(1, 8 * mm))
-    story.append(Paragraph("COMPLIANCE MAPPING", S["section_label"]))
-    story.append(ColoredBar(C_ACCENT_BLUE, 2))
-    story.append(Spacer(1, 4 * mm))
+# ── Path Security ─────────────────────────────────────────────────────────────
+BASE_DIR = pathlib.Path(__file__).parent.parent.absolute()
+ASSETS_DIR = BASE_DIR / "app" / "assets"
 
-    FRAMEWORKS = {
-        "eu_ai_act": {
-            "name": "EU AI Act",
-            "articles_key": "articles",
-            "fine_key": "fine_eur",
-            "currency": "€",
-            "color": colors.HexColor("#1565C0"),
-        },
-        "dpdp": {
-            "name": "India DPDP Act",
-            "articles_key": "sections",
-            "fine_key": "fine_inr",
-            "currency": "₹",
-            "color": colors.HexColor("#6A1B9A"),
-        },
-        "nist_ai_rmf": {
-            "name": "NIST AI RMF",
-            "articles_key": "functions",
-            "fine_key": None,
-            "currency": None,
-            "color": colors.HexColor("#00695C"),
-        },
-    }
+def get_safe_asset_path(filename: str) -> Optional[pathlib.Path]:
+    """Ensure asset paths are confined to the assets directory."""
+    path = (ASSETS_DIR / filename).resolve()
+    if ASSETS_DIR in path.parents:
+        return path
+    return None
 
-    header_row = [
-        Paragraph("Framework", S["table_header"]),
-        Paragraph("Triggered Controls", S["table_header"]),
-        Paragraph("Max Exposure", S["table_header"]),
-    ]
-    rows = [header_row]
+# ── Styles ────────────────────────────────────────────────────────────────────
+def get_report_styles():
+    styles = getSampleStyleSheet()
+    
+    # Custom styles
+    styles.add(ParagraphStyle(
+        name='MainTitle',
+        parent=styles['Heading1'],
+        fontSize=28,
+        textColor=colors.HexColor("#000000"),
+        alignment=TA_CENTER,
+        spaceAfter=30,
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='SectionHeader',
+        parent=styles['Heading2'],
+        fontSize=18,
+        textColor=colors.HexColor("#2563EB"), # Blue-600
+        spaceBefore=20,
+        spaceAfter=12,
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='RiskHigh',
+        parent=styles['Normal'],
+        textColor=colors.HexColor("#DC2626"), # Red-600
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='RiskMedium',
+        parent=styles['Normal'],
+        textColor=colors.HexColor("#D97706"), # Amber-600
+        fontName='Helvetica-Bold'
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='RiskLow',
+        parent=styles['Normal'],
+        textColor=colors.HexColor("#059669"), # Emerald-600
+        fontName='Helvetica-Bold'
+    ))
+    
+    return styles
 
-    for key, meta in FRAMEWORKS.items():
-        fw = compliance.get(key)
-        if not fw:
-            continue
-        articles = fw.get(meta["articles_key"], [])
-        articles_str = ", ".join(articles) if articles else "—"
-        if meta["fine_key"] and fw.get(meta["fine_key"]):
-            fine_val = fw[meta["fine_key"]]
-            fine_str = f"{meta['currency']}{fine_val:,.0f}"
-        else:
-            fine_str = "N/A"
+# ── Report Generation ──────────────────────────────────────────────────────────
 
-        rows.append([
-            Paragraph(f"<b>{meta['name']}</b>",
-                      ParagraphStyle("fn", fontName="Helvetica-Bold", fontSize=9,
-                                     textColor=meta["color"])),
-            Paragraph(articles_str, S["table_cell"]),
-            Paragraph(fine_str,
-                      ParagraphStyle("fe", fontName="Helvetica-Bold", fontSize=9,
-                                     textColor=C_ACCENT_RED if meta["fine_key"] else C_TEXT_MUTED)),
-        ])
-
-    col_w = [45 * mm, CONTENT_W - 45 * mm - 40 * mm, 40 * mm]
-    table = Table(rows, colWidths=col_w, repeatRows=1)
-    style = [
-        ("BACKGROUND",    (0, 0), (-1, 0), C_BG_HEADER),
-        ("TEXTCOLOR",     (0, 0), (-1, 0), C_TEXT_WHITE),
-        ("FONTNAME",      (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTSIZE",      (0, 0), (-1, 0), 8),
-        ("ROWBACKGROUNDS",(0, 1), (-1, -1), [C_BG_CARD, C_BG_ALT_ROW]),
-        ("GRID",          (0, 0), (-1, -1), 0.4, C_BORDER),
-        ("VALIGN",        (0, 0), (-1, -1), "MIDDLE"),
-        ("LEFTPADDING",   (0, 0), (-1, -1), 8),
-        ("RIGHTPADDING",  (0, 0), (-1, -1), 8),
-        ("TOPPADDING",    (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-    ]
-    table.setStyle(TableStyle(style))
-    story.append(table)
-
-
-def _recommendations_section(scan: dict, S: dict, story: list):
-    findings = scan.get("findings", [])
+def generate_audit_pdf(scan_data: Dict[str, Any]) -> bytes:
+    """
+    Generate a professional security audit report as PDF.
+    Returns bytes using an in-memory buffer.
+    """
+    logger.info(f"Generating PDF report for scan {scan_data.get('scan_id')}")
+    
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=50,
+        bottomMargin=50
+    )
+    
+    styles = get_report_styles()
+    story = []
+    
+    # 1. Cover Page
+    story.append(Spacer(1, 1*inch))
+    # story.append(Image(get_safe_asset_path("logo.png"), width=2*inch, height=0.6*inch)) # Add if logo exists
+    story.append(Spacer(1, 0.5*inch))
+    story.append(Paragraph("AI Security Audit Report", styles['MainTitle']))
+    story.append(Paragraph(f"Target: {scan_data.get('url', 'Unknown Endpoint')}", styles['Normal']))
+    story.append(Paragraph(f"Scan ID: {scan_data.get('scan_id', 'N/A')}", styles['Normal']))
+    story.append(Paragraph(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
+    story.append(Spacer(1, 2*inch))
+    
+    # Risk Score Circle (Simplified)
+    score = scan_data.get('risk_score', 0.0)
+    score_color = "#DC2626" if score > 7 else "#D97706" if score > 4 else "#059669"
+    story.append(Paragraph(f"<font size='48' color='{score_color}'>{score}</font>", styles['MainTitle']))
+    story.append(Paragraph("Overall Risk Score", styles['Normal']))
+    
+    story.append(PageBreak())
+    
+    # 2. Executive Summary
+    story.append(Paragraph("Executive Summary", styles['SectionHeader']))
+    summary_text = (
+        "This report outlines the findings of an adversarial security scan performed on the specified "
+        "AI endpoint. The scan involved multiple high-impact probes designed to test for jailbreaking, "
+        "data exfiltration, and policy bypass vulnerabilities."
+    )
+    story.append(Paragraph(summary_text, styles['Normal']))
+    story.append(Spacer(1, 0.2*inch))
+    
+    # 3. Detailed Findings
+    story.append(Paragraph("Detailed Findings", styles['SectionHeader']))
+    
+    findings = scan_data.get('findings', [])
     if not findings:
-        return
-
-    story.append(Spacer(1, 8 * mm))
-    story.append(Paragraph("RECOMMENDATIONS", S["section_label"]))
-    story.append(ColoredBar(C_ACCENT_AMBER, 2))
-    story.append(Spacer(1, 4 * mm))
-
-    RECS = {
-        "JAILBREAK": (
-            "Implement multi-turn context monitoring to detect jailbreak patterns. "
-            "Apply system prompt hardening and use output classifiers to flag policy-violating responses."
-        ),
-        "PROMPT_INJECTION": (
-            "Sanitise and validate all user inputs before injection into the model context. "
-            "Use structured prompting with clear role separators and apply a secondary moderation layer."
-        ),
-        "PII_LEAK": (
-            "Audit your system prompt for sensitive data. Implement output filtering to detect "
-            "and redact PII before responses are returned to users."
-        ),
-        "ENCODING_BYPASS": (
-            "Apply input normalisation to decode Base64, Leetspeak, and other encoding variants "
-            "before the prompt reaches the model."
-        ),
-    }
-
-    seen_cats = set()
-    rec_rows = []
-    for i, f in enumerate(findings):
-        cat = f.get("category", "").upper()
-        if cat in seen_cats:
-            continue
-        seen_cats.add(cat)
-        rec = RECS.get(cat, "Review and harden the model configuration against this attack vector.")
-        rec_rows.append([
-            Paragraph(f"<b>{i+1}</b>",
-                      ParagraphStyle("rn", fontName="Helvetica-Bold", fontSize=9,
-                                     textColor=C_TEXT_WHITE, alignment=TA_CENTER)),
-            Paragraph(f"<b>{cat.replace('_', ' ')}</b><br/>{rec}",
-                      ParagraphStyle("rb", fontName="Helvetica", fontSize=9,
-                                     textColor=C_TEXT_PRIMARY, leading=13)),
-        ])
-
-    if rec_rows:
-        t = Table(rec_rows, colWidths=[10 * mm, CONTENT_W - 10 * mm])
+        story.append(Paragraph("No significant vulnerabilities were identified during this scan.", styles['Normal']))
+    else:
+        table_data = [["Category", "Severity", "Hit Rate", "Status"]]
+        for f in findings:
+            sev_style = 'RiskHigh' if f['severity'] == 'HIGH' else 'RiskMedium' if f['severity'] == 'MEDIUM' else 'RiskLow'
+            table_data.append([
+                f['category'],
+                Paragraph(f['severity'], styles[sev_style]),
+                f"{f.get('hit_rate', 0)*100:.1f}%",
+                "Flagged" if f.get('hits', 0) > 0 else "Passed"
+            ])
+            
+        t = Table(table_data, colWidths=[2*inch, 1*inch, 1*inch, 1*inch])
         t.setStyle(TableStyle([
-            ("BACKGROUND",    (0, 0), (0, -1), C_BG_HEADER),
-            ("BACKGROUND",    (1, 0), (-1, -1), C_BG_CARD),
-            ("ROWBACKGROUNDS",(1, 1), (-1, -1), [C_BG_CARD, C_BG_ALT_ROW]),
-            ("VALIGN",        (0, 0), (-1, -1), "TOP"),
-            ("ALIGN",         (0, 0), (0, -1), "CENTER"),
-            ("TOPPADDING",    (0, 0), (-1, -1), 8),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-            ("LEFTPADDING",   (1, 0), (1, -1), 10),
-            ("GRID",          (0, 0), (-1, -1), 0.4, C_BORDER),
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#F3F4F6")),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.black),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0,0), (-1,0), 12),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ]))
         story.append(t)
-
-
-# ─── Main Entry Point ──────────────────────────────────────────────────────────
-
-def generate_audit_pdf(scan: dict) -> bytes:
-    """Generate a professional light-themed audit PDF. Returns raw bytes."""
-    buf = io.BytesIO()
-    S = _styles()
-
-    doc = BaseDocTemplate(
-        buf,
-        pagesize=A4,
-        leftMargin=MARGIN_L,
-        rightMargin=MARGIN_R,
-        topMargin=MARGIN_T + 14 * mm,
-        bottomMargin=MARGIN_B + 4 * mm,
-        title="VULNRA AI Security Audit Report",
-        author="VULNRA Scanner",
-    )
-
-    cover_frame = Frame(0, 0, PAGE_W, PAGE_H,
-                        leftPadding=MARGIN_L, rightPadding=MARGIN_R,
-                        topPadding=MARGIN_T, bottomPadding=MARGIN_B)
-    body_frame = Frame(MARGIN_L, MARGIN_B + 4 * mm,
-                       CONTENT_W, PAGE_H - (MARGIN_T + 14 * mm) - (MARGIN_B + 4 * mm))
-
-    cover_template = PageTemplate(id="cover", frames=[cover_frame], onPage=_cover_bg)
-    body_template  = PageTemplate(id="body",  frames=[body_frame],  onPage=_body_bg)
-    doc.addPageTemplates([cover_template, body_template])
-
-    from reportlab.platypus import NextPageTemplate
-    story = []
-
-    # Cover page
-    _cover_page(scan, S, story)
-    story.append(NextPageTemplate("body"))
-    from reportlab.platypus import PageBreak
-    story.append(PageBreak())
-
-    # Body pages
-    _executive_summary(scan, S, story)
-    _findings_section(scan, S, story)
-    _compliance_section(scan, S, story)
-    _recommendations_section(scan, S, story)
-
-    # Footer note
-    story.append(Spacer(1, 10 * mm))
-    story.append(HRFlowable(width=CONTENT_W, thickness=0.5, color=C_BORDER, spaceAfter=4 * mm))
-    story.append(Paragraph(
-        "Generated by VULNRA — AI Red-Teaming Platform. "
-        "This report is for internal security review only. "
-        "Do not distribute without authorisation.",
-        S["footer"]))
-
+        
+    story.append(Spacer(1, 0.5*inch))
+    
+    # 4. Compliance Status
+    story.append(Paragraph("Regulatory Compliance Gap Analysis", styles['SectionHeader']))
+    compliance = scan_data.get('compliance', {})
+    
+    if not compliance or compliance.get('blurred'):
+        story.append(Paragraph("Full compliance reporting is available in Pro and Enterprise tiers.", styles['Normal']))
+    else:
+        # EU AI Act, etc.
+        for framework, details in compliance.items():
+            if framework == "blurred": continue
+            story.append(Paragraph(framework.replace("_", " ").upper(), styles['Normal']))
+            story.append(Paragraph(f"Critical Articles: {', '.join(details.get('articles', []))}", styles['Normal']))
+            if 'fine_eur' in details:
+                story.append(Paragraph(f"Potential Exposure: &euro;{details['fine_eur']:,}", styles['Normal']))
+            story.append(Spacer(1, 0.1*inch))
+            
+    # 5. Recommendations
+    story.append(Paragraph("Recommendations", styles['SectionHeader']))
+    recs = [
+        "Implementing robust output filtering layers.",
+        "Utilizing adversarial training datasets.",
+        "Applying strict rate-limiting to prompt sequences.",
+        "Monitoring for repetitive structured query patterns."
+    ]
+    for r in recs:
+        story.append(Paragraph(f"• {r}", styles['Normal']))
+        
+    # Footer (Optional: added via PageTemplate if needed more complexly)
+    
     doc.build(story)
-    return buf.getvalue()
-
-
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    
+    return pdf_bytes
 # ─── CLI test ──────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     sample = {

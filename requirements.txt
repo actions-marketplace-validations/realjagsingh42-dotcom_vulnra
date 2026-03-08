@@ -52,3 +52,6 @@ watchfiles==1.1.1
 wcwidth==0.6.0
 websockets==16.0
 reportlab==4.1.0
+slowapi==0.1.9
+pydantic-settings==2.1.0
+ipaddress==1.0.23

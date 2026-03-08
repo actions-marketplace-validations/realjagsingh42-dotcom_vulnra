@@ -1,72 +1,89 @@
-import os, time, pathlib
+"""
+app/worker.py - Celery worker for VULNRA.
+Consolidated and hardened version.
+"""
+
+import os
+import time
+import pathlib
+import sys
+import logging
 from celery import Celery
 
+# Ensure project root is on path for standalone execution
+ROOT = pathlib.Path(__file__).parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-def _env(key, default=""):
-    # ✅ Always check real environment variables FIRST (Railway, Docker, etc)
-    val = os.environ.get(key)
-    if val:
-        return val
-    # Fall back to .env file for local development
-    p = pathlib.Path(__file__).parent.parent / ".env"
-    if p.exists():
-        for line in p.read_text().splitlines():
-            line = line.strip()
-            if line.startswith(f"{key}=") and not line.startswith("#"):
-                return line.split("=", 1)[1].strip()
-    return default
+from app.main import settings
 
+# ── Logging Setup ─────────────────────────────────────────────────────────────
+logger = logging.getLogger("vulnra.worker")
 
-REDIS_URL = _env("REDIS_URL", "redis://localhost:6379/0")
+# ── Celery App Setup ──────────────────────────────────────────────────────────
+app = Celery(
+    "vulnra",
+    broker=settings.redis_url,
+    backend=settings.redis_url
+)
 
-app = Celery("mirushield", broker=REDIS_URL, backend=REDIS_URL)
 app.conf.update(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
     timezone="UTC",
-    worker_pool="solo",
+    worker_pool="solo", # Safe for Windows/Development
     broker_connection_retry_on_startup=True,
+    task_track_started=True,
     broker_transport_options={
         "visibility_timeout": 3600,
         "socket_connect_timeout": 5,
         "socket_timeout": 5,
-    },
-    task_routes={
-        "app.worker.run_scan":       {"queue": "scans"},
-        "app.worker.sentinel_check": {"queue": "sentinel"},
-    },
+    }
 )
-celery_app = app
 
+# ── Tasks ─────────────────────────────────────────────────────────────────────
 
 @app.task(name="app.worker.run_scan", bind=True)
-def run_scan(self, scan_id, url, tier="free"):
-    print(f"[WORKER] scan={scan_id} url={url} tier={tier}")
+def run_scan(self, scan_id: str, url: str, tier: str = "free"):
+    """
+    Asynchronous task to run a Garak scan.
+    """
+    logger.info(f"Worker received scan task: {scan_id} -> {url} [Tier: {tier}]")
+    
+    try:
+        from app.garak_engine import run_garak_scan
+        result = run_garak_scan(scan_id, url, tier)
+        
+        # Post-process for free tier (minimal info)
+        if tier == "free" and result.get("findings"):
+            for i, f in enumerate(result["findings"]):
+                if i > 0:
+                    f["blurred"] = True
+                    f["detail"] = "Upgrade to Pro to see full details"
+            result["compliance"] = {"blurred": True, "hint": "Upgrade to Pro"}
 
-    from app.garak_engine import run_garak_scan
-    result = run_garak_scan(scan_id, url, tier)
-
-    # Free-tier blurring (applied after real scan)
-    if tier == "free" and result.get("findings"):
-        for i, f in enumerate(result["findings"]):
-            if i > 0:
-                f["blurred"] = True
-                f["detail"]  = "Upgrade to Pro to see full details"
-        result["compliance"] = {"blurred": True, "hint": "Upgrade to Pro"}
-
-    result.update({
-        "tier":           tier,
-        "findings_count": len(result.get("findings", [])),
-        "completed_at":   time.time(),
-    })
-
-    print(f"[WORKER] done scan={scan_id} score={result.get('risk_score')} "
-          f"engine={result.get('scan_engine')} findings={result.get('findings_count')}")
-    return result
-
+        result.update({
+            "tier": tier,
+            "completed_at": time.time(),
+        })
+        
+        logger.info(f"Scan {scan_id} completed successfully.")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Worker failed during scan {scan_id}: {e}")
+        return {
+            "scan_id": scan_id,
+            "status": "failed",
+            "error": str(e),
+            "completed_at": time.time()
+        }
 
 @app.task(name="app.worker.sentinel_check")
-def sentinel_check(watch_id, url, chat_id):
-    task = run_scan.delay(watch_id, url, tier="pro")
-    return {"watch_id": watch_id, "task_id": task.id}
+def sentinel_check(watch_id: str, url: str, tier: str = "pro"):
+    """
+    Recurring scan task for watched endpoints.
+    """
+    logger.info(f"Sentinel re-scan triggered for {url}")
+    return run_scan.delay(watch_id, url, tier)
