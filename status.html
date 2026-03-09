@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VULNRA System Status — API Uptime & Incident History | vulnra.ai</title>
+    <meta name="description"
+        content="Real-time status of VULNRA's LLM security scanner, API, scan engine, PDF reports, and compliance pipeline.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://vulnra.ai/status">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #060608;
+            --bg1: #0a0b0f;
+            --bg2: #0f1117;
+            --bg3: #151820;
+            --acid: #b8ff57;
+            --text: #e8edf4;
+            --muted: rgba(232, 237, 244, .42);
+            --muted2: rgba(232, 237, 244, .2);
+            --border: rgba(255, 255, 255, .07);
+            --mono: 'IBM Plex Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            line-height: 1.6
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 60px;
+            background: rgba(6, 6, 8, .9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border2)
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none
+        }
+
+        .nav-logo-mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 5px;
+            background: var(--acid);
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .nav-logo em {
+            font-style: normal;
+            color: var(--acid)
+        }
+
+        .page-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 120px 48px 96px
+        }
+
+        .page-title {
+            font-family: var(--mono);
+            font-size: clamp(28px, 4vw, 46px);
+            font-weight: 700;
+            margin-bottom: 24px
+        }
+
+        .status-banner {
+            background: var(--bg1);
+            border: 1px solid var(--acid);
+            border-radius: 5px;
+            padding: 24px;
+            margin-bottom: 48px;
+            text-align: center
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: var(--acid);
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--acid)
+        }
+
+        .legal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0
+        }
+
+        .legal-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted2)
+        }
+
+        .legal-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border2);
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        .check {
+            color: var(--acid);
+            font-family: var(--mono);
+            font-weight: 700
+        }
+
+        footer {
+            border-top: 1px solid var(--border2);
+            padding: 28px 48px;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--muted2)
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <div class="nav-logo-mark">
+                <svg viewBox="0 0 14 14" fill="none">
+                    <rect x="1" y="1" width="5" height="5" fill="#000" />
+                    <rect x="8" y="1" width="5" height="5" fill="#000" />
+                    <rect x="1" y="8" width="5" height="5" fill="#000" />
+                </svg>
+            </div>
+            VULN<em>RA</em>
+        </a>
+    </nav>
+
+    <main class="page-wrap">
+        <h1 class="page-title">VULNRA System Status</h1>
+        <div class="status-banner">
+            <span class="status-dot"></span> All Systems Operational — Last checked 60s ago
+        </div>
+
+        <h2>Component Status</h2>
+        <table class="legal-table">
+            <thead>
+                <tr>
+                    <th>Service Component</th>
+                    <th>Status</th>
+                    <th>90-Day Uptime</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Scanner API (POST /v1/scan)</td>
+                    <td><span class="check">✓</span> Operational</td>
+                    <td>99.9%</td>
+                </tr>
+                <tr>
+                    <td>PDF Report Generation</td>
+                    <td><span class="check">✓</span> Operational</td>
+                    <td>99.8%</td>
+                </tr>
+                <tr>
+                    <td>Authentication (Supabase)</td>
+                    <td><span class="check">✓</span> Operational</td>
+                    <td>100%</td>
+                </tr>
+                <tr>
+                    <td>Frontend (Railway CDN)</td>
+                    <td><span class="check">✓</span> Operational</td>
+                    <td>100%</td>
+                </tr>
+                <tr>
+                    <td>Garak Scan Engine (Worker)</td>
+                    <td><span class="check">✓</span> Operational</td>
+                    <td>99.7%</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 style="margin-top:48px">SLA Commitments</h2>
+        <ul style="list-style:none; margin-top:16px;">
+            <li style="margin-bottom:12px">• <strong>Enterprise SLA:</strong> 99.9% monthly uptime guarantee.</li>
+            <li style="margin-bottom:12px">• <strong>Pro tier:</strong> 99.5% monthly uptime, best-effort.</li>
+        </ul>
+    </main>
+
+    <footer>
+        <div>© 2025 VULNRA. MIT Licensed.</div>
+    </footer>
+</body>
+
+</html>

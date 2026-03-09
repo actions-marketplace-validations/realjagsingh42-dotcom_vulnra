@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India DPDP & AI Compliance — What Every AI Startup Must Know | VULNRA</title>
+    <meta name="description"
+        content="India's Digital Personal Data Protection Act (DPDP 2023) applies to every AI product processing personal data. Learn about DPDP sections, fines, and compliance.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://vulnra.ai/dpdp-guide">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+        rel="stylesheet">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #060608;
+            --bg1: #0a0b0f;
+            --bg2: #0f1117;
+            --bg3: #151820;
+            --acid: #b8ff57;
+            --text: #e8edf4;
+            --muted: rgba(232, 237, 244, .42);
+            --border: rgba(255, 255, 255, .07);
+            --border2: rgba(255, 255, 255, .04);
+            --mono: 'IBM Plex Mono', monospace;
+            --sans: 'DM Sans', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            line-height: 1.8
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 48px;
+            height: 60px;
+            background: rgba(6, 6, 8, .9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border2)
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none
+        }
+
+        .nav-logo-mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 5px;
+            background: var(--acid);
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .page-wrap {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 120px 48px 96px
+        }
+
+        .page-title {
+            font-family: var(--mono);
+            font-size: clamp(28px, 4vw, 46px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            line-height: 1.2
+        }
+
+        .legal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 32px 0
+        }
+
+        .legal-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted2)
+        }
+
+        .legal-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border2);
+            font-size: 14px;
+            color: var(--muted)
+        }
+
+        .highlight-box {
+            background: var(--bg1);
+            border-left: 4px solid var(--acid);
+            padding: 24px;
+            margin: 32px 0
+        }
+
+        footer {
+            border-top: 1px solid var(--border2);
+            padding: 28px 48px;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--muted2)
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="index.html" class="nav-logo">
+            <div class="nav-logo-mark">
+                <svg viewBox="0 0 14 14" fill="none">
+                    <rect x="1" y="1" width="5" height="5" fill="#000" />
+                    <rect x="8" y="1" width="5" height="5" fill="#000" />
+                    <rect x="1" y="8" width="5" height="5" fill="#000" />
+                </svg>
+            </div>
+            VULN<em>RA</em>
+        </a>
+    </nav>
+
+    <main class="page-wrap">
+        <h1 class="page-title">India DPDP & AI Compliance: The Complete Guide</h1>
+        <p>India's Digital Personal Data Protection Act (DPDP Act 2023) applies to every company processing personal
+            data of Indian citizens — including every SaaS product using an LLM to handle user inputs.</p>
+
+        <div class="highlight-box">
+            <strong>Fines for violations reach ₹250 crore.</strong> VULNRA is the only LLM security scanner that
+            automatically tests your AI system against India DPDP requirements.
+        </div>
+
+        <h2>Key DPDP Sections for AI Companies</h2>
+        <table class="legal-table">
+            <thead>
+                <tr>
+                    <th>Section</th>
+                    <th>Title</th>
+                    <th>What it means for AI</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Section 4</td>
+                    <td>Grounds for Processing</td>
+                    <td>LLM features must have a lawful basis (consent or legitimate use).</td>
+                </tr>
+                <tr>
+                    <td>Section 8</td>
+                    <td>Data Fiduciary Obligations</td>
+                    <td>Safeguards must be proportionate to risk. No retention policies violate this.</td>
+                </tr>
+                <tr>
+                    <td>Section 11</td>
+                    <td>Right to Erasure</td>
+                    <td>Users can request deletion of data from vector stores and logs.</td>
+                </tr>
+                <tr>
+                    <td>Section 16</td>
+                    <td>Cross-Border Transfer</td>
+                    <td>Restricts transferring Indian user data to unapproved countries.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 style="margin-top:48px">Compliance Checklist</h2>
+        <ul style="padding-left:20px; margin-top:16px">
+            <li style="margin-bottom:12px">Map all personal data flows through your LLM system.</li>
+            <li style="margin-bottom:12px">Implement a data deletion workflow for Section 11 requests.</li>
+            <li style="margin-bottom:12px">Run a VULNRA scan to test for PII leakage.</li>
+        </ul>
+    </main>
+
+    <footer>
+        <div>© 2025 VULNRA. MIT Licensed.</div>
+    </footer>
+</body>
+
+</html>
