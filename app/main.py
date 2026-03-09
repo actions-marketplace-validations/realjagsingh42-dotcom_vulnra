@@ -110,6 +110,18 @@ async def limit_request_size(request: Request, call_next):
     return await call_next(request)
 
 # ── SSRF Protection ───────────────────────────────────────────────────────────
+BLOCKED_RANGES = [
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("169.254.0.0/16"),  # AWS/GCP/Azure metadata service
+    ipaddress.ip_network("100.64.0.0/10"),   # Carrier-grade NAT
+    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("::1/128"),          # IPv6 loopback
+    ipaddress.ip_network("fc00::/7"),         # IPv6 private
+]
+
 def is_safe_url(target_url: str) -> bool:
     """Validate URL to prevent SSRF against internal networks."""
     try:
@@ -121,9 +133,22 @@ def is_safe_url(target_url: str) -> bool:
         if not hostname:
             return False
 
-        ip = socket.gethostbyname(hostname)
-        ip_obj = ipaddress.ip_address(ip)
+        # Resolve hostname to catch DNS rebinding attacks
+        try:
+            resolved_ip = socket.gethostbyname(hostname)
+        except socket.gaierror:
+            logger.warning(f"Could not resolve hostname: {hostname}")
+            return False
 
+        ip_obj = ipaddress.ip_address(resolved_ip)
+
+        # Check against comprehensive blocked ranges
+        for blocked in BLOCKED_RANGES:
+            if ip_obj in blocked:
+                logger.warning(f"Blocked private IP range: {hostname} -> {resolved_ip}")
+                return False
+
+        # Additional checks using ipaddress built-in checks
         if (
             ip_obj.is_private
             or ip_obj.is_loopback

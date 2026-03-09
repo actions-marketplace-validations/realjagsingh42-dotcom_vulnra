@@ -222,6 +222,30 @@
       footer{flex-direction:column;gap:14px;text-align:center;padding:24px}
     }
     @media(max-width:580px){.stats-grid{grid-template-columns:1fr}}
+
+    /* FOOTER */
+    footer{background:var(--bg);border-top:1px solid var(--border2);padding:60px 48px 32px}
+    .footer-grid{display:grid;grid-template-columns:1.5fr repeat(6,1fr);gap:32px;margin-bottom:48px}
+    .footer-col h4{font-family:var(--mono);font-size:11px;color:var(--text);text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px}
+    .footer-col ul{list-style:none}
+    .footer-col ul li{margin-bottom:10px}
+    .footer-col ul li a{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;transition:color .2s}
+    .footer-col ul li a:hover{color:var(--acid)}
+    .nav-logo{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px}
+    .nav-logo em{font-style:normal;color:var(--acid)}
+    .nav-logo-mark{width:28px;height:28px;border-radius:5px;background:var(--acid);display:flex;align-items:center;justify-content:center}
+    .nav-logo-mark svg{width:14px;height:14px}
+    .footer-legal{background:var(--bg);border-top:1px solid var(--border2);padding:24px 48px}
+    .footer-legal-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+    .footer-legal-links{display:flex;gap:24px}
+    .footer-legal-links a{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-decoration:none;transition:color .2s}
+    .footer-legal-links a:hover{color:var(--acid)}
+    .footer-legal-copy{font-family:var(--mono);font-size:10.5px;color:var(--muted2);display:flex;align-items:center;gap:8px}
+    .footer-legal-sep{color:var(--muted3)}
+    .footer-legal-copy a{color:var(--muted2);text-decoration:none;transition:color .2s}
+    .footer-legal-copy a:hover{color:var(--acid)}
+    @media(max-width:1200px){.footer-grid{grid-template-columns:1fr 1fr 1fr}}
+    @media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr}.footer-legal-inner{flex-direction:column;text-align:center;gap:12px}}
   </style>
 </head>
 <body>
@@ -502,15 +526,96 @@
 </main>
 
 <footer>
-  <div class="footer-left">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
-  <div class="footer-links">
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-    <a href="acceptable-use.html">AUP</a>
-    <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
-    <a href="mailto:hello@vulnra.ai">hello@vulnra.ai</a>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <a href="index.html" class="nav-logo" style="padding:0;margin-bottom:20px;display:inline-flex">
+        <div class="nav-logo-mark">
+          <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" fill="#000"/><rect x="8" y="1" width="5" height="5" fill="#000"/><rect x="1" y="8" width="5" height="5" fill="#000"/></svg>
+        </div>
+        VULN<em>RA</em>
+      </a>
+      <p style="font-size:12px;color:var(--muted);max-width:240px;line-height:1.6">The self-serve LLM red-teaming platform for the compliance era.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="scanner.html">Scanner</a></li>
+        <li><a href="mcp-scanner.html">MCP Scanner</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+        <li><a href="status.html">System Status</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="api-docs.html">API Reference</a></li>
+        <li><a href="integrations.html">Integrations</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="case-studies.html">Case Studies</a></li>
+        <li><a href="report-sample.html">Sample Report</a></li>
+        <li><a href="compare.html">Compare</a></li>
+        <li><a href="roadmap.html">Roadmap</a></li>
+        <li><a href="changelog.html">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Compliance</h4>
+      <ul>
+        <li><a href="security.html">Security</a></li>
+        <li><a href="trust.html">Trust Center</a></li>
+        <li><a href="eu-ai-act.html">EU AI Act</a></li>
+        <li><a href="dpdp-guide.html">DPDP Guide</a></li>
+        <li><a href="compliance.html">Compliance</a></li>
+        <li><a href="vuln-db.html">Vulnerability DB</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="enterprise.html">Enterprise</a></li>
+        <li><a href="open-source.html">Open Source</a></li>
+        <li><a href="affiliates.html">Affiliates</a></li>
+        <li><a href="investors.html">Investors</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <ul>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="acceptable-use.html">Acceptable Use</a></li>
+      </ul>
+    </div>
   </div>
 </footer>
+
+<div class="footer-legal">
+  <div class="footer-legal-inner">
+    <div class="footer-legal-links">
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="acceptable-use.html">Acceptable Use</a>
+    </div>
+    <div class="footer-legal-copy">
+      © 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.
+      <span class="footer-legal-sep">·</span>
+      <a href="https://github.com">GitHub</a>
+      <span class="footer-legal-sep">·</span>
+      <a href="mailto:hello@vulnra.ai">hello@vulnra.ai</a>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
