@@ -55,12 +55,18 @@
 
     function reset() {
         clearInterval(hexTimer); clearInterval(msgTimer); cancelAnimationFrame(rafId);
+        if (loader) loader.classList.remove('active');
         if (barEl) barEl.style.width = '0%';
         if (glowEl) glowEl.style.left = '0%';
         if (statusEl) statusEl.textContent = MSGS[0];
         if (hexEl) hexEl.textContent = '0x00';
         isActive = false;
     }
+
+    // Fix for BFCache (Back button)
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) reset();
+    });
 
     function runProgress(onDone) {
         let msgIdx = 0;

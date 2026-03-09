@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — VULNRA AI Security</title>
+  <meta name="description" content="Every VULNRA release, feature update, and bug fix. Follow the product roadmap in real time.">
+  <meta name="keywords" content="VULNRA changelog, LLM security updates, AI red teaming release notes">
+  <meta property="og:title" content="Changelog — VULNRA AI Security">
+  <meta property="og:description" content="Every VULNRA release, feature update, and bug fix.">
+  <link rel="canonical" href="https://vulnra.ai/changelog">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "VULNRA Changelog",
+    "description": "Release notes and product updates for VULNRA LLM security scanner.",
+    "url": "https://vulnra.ai/changelog"
+  }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060608; --bg1: #0a0b0f; --bg2: #0f1117; --bg3: #151820;
+      --acid: #b8ff57; --acid2: rgba(184,255,87,0.08); --acid3: rgba(184,255,87,0.18);
+      --red: #ff3c5a; --amber: #ffb340; --blue: #4db8ff; --teal: #3dffaa;
+      --text: #e8edf4; --muted: rgba(232,237,244,0.42);
+      --muted2: rgba(232,237,244,0.2); --muted3: rgba(232,237,244,0.1);
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.04);
+      --mono: 'IBM Plex Mono', monospace; --sans: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); overflow-x: hidden; }
+
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+      pointer-events: none; z-index: 9998;
+    }
+    body::after {
+      content: ''; position: fixed; inset: -200%; width: 400%; height: 400%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9997; animation: grain 0.4s steps(1) infinite;
+    }
+
+    @keyframes grain {
+      0% { transform:translate(0,0); } 20% { transform:translate(-3%,-4%); }
+      40% { transform:translate(-6%,3%); } 60% { transform:translate(3%,-2%); }
+      80% { transform:translate(-4%,6%); } 100% { transform:translate(5%,-3%); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.3; transform:scale(.6); }
+    }
+    @keyframes orb1 {
+      0%,100% { transform:translate(0,0) scale(1); } 50% { transform:translate(80px,-60px) scale(1.15); }
+    }
+    @keyframes shine {
+      0% { left:-100%; } 100% { left:200%; }
+    }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); }
+    }
+
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--acid); }
+    ::selection { background:var(--acid); color:#000; }
+
+    /* NAV */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 48px; height:60px;
+      background:rgba(6,6,8,.9); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border2);
+    }
+    nav::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg,transparent,rgba(184,255,87,.3),transparent);
+    }
+    .nav-logo {
+      display:flex; align-items:center; gap:10px;
+      font-family:var(--mono); font-size:15px; font-weight:700;
+      letter-spacing:.1em; color:var(--text); text-decoration:none;
+    }
+    .nav-logo-mark { width:28px; height:28px; border-radius:5px; background:var(--acid); display:flex; align-items:center; justify-content:center; }
+    .nav-logo-mark svg { width:14px; height:14px; }
+    .nav-logo em { font-style:normal; color:var(--acid); }
+    .nav-links { display:flex; align-items:center; gap:36px; }
+    .nav-links a { font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; color:var(--muted); text-decoration:none; transition:color .2s; }
+    .nav-links a:hover, .nav-links a.active { color:var(--acid); }
+    .nav-right { display:flex; align-items:center; gap:12px; }
+    .btn-acid {
+      font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.12em;
+      background:var(--acid); color:#000; border:none; padding:8px 18px;
+      border-radius:3px; cursor:pointer; text-decoration:none;
+      transition:all .25s; position:relative; overflow:hidden;
+    }
+    .btn-acid:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(184,255,87,.3); }
+
+    /* HERO */
+    .hero { padding:140px 48px 80px; position:relative; overflow:hidden; }
+    .hero-bg { position:absolute; inset:0; pointer-events:none; }
+    .hero-grid {
+      position:absolute; inset:0;
+      background-image: linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px), linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+      background-size:56px 56px;
+      mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    }
+    .orb { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; }
+    .orb-1 { width:600px; height:400px; background:rgba(184,255,87,.07); top:-10%; right:10%; animation:orb1 14s ease-in-out infinite; }
+
+    .hero-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; display:grid; grid-template-columns:1fr auto; align-items:end; gap:48px; }
+
+    .hero-eyebrow {
+      display:inline-flex; align-items:center; gap:10px;
+      font-family:var(--mono); font-size:10px; letter-spacing:.22em; color:var(--acid);
+      margin-bottom:24px; opacity:0; animation:fadeUp .5s ease forwards .1s;
+    }
+    .pulse-dot { width:7px; height:7px; border-radius:50%; background:var(--acid); animation:pulse 1.6s ease infinite; }
+    .hero-eyebrow .sep { color:var(--muted2); }
+
+    h1.page-h1 {
+      font-family:var(--mono); font-size:clamp(32px,4.5vw,56px); font-weight:700;
+      line-height:1.06; letter-spacing:-.02em; margin-bottom:20px;
+      opacity:0; animation:fadeUp .6s ease forwards .2s;
+    }
+    h1.page-h1 .accent { color:var(--acid); }
+
+    .hero-sub { font-size:15px; color:var(--muted); line-height:1.7; max-width:560px; font-weight:300; opacity:0; animation:fadeUp .6s ease forwards .35s; }
+
+    /* SUBSCRIBE CARD */
+    .subscribe-card {
+      background:var(--bg1); border:1px solid var(--border); border-radius:5px;
+      padding:24px; min-width:280px; opacity:0; animation:fadeUp .7s ease forwards .45s;
+    }
+    .subscribe-card p { font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; color:var(--muted2); margin-bottom:12px; }
+    .subscribe-form { display:flex; gap:8px; }
+    .subscribe-input {
+      flex:1; background:var(--bg2); border:1px solid var(--border); color:var(--text);
+      font-family:var(--mono); font-size:11px; padding:8px 12px; border-radius:3px;
+      outline:none; transition:border-color .2s;
+    }
+    .subscribe-input::placeholder { color:var(--muted2); }
+    .subscribe-input:focus { border-color:var(--acid3); }
+    .subscribe-btn {
+      background:var(--acid); color:#000; border:none; font-family:var(--mono);
+      font-size:10px; font-weight:700; letter-spacing:.1em; padding:8px 14px;
+      border-radius:3px; cursor:pointer; white-space:nowrap; transition:all .2s;
+    }
+    .subscribe-btn:hover { opacity:.85; transform:translateY(-1px); }
+
+    /* FILTER STRIP */
+    .filter-strip {
+      border-top:1px solid var(--border2); border-bottom:1px solid var(--border2);
+      background:var(--bg1); padding:0 48px;
+    }
+    .filter-inner {
+      max-width:1200px; margin:0 auto;
+      display:flex; align-items:center; gap:0;
+      height:50px;
+    }
+    .filter-btn {
+      font-family:var(--mono); font-size:10px; letter-spacing:.1em;
+      color:var(--muted2); background:none; border:none; border-bottom:2px solid transparent;
+      padding:0 18px; height:100%; cursor:pointer; transition:all .2s; white-space:nowrap;
+    }
+    .filter-btn:hover { color:var(--text); }
+    .filter-btn.active { color:var(--acid); border-bottom-color:var(--acid); }
+
+    /* MAIN LAYOUT */
+    .main-layout {
+      max-width:1200px; margin:0 auto; padding:64px 48px;
+      display:grid; grid-template-columns:220px 1fr; gap:64px; align-items:start;
+    }
+
+    /* SIDEBAR */
+    .cl-sidebar { position:sticky; top:84px; }
+    .cl-sidebar-label { font-family:var(--mono); font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted2); margin-bottom:16px; }
+    .cl-year-group { margin-bottom:24px; }
+    .cl-year { font-family:var(--mono); font-size:9px; letter-spacing:.14em; color:var(--muted2); text-transform:uppercase; margin-bottom:8px; }
+    .cl-sidebar-link {
+      display:flex; align-items:center; gap:8px;
+      font-family:var(--mono); font-size:10.5px; color:var(--muted2);
+      text-decoration:none; padding:4px 0; transition:color .2s; letter-spacing:.04em;
+    }
+    .cl-sidebar-link:hover { color:var(--text); }
+    .cl-sidebar-link.active { color:var(--acid); }
+    .cl-sidebar-link .dot { width:5px; height:5px; border-radius:50%; background:var(--muted2); flex-shrink:0; }
+    .cl-sidebar-link.active .dot { background:var(--acid); }
+
+    /* CHANGELOG ENTRIES */
+    .entries { display:flex; flex-direction:column; gap:0; }
+
+    .entry {
+      border-bottom:1px solid var(--border2); padding-bottom:56px; margin-bottom:56px;
+      opacity:0; transition:opacity .4s ease, transform .4s ease; transform:translateY(10px);
+    }
+    .entry:last-child { border-bottom:none; margin-bottom:0; }
+    .entry.visible { opacity:1; transform:translateY(0); }
+
+    .entry-header { display:flex; align-items:flex-start; gap:20px; margin-bottom:28px; }
+
+    .version-badge {
+      font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.08em;
+      background:var(--acid); color:#000; padding:4px 12px; border-radius:3px;
+      white-space:nowrap; flex-shrink:0; margin-top:2px;
+    }
+    .version-badge.minor { background:var(--bg2); color:var(--acid); border:1px solid var(--acid3); }
+    .version-badge.patch { background:transparent; color:var(--muted2); border:1px solid var(--border); font-weight:400; }
+
+    .entry-meta { flex:1; }
+    .entry-date { font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; color:var(--muted2); margin-bottom:6px; text-transform:uppercase; }
+    .entry-title { font-family:var(--mono); font-size:22px; font-weight:700; letter-spacing:-.01em; line-height:1.2; margin-bottom:8px; }
+    .entry-summary { font-size:14px; color:var(--muted); line-height:1.7; font-weight:300; }
+
+    /* CHANGE ITEMS */
+    .changes { display:flex; flex-direction:column; gap:8px; margin-top:24px; }
+
+    .change-item {
+      display:flex; align-items:flex-start; gap:12px;
+      background:var(--bg1); border:1px solid var(--border2);
+      border-radius:3px; padding:14px 16px;
+      transition:background .2s, border-color .2s;
+    }
+    .change-item:hover { background:var(--bg2); border-color:var(--border); }
+
+    .change-tag {
+      font-family:var(--mono); font-size:8.5px; font-weight:600; letter-spacing:.12em;
+      text-transform:uppercase; padding:2px 7px; border-radius:2px;
+      white-space:nowrap; flex-shrink:0; margin-top:1px;
+    }
+    .tag-new      { background:rgba(184,255,87,.12); color:var(--acid); border:1px solid rgba(184,255,87,.2); }
+    .tag-improved { background:rgba(77,184,255,.1);  color:var(--blue); border:1px solid rgba(77,184,255,.2); }
+    .tag-fixed    { background:rgba(61,255,170,.1);  color:var(--teal); border:1px solid rgba(61,255,170,.2); }
+    .tag-security { background:rgba(255,60,90,.1);   color:var(--red);  border:1px solid rgba(255,60,90,.2); }
+    .tag-breaking { background:rgba(255,179,64,.1);  color:var(--amber);border:1px solid rgba(255,179,64,.2); }
+
+    .change-text { font-size:13.5px; color:var(--text); line-height:1.65; font-weight:300; }
+    .change-text strong { font-weight:600; color:var(--text); }
+    .change-text code {
+      font-family:var(--mono); font-size:11.5px; color:var(--acid);
+      background:var(--acid2); padding:1px 6px; border-radius:2px;
+    }
+
+    /* FEATURED HIGHLIGHT */
+    .entry-highlight {
+      background:var(--bg1); border:1px solid var(--border); border-radius:5px;
+      padding:24px; margin-top:20px; position:relative; overflow:hidden;
+    }
+    .entry-highlight::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg, var(--acid), transparent);
+    }
+    .highlight-label { font-family:var(--mono); font-size:9px; letter-spacing:.18em; color:var(--acid); text-transform:uppercase; margin-bottom:10px; }
+    .highlight-text { font-size:13.5px; color:var(--muted); line-height:1.72; font-weight:300; }
+    .highlight-text strong { color:var(--text); font-weight:600; }
+
+    /* STATS ROW */
+    .entry-stats {
+      display:flex; gap:1px; background:var(--border2);
+      border:1px solid var(--border); border-radius:5px; overflow:hidden; margin-top:20px;
+    }
+    .entry-stat { flex:1; background:var(--bg1); padding:16px 20px; text-align:center; }
+    .entry-stat .val { font-family:var(--mono); font-size:22px; font-weight:700; color:var(--acid); display:block; }
+    .entry-stat .lbl { font-family:var(--mono); font-size:8.5px; letter-spacing:.1em; color:var(--muted2); text-transform:uppercase; }
+
+    /* CTA */
+    .cta { background:var(--bg); border-top:1px solid var(--border2); text-align:center; padding:100px 48px; position:relative; overflow:hidden; }
+    .cta-glow { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:700px; height:350px; background:radial-gradient(ellipse, rgba(184,255,87,.05) 0%, transparent 70%); pointer-events:none; }
+    .cta h2 { font-family:var(--mono); font-size:clamp(24px,4vw,46px); font-weight:700; letter-spacing:-.03em; margin-bottom:12px; }
+    .cta p { font-size:15px; color:var(--muted); margin-bottom:36px; font-weight:300; }
+    .cta-actions { display:flex; align-items:center; justify-content:center; gap:12px; }
+    .btn-primary {
+      font-family:var(--mono); font-size:11px; font-weight:600; letter-spacing:.12em;
+      background:var(--acid); color:#000; border:none; padding:12px 26px;
+      border-radius:3px; cursor:pointer; text-decoration:none;
+      transition:all .25s; display:inline-flex; align-items:center; gap:7px;
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 24px rgba(184,255,87,.3); }
+    .btn-outline {
+      font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--text);
+      background:none; border:1px solid var(--border); padding:12px 24px;
+      border-radius:3px; cursor:pointer; text-decoration:none; transition:all .25s;
+    }
+    .btn-outline:hover { border-color:rgba(255,255,255,.2); transform:translateY(-2px); }
+
+    /* FOOTER */
+    footer { background:var(--bg); border-top:1px solid var(--border2); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; }
+    .footer-left { font-family:var(--mono); font-size:10.5px; color:var(--muted2); }
+    .footer-links { display:flex; gap:22px; }
+    .footer-links a { font-family:var(--mono); font-size:10.5px; color:var(--muted2); text-decoration:none; transition:color .2s; }
+    .footer-links a:hover { color:var(--acid); }
+
+    @media(max-width:960px) {
+      nav { padding:0 20px; } .nav-links { display:none; }
+      .hero { padding-left:24px; padding-right:24px; }
+      .hero-inner { grid-template-columns:1fr; gap:32px; }
+      .subscribe-card { min-width:auto; }
+      .filter-strip { padding:0 24px; }
+      .main-layout { grid-template-columns:1fr; padding:40px 24px; gap:32px; }
+      .cl-sidebar { position:static; }
+      .cta { padding:80px 24px; }
+      footer { flex-direction:column; gap:14px; text-align:center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="5" height="5" fill="#000"/>
+          <rect x="8" y="1" width="5" height="5" fill="#000"/>
+          <rect x="1" y="8" width="5" height="5" fill="#000"/>
+          <rect x="8" y="10" width="2" height="2" fill="#000"/>
+          <rect x="11" y="10" width="2" height="2" fill="#000"/>
+        </svg>
+      </div>
+      VULN<em>RA</em>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#features">Features</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="docs.html">Docs</a>
+      <a href="changelog.html" class="active">Changelog</a>
+    </div>
+    <div class="nav-right">
+      <a href="signin.html" class="btn-acid">Get Started →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="orb orb-1"></div>
+    </div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="pulse-dot"></span>
+          LIVE <span class="sep">/</span> PRODUCT_UPDATES
+        </div>
+        <h1 class="page-h1">What's <span class="accent">shipping.</span></h1>
+        <p class="hero-sub">Every feature, fix, and security patch — logged in full. We ship fast and document everything. Follow the build in real time.</p>
+      </div>
+      <div class="subscribe-card">
+        <p>GET NOTIFIED ON EVERY RELEASE</p>
+        <div class="subscribe-form">
+          <input type="email" class="subscribe-input" placeholder="you@company.com" id="subEmail">
+          <button class="subscribe-btn" onclick="handleSubscribe()">SUBSCRIBE</button>
+        </div>
+        <p style="margin-top:10px;font-size:9px;">No spam. Release notes only. Unsubscribe anytime.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTER STRIP -->
+  <div class="filter-strip">
+    <div class="filter-inner">
+      <button class="filter-btn active" onclick="filterEntries('all', this)">All</button>
+      <button class="filter-btn" onclick="filterEntries('new', this)">New Features</button>
+      <button class="filter-btn" onclick="filterEntries('security', this)">Security</button>
+      <button class="filter-btn" onclick="filterEntries('improved', this)">Improvements</button>
+      <button class="filter-btn" onclick="filterEntries('fixed', this)">Bug Fixes</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-layout">
+
+    <!-- SIDEBAR NAV -->
+    <aside class="cl-sidebar">
+      <div class="cl-sidebar-label">Jump to</div>
+      <div class="cl-year-group">
+        <div class="cl-year">2026</div>
+        <a href="#v0-9-0" class="cl-sidebar-link active"><span class="dot"></span>v0.9.0 — Mar 2026</a>
+        <a href="#v0-8-0" class="cl-sidebar-link"><span class="dot"></span>v0.8.0 — Feb 2026</a>
+        <a href="#v0-7-0" class="cl-sidebar-link"><span class="dot"></span>v0.7.0 — Jan 2026</a>
+      </div>
+      <div class="cl-year-group">
+        <div class="cl-year">2025</div>
+        <a href="#v0-6-0" class="cl-sidebar-link"><span class="dot"></span>v0.6.0 — Dec 2025</a>
+        <a href="#v0-5-0" class="cl-sidebar-link"><span class="dot"></span>v0.5.0 — Nov 2025</a>
+        <a href="#v0-4-0" class="cl-sidebar-link"><span class="dot"></span>v0.4.0 — Oct 2025</a>
+      </div>
+      <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border2);">
+        <a href="https://github.com" style="font-family:var(--mono);font-size:9.5px;color:var(--muted2);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;" onmouseover="this.style.color='var(--acid)'" onmouseout="this.style.color='var(--muted2)'">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </aside>
+
+    <!-- ENTRIES -->
+    <div class="entries" id="entriesContainer">
+
+      <!-- v0.9.0 -->
+      <div class="entry" id="v0-9-0" data-tags="new security improved">
+        <div class="entry-header">
+          <span class="version-badge">v0.9.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">March 9, 2026</div>
+            <div class="entry-title">Supabase Auth + Full Frontend Suite</div>
+            <div class="entry-summary">Complete authentication system live — Google OAuth, GitHub OAuth, email/password. All 18 marketing and product pages shipped. The scanner is now a fully navigable product.</div>
+          </div>
+        </div>
+
+        <div class="entry-stats">
+          <div class="entry-stat"><span class="val">18</span><span class="lbl">Pages Shipped</span></div>
+          <div class="entry-stat"><span class="val">3</span><span class="lbl">OAuth Providers</span></div>
+          <div class="entry-stat"><span class="val">5</span><span class="lbl">Frameworks Mapped</span></div>
+        </div>
+
+        <div class="entry-highlight" style="margin-top:20px;">
+          <div class="highlight-label">Major Milestone</div>
+          <p class="highlight-text">VULNRA now has a complete frontend: landing page with live scanner terminal, dedicated scanner workspace, full auth flow, pricing, compliance, docs, blog, integrations, trust center, enterprise page, case studies, dashboard, and this changelog. <strong>The product is now launchable.</strong></p>
+        </div>
+
+        <div class="changes">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Supabase authentication</strong> — real signin/signup with email/password, Google OAuth, and GitHub OAuth. Sessions protected by JWT. Scanner requires auth.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Full page suite shipped</strong> — About, Changelog, Case Studies, Dashboard, Enterprise, Trust Center, Docs, Blog, Integrations, Security page all live.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Dashboard</strong> — post-auth workspace with scan history table, KPI cards, risk score trend chart, compliance posture bars, and Sentinel watch management.</span>
+          </div>
+          <div class="change-item" data-tag="improved">
+            <span class="change-tag tag-improved">Improved</span>
+            <span class="change-text"><strong>Scanner UI</strong> — 3-column workspace with config panel, live log console, and results panel. Blurred findings for free tier. PDF download button.</span>
+          </div>
+          <div class="change-item" data-tag="security">
+            <span class="change-tag tag-security">Security</span>
+            <span class="change-text">CORS configuration hardened: <code>allow_credentials=False</code> + <code>allow_origins=["*"]</code>. Previous combination silently broke all browser requests.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.8.0 -->
+      <div class="entry" id="v0-8-0" data-tags="new improved fixed">
+        <div class="entry-header">
+          <span class="version-badge minor">v0.8.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">February 14, 2026</div>
+            <div class="entry-title">PDF Reports + Sync Scan Engine</div>
+            <div class="entry-summary">Compliance PDF generation fully working end-to-end. POST /report/generate now accepts full scan JSON directly — no Redis dependency. Scans return synchronously on Railway free tier.</div>
+          </div>
+        </div>
+
+        <div class="changes">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>PDF audit reports</strong> via ReportLab 4.1.0. Generates compliance-mapped output with findings, risk scores, EU AI Act / DPDP / NIST citations, and remediation notes.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Synchronous scan mode</strong> — <code>POST /scan</code> falls back to synchronous <code>_run_scan()</code> when Celery is unavailable. Returns full result immediately.</span>
+          </div>
+          <div class="change-item" data-tag="improved">
+            <span class="change-tag tag-improved">Improved</span>
+            <span class="change-text"><strong><code>POST /report/generate</code></strong> now accepts the full scan JSON in the request body. No Redis lookup required — works even when Redis is unavailable on Railway.</span>
+          </div>
+          <div class="change-item" data-tag="fixed">
+            <span class="change-tag tag-fixed">Fixed</span>
+            <span class="change-text"><strong>PDF download broken</strong> — <code>reportlab</code> was missing from <code>requirements.txt</code> and scan data was lost between requests. Both resolved.</span>
+          </div>
+          <div class="change-item" data-tag="fixed">
+            <span class="change-tag tag-fixed">Fixed</span>
+            <span class="change-text"><strong>Scan results lost on Railway</strong> — results stored in <code>_memory_store</code> were stateless per-request. Sync mode eliminates the dependency entirely.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.7.0 -->
+      <div class="entry" id="v0-7-0" data-tags="new security fixed">
+        <div class="entry-header">
+          <span class="version-badge minor">v0.7.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">January 22, 2026</div>
+            <div class="entry-title">Railway Deployment + Redis Fix</div>
+            <div class="entry-summary">Production backend fully deployed on Railway with auto-deploy from git. Critical Redis environment variable ordering bug fixed. Garak mock fallback implemented for Railway's memory constraints.</div>
+          </div>
+        </div>
+
+        <div class="changes">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Railway auto-deploy</strong> — backend deploys on every <code>git push origin main</code>. Netlify handles frontend. Zero manual deployment steps.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Garak mock fallback</strong> — when Garak is unavailable on Railway (no torch/transformers), <code>garak_engine.py</code> returns realistic mock findings with tiered blurring by subscription tier.</span>
+          </div>
+          <div class="change-item" data-tag="fixed">
+            <span class="change-tag tag-fixed">Fixed</span>
+            <span class="change-text"><strong>Redis not connecting on Railway</strong> — <code>_env()</code> in <code>worker.py</code> was reading <code>.env</code> before <code>os.environ</code>, so the Railway <code>REDIS_URL</code> was ignored. Reordered to check <code>os.environ</code> first in both files.</span>
+          </div>
+          <div class="change-item" data-tag="fixed">
+            <span class="change-tag tag-fixed">Fixed</span>
+            <span class="change-text"><strong>"Failed to fetch" errors</strong> — frontend cached old <code>localhost:8000</code> URL. Railway served a stale build. Fixed by deleting <code>runtime.txt</code> and force-redeploying Netlify.</span>
+          </div>
+          <div class="change-item" data-tag="security">
+            <span class="change-tag tag-security">Security</span>
+            <span class="change-text"><strong><code>GET /debug/redis</code> endpoint</strong> added — shows connection status and URL prefix for diagnosis. Returns <code>connected</code> / <code>unavailable</code> status.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.6.0 -->
+      <div class="entry" id="v0-6-0" data-tags="new improved">
+        <div class="entry-header">
+          <span class="version-badge minor">v0.6.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">December 10, 2025</div>
+            <div class="entry-title">Compliance Mapping — EU AI Act + India DPDP</div>
+            <div class="entry-summary">Full compliance framework mapping implemented. Every scan finding now maps to specific EU AI Act articles, India DPDP sections, NIST AI RMF functions, and OWASP LLM Top 10 categories.</div>
+          </div>
+        </div>
+
+        <div class="entry-highlight">
+          <div class="highlight-label">Differentiation</div>
+          <p class="highlight-text">India DPDP mapping is unique to VULNRA in the self-serve LLM security category. <strong>No other tool maps LLM vulnerabilities to India's Digital Personal Data Protection Act.</strong> Section 8, 11, and 16 citations are now included in every Pro scan.</p>
+        </div>
+
+        <div class="changes" style="margin-top:20px;">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>EU AI Act mapping</strong> — Article 9 (risk management), Article 13 (transparency), Article 15 (accuracy), Article 17 (quality). Fine exposure shown: up to €30M.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>India DPDP mapping</strong> — Section 8 (data principal obligations), Section 11 (consent), Section 16 (cross-border transfer). Fine exposure: up to ₹250Cr. <strong>First in category.</strong></span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>NIST AI RMF mapping</strong> — GOVERN 1.1, MAP 2.1, MEASURE 2.5, MANAGE 1.1. Full four-function coverage.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>ISO 42001 mapping</strong> — Clause 6.1, Clause 9.1, Annex A controls. Compliance accordion in scanner results panel.</span>
+          </div>
+          <div class="change-item" data-tag="improved">
+            <span class="change-tag tag-improved">Improved</span>
+            <span class="change-text"><strong>Compliance blurring for Free tier</strong> — framework citations locked behind Pro. Users can see that compliance issues exist but not which articles are implicated.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.5.0 -->
+      <div class="entry" id="v0-5-0" data-tags="new improved">
+        <div class="entry-header">
+          <span class="version-badge minor">v0.5.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">November 3, 2025</div>
+            <div class="entry-title">Garak Integration + Risk Scoring</div>
+            <div class="entry-summary">NVIDIA Garak v0.14.0 integrated as the primary scan engine. Deterministic 0–10 risk scoring live. Eight vulnerability categories implemented including jailbreak, prompt injection, encoding bypass, and PII exfiltration.</div>
+          </div>
+        </div>
+
+        <div class="changes">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Garak v0.14.0 integration</strong> — full probe library including AutoDAN, DAN variants, indirect injection chains, encoding permutations (Base64, ROT13, Unicode homoglyphs).</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>0–10 risk score</strong> — deterministic scoring weighted by severity, exploitability, and regulatory exposure. Comparable across scans over time.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Tiered finding blurring</strong> — Free tier shows 1 blurred finding. Pro shows all findings in full. Blurring is server-side — cannot be bypassed from the frontend.</span>
+          </div>
+          <div class="change-item" data-tag="improved">
+            <span class="change-tag tag-improved">Improved</span>
+            <span class="change-text"><strong>Async Celery queue</strong> — scans run as Celery tasks with Redis broker. <code>GET /scan/{scan_id}</code> polls status. Falls back to synchronous if Celery is unavailable.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.4.0 -->
+      <div class="entry" id="v0-4-0" data-tags="new">
+        <div class="entry-header">
+          <span class="version-badge patch">v0.4.0</span>
+          <div class="entry-meta">
+            <div class="entry-date">October 15, 2025</div>
+            <div class="entry-title">First Working Scan — FastAPI Backend</div>
+            <div class="entry-summary">First end-to-end scan working. FastAPI backend accepts a target URL, fires a basic probe suite, returns a JSON result with findings. The foundation everything else is built on.</div>
+          </div>
+        </div>
+
+        <div class="changes">
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>FastAPI backend</strong> — <code>POST /scan</code>, <code>GET /scan/{id}</code>, <code>GET /health</code>. Deployed on Railway with Procfile.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Static HTML frontend</strong> — <code>index.html</code> with IBM Plex Mono + DM Sans design system, acid green <code>#B8FF57</code> accent, grain and scanline overlays.</span>
+          </div>
+          <div class="change-item" data-tag="new">
+            <span class="change-tag tag-new">New</span>
+            <span class="change-text"><strong>Netlify auto-deploy</strong> — frontend deploys on every git push. Static HTML served from CDN. No build step required.</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end entries -->
+  </div><!-- end main-layout -->
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="cta-glow"></div>
+    <div style="position:relative;z-index:1;">
+      <h2>Ship faster.<br>Scan everything.</h2>
+      <p>Join the teams already using VULNRA to catch vulnerabilities before they reach production.</p>
+      <div class="cta-actions">
+        <a href="signin.html" class="btn-primary">Start Scanning Free →</a>
+        <a href="docs.html" class="btn-outline">Read the docs →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-left">© 2026 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
+    <div class="footer-links">
+      <a href="how-it-works.html">How it works</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="docs.html">Docs</a>
+      <a href="blog.html">Blog</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <script>
+    // Intersection observer — fade entries in on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+      });
+    }, { threshold: 0.05 });
+
+    document.querySelectorAll('.entry').forEach(el => observer.observe(el));
+
+    // Filter
+    function filterEntries(tag, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.entry').forEach(entry => {
+        if (tag === 'all') {
+          entry.style.display = '';
+          return;
+        }
+        const tags = (entry.dataset.tags || '').split(' ');
+        entry.style.display = tags.includes(tag) ? '' : 'none';
+      });
+    }
+
+    // Subscribe
+    function handleSubscribe() {
+      const email = document.getElementById('subEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('subEmail').style.borderColor = 'var(--red)';
+        setTimeout(() => document.getElementById('subEmail').style.borderColor = '', 1500);
+        return;
+      }
+      const btn = document.querySelector('.subscribe-btn');
+      btn.textContent = '✓ SUBSCRIBED';
+      btn.style.background = 'var(--teal)';
+      document.getElementById('subEmail').value = '';
+      setTimeout(() => {
+        btn.textContent = 'SUBSCRIBE';
+        btn.style.background = 'var(--acid)';
+      }, 3000);
+    }
+
+    // Sidebar active on scroll
+    const entryEls = document.querySelectorAll('.entry[id]');
+    const sidebarLinks = document.querySelectorAll('.cl-sidebar-link');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      entryEls.forEach(el => {
+        if (window.scrollY >= el.offsetTop - 120) current = el.id;
+      });
+      sidebarLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+        link.querySelector('.dot').style.background = link.classList.contains('active') ? 'var(--acid)' : 'var(--muted2)';
+      });
+    });
+  </script>
+
+</body>
+</html>

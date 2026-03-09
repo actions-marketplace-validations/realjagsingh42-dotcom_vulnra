@@ -2071,24 +2071,77 @@
       letter-spacing: .05em;
     }
 
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 22px;
-      justify-content: flex-end;
+    footer {
+      border-top: 1px solid var(--border2);
+      padding: 80px 48px;
     }
 
-    .footer-links a {
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .footer-col h4 {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 12px;
+    }
+
+    .footer-col ul li a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--acid);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border2);
+    }
+
+    .footer-copy {
       font-family: var(--mono);
       font-size: 10.5px;
       color: var(--muted2);
-      text-decoration: none;
-      letter-spacing: .05em;
-      transition: color .2s;
     }
 
-    .footer-links a:hover {
-      color: var(--acid);
+    @media (max-width: 1024px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* ── RESPONSIVE ── */
@@ -2787,25 +2840,71 @@
   </section>
 
   <footer>
-    <div class="footer-left">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
-    <div class="footer-links">
-      <a href="how-it-works.html">How it works</a>
-      <a href="compliance.html">Compliance</a>
-      <a href="pricing.html">Pricing</a>
-      <a href="api-docs.html">API Docs</a>
-      <a href="status.html">Status</a>
-      <a href="vuln-db.html">Vulnerability DB</a>
-      <a href="compare.html">Compare</a>
-      <a href="open-source.html">Open Source</a>
-      <a href="affiliates.html">Affiliates</a>
-      <a href="dpdp-guide.html">India DPDP Guide</a>
-      <a href="eu-ai-act.html">EU AI Act</a>
-      <a href="investors.html">Investors</a>
-      <a href="404.html">404 Test</a>
-      <a href="acceptable-use.html">Acceptable Use</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="contact.html">Contact</a>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <a href="index.html" class="nav-logo" style="padding:0; margin-bottom:20px">
+          <div class="nav-logo-mark">
+            <svg viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1" width="5" height="5" fill="#000" />
+              <rect x="8" y="1" width="5" height="5" fill="#000" />
+              <rect x="1" y="8" width="5" height="5" fill="#000" />
+            </svg>
+          </div>
+          VULN<em>RA</em>
+        </a>
+        <p style="font-size:12px; color:var(--muted); max-width:240px; line-height:1.6">
+          The self-serve LLM red-teaming platform for the compliance era. Audit any endpoint in 60 seconds.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="how-it-works.html">Documentation</a></li>
+          <li><a href="api-docs.html">API Reference</a></li>
+          <li><a href="scanner.html">Interactive Scanner</a></li>
+          <li><a href="pricing.html">Pricing Plans</a></li>
+          <li><a href="status.html">System Status</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Compliance</h4>
+        <ul>
+          <li><a href="eu-ai-act.html">EU AI Act Guide</a></li>
+          <li><a href="dpdp-guide.html">India DPDP Guide</a></li>
+          <li><a href="compliance.html">Compliance Mapping</a></li>
+          <li><a href="vuln-db.html">Vulnerability DB</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="open-source.html">Open Source</a></li>
+          <li><a href="affiliates.html">Affiliate Program</a></li>
+          <li><a href="investors.html">Investors & Press</a></li>
+          <li><a href="contact.html">Contact Support</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="acceptable-use.html">Acceptable Use</a></li>
+          <li><a href="404.html">404 Debug</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
+      <div style="display:flex; gap:20px">
+        <a href="https://github.com" class="footer-copy" style="text-decoration:none">GitHub</a>
+        <a href="mailto:hello@vulnra.ai" class="footer-copy" style="text-decoration:none">hello@vulnra.ai</a>
+      </div>
     </div>
   </footer>
 

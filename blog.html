@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — LLM Security, AI Compliance & Red-Teaming Guides | VULNRA</title>
+  <meta name="description" content="In-depth guides on LLM red-teaming, EU AI Act compliance, India DPDP requirements, OWASP LLM Top 10, and AI security best practices. Written by the VULNRA team.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://vulnra.ai/blog.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VULNRA Blog — LLM Security & AI Compliance">
+  <meta property="og:description" content="Guides on LLM red-teaming, EU AI Act, India DPDP, OWASP LLM Top 10, and AI security best practices.">
+  <meta property="og:url" content="https://vulnra.ai/blog.html">
+  <link rel="alternate" hreflang="en-in" href="https://vulnra.ai/blog.html">
+  <link rel="alternate" hreflang="en-eu" href="https://vulnra.ai/blog.html">
+  <link rel="alternate" hreflang="en" href="https://vulnra.ai/blog.html">
+  <link rel="alternate" hreflang="x-default" href="https://vulnra.ai/blog.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Blog",
+        "@id": "https://vulnra.ai/blog.html",
+        "name": "VULNRA Blog",
+        "url": "https://vulnra.ai/blog.html",
+        "description": "LLM security research, AI compliance guides, and red-teaming best practices.",
+        "publisher": { "@type": "Organization", "name": "VULNRA", "url": "https://vulnra.ai" },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://vulnra.ai/" },
+            { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://vulnra.ai/blog.html" }
+          ]
+        }
+      }
+    ]
+  }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#060608;--bg1:#0a0b0f;--bg2:#0f1117;
+      --acid:#b8ff57;--acid2:rgba(184,255,87,.07);--acid3:rgba(184,255,87,.15);
+      --red:#ff3c5a;--amber:#ffb340;--blue:#4db8ff;--purple:#b48bff;
+      --text:#e8edf4;--muted:rgba(232,237,244,.44);--muted2:rgba(232,237,244,.22);
+      --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
+      --mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:9998}
+    body::after{content:'';position:fixed;inset:-200%;width:400%;height:400%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9997;animation:grain .4s steps(1) infinite}
+    @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,-4%)}40%{transform:translate(-6%,3%)}60%{transform:translate(3%,-2%)}80%{transform:translate(-4%,6%)}100%{transform:translate(5%,-3%)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--acid)}
+    ::selection{background:var(--acid);color:#000}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:60px;background:rgba(6,6,8,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2)}
+    nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,255,87,.25),transparent)}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);text-decoration:none}
+    .nav-logo-mark{width:28px;height:28px;border-radius:5px;background:var(--acid);display:flex;align-items:center;justify-content:center}
+    .nav-logo-mark svg{width:14px;height:14px}
+    .nav-logo em{font-style:normal;color:var(--acid)}
+    .nav-links{display:flex;align-items:center;gap:36px}
+    .nav-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-decoration:none;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--acid)}
+    .nav-right{display:flex;align-items:center;gap:12px}
+    .btn-ghost{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:none;transition:color .2s}
+    .btn-ghost:hover{color:var(--text)}
+    .btn-acid{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:8px 18px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:6px}
+    .btn-acid:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(184,255,87,.28)}
+
+    /* HEADER */
+    .blog-header{padding:100px 48px 60px;max-width:1200px;margin:0 auto}
+    .page-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--acid);margin-bottom:18px;animation:fadeUp .5s ease forwards;opacity:0}
+    .page-eyebrow::before,.page-eyebrow::after{content:'';display:block;width:20px;height:1px;background:var(--acid);opacity:.35}
+    .blog-title{font-family:var(--mono);font-size:clamp(30px,4.5vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1.08;margin-bottom:14px;animation:fadeUp .5s ease forwards .1s;opacity:0}
+    .blog-title .accent{color:var(--acid)}
+    .blog-sub{font-size:16px;color:var(--muted);line-height:1.7;font-weight:300;max-width:520px;animation:fadeUp .5s ease forwards .2s;opacity:0}
+
+    /* SEARCH + FILTER */
+    .blog-controls{max-width:1200px;margin:0 auto;padding:0 48px 40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;animation:fadeUp .5s ease forwards .3s;opacity:0}
+    .search-wrap{position:relative;flex:1;max-width:340px}
+    .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted2);pointer-events:none}
+    .search-input{width:100%;background:var(--bg1);border:1px solid var(--border);border-radius:3px;padding:9px 12px 9px 34px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--text);outline:none;transition:border-color .2s}
+    .search-input::placeholder{color:var(--muted2)}
+    .search-input:focus{border-color:rgba(184,255,87,.25)}
+    .filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+    .pill{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:2px;border:1px solid var(--border);color:var(--muted2);cursor:pointer;transition:all .18s;user-select:none;white-space:nowrap}
+    .pill:hover{border-color:rgba(255,255,255,.15);color:var(--muted)}
+    .pill.active{border-color:var(--acid);color:var(--acid);background:var(--acid2)}
+    .pill[data-cat="compliance"].active{border-color:var(--blue);color:var(--blue);background:rgba(77,184,255,.07)}
+    .pill[data-cat="research"].active{border-color:var(--amber);color:var(--amber);background:rgba(255,179,64,.07)}
+    .pill[data-cat="tutorial"].active{border-color:var(--purple);color:var(--purple);background:rgba(180,139,255,.07)}
+    .pill[data-cat="india"].active{border-color:#ff9933;color:#ff9933;background:rgba(255,153,51,.07)}
+
+    /* FEATURED */
+    .featured-wrap{max-width:1200px;margin:0 auto;padding:0 48px 56px}
+    .featured-label{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted2);margin-bottom:16px}
+    .featured-card{display:grid;grid-template-columns:1fr 420px;background:var(--bg1);border:1px solid var(--border);border-radius:5px;overflow:hidden;cursor:pointer;transition:border-color .25s,transform .25s;text-decoration:none;color:inherit}
+    .featured-card:hover{border-color:rgba(184,255,87,.2);transform:translateY(-3px)}
+    .featured-img{background:var(--bg2);position:relative;overflow:hidden;min-height:280px;display:flex;align-items:center;justify-content:center}
+    .featured-img-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(184,255,87,.06) 0%,transparent 60%)}
+    .featured-terminal{font-family:var(--mono);font-size:11.5px;line-height:1.8;color:var(--muted);padding:32px;position:relative;z-index:1;width:100%}
+    .ft-line-acid{color:var(--acid)}
+    .ft-line-red{color:var(--red)}
+    .ft-line-muted{color:var(--muted2)}
+    .featured-body{padding:36px 36px 32px;display:flex;flex-direction:column;justify-content:space-between}
+    .feat-cat{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+    .feat-cat-dot{width:5px;height:5px;border-radius:50%}
+    .feat-title{font-family:var(--mono);font-size:clamp(17px,1.8vw,22px);font-weight:700;letter-spacing:-.02em;line-height:1.28;margin-bottom:14px}
+    .feat-excerpt{font-size:13.5px;color:var(--muted);line-height:1.72;font-weight:300;margin-bottom:24px}
+    .feat-meta{display:flex;align-items:center;justify-content:space-between}
+    .feat-meta-left{display:flex;flex-direction:column;gap:3px}
+    .feat-date{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted2)}
+    .feat-read{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted2)}
+    .feat-arrow{font-family:var(--mono);font-size:13px;color:var(--acid);transition:transform .2s}
+    .featured-card:hover .feat-arrow{transform:translateX(5px)}
+
+    /* GRID */
+    .blog-grid-wrap{max-width:1200px;margin:0 auto;padding:0 48px 80px}
+    .grid-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+    .grid-count{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted2)}
+    .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border2)}
+    .blog-card{background:var(--bg1);padding:28px 26px;cursor:pointer;transition:background .2s;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px}
+    .blog-card:hover{background:var(--bg2)}
+    .card-cat{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase}
+    .cat-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+    .cat-security .cat-dot{background:var(--acid)}
+    .cat-security .cat-text{color:var(--acid)}
+    .cat-compliance .cat-dot{background:var(--blue)}
+    .cat-compliance .cat-text{color:var(--blue)}
+    .cat-research .cat-dot{background:var(--amber)}
+    .cat-research .cat-text{color:var(--amber)}
+    .cat-tutorial .cat-dot{background:var(--purple)}
+    .cat-tutorial .cat-text{color:var(--purple)}
+    .cat-india .cat-dot{background:#ff9933}
+    .cat-india .cat-text{color:#ff9933}
+    .card-title{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:-.01em;line-height:1.38;flex:1}
+    .card-excerpt{font-size:12.5px;color:var(--muted);line-height:1.68;font-weight:300}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:14px;border-top:1px solid var(--border2)}
+    .card-date{font-family:var(--mono);font-size:9px;letter-spacing:.08em;color:var(--muted2)}
+    .card-read{font-family:var(--mono);font-size:9px;color:var(--muted2)}
+    .card-arrow{color:var(--acid);font-size:12px;opacity:0;transition:opacity .2s,transform .2s}
+    .blog-card:hover .card-arrow{opacity:1;transform:translateX(3px)}
+
+    /* NEWSLETTER */
+    .newsletter{max-width:1200px;margin:0 auto;padding:0 48px 80px}
+    .nl-inner{background:var(--bg1);border:1px solid rgba(184,255,87,.12);border-radius:5px;padding:40px 48px;display:flex;align-items:center;justify-content:space-between;gap:32px;position:relative;overflow:hidden}
+    .nl-glow{position:absolute;right:-60px;top:50%;transform:translateY(-50%);width:300px;height:200px;background:radial-gradient(ellipse,rgba(184,255,87,.06) 0%,transparent 70%);pointer-events:none}
+    .nl-left h3{font-family:var(--mono);font-size:18px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+    .nl-left p{font-size:13.5px;color:var(--muted);font-weight:300;line-height:1.6}
+    .nl-form{display:flex;gap:8px;flex-shrink:0}
+    .nl-input{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:10px 16px;font-family:var(--mono);font-size:11px;color:var(--text);outline:none;width:240px;transition:border-color .2s}
+    .nl-input::placeholder{color:var(--muted2)}
+    .nl-input:focus{border-color:rgba(184,255,87,.25)}
+    .nl-btn{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:10px 20px;border-radius:3px;cursor:pointer;white-space:nowrap;transition:all .2s}
+    .nl-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(184,255,87,.25)}
+
+    /* EMPTY STATE */
+    .empty-state{text-align:center;padding:72px 24px;color:var(--muted2);font-family:var(--mono);font-size:13px}
+    .empty-state span{display:block;font-size:28px;margin-bottom:12px;opacity:.5}
+
+    footer{background:var(--bg);border-top:1px solid var(--border2);padding:28px 48px;display:flex;align-items:center;justify-content:space-between}
+    .footer-left{font-family:var(--mono);font-size:10.5px;color:var(--muted2);letter-spacing:.05em}
+    .footer-links{display:flex;gap:22px}
+    .footer-links a{font-family:var(--mono);font-size:10.5px;color:var(--muted2);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+    .footer-links a:hover{color:var(--acid)}
+
+    @media(max-width:1024px){.blog-grid{grid-template-columns:repeat(2,1fr)}.featured-card{grid-template-columns:1fr}}
+    @media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.blog-header,.blog-controls,.featured-wrap,.blog-grid-wrap,.newsletter{padding-left:20px;padding-right:20px}.blog-grid{grid-template-columns:1fr}.nl-inner{flex-direction:column;padding:28px 24px}.nl-form{flex-direction:column;width:100%}.nl-input{width:100%}footer{flex-direction:column;gap:14px;text-align:center;padding:24px}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" fill="#000"/><rect x="8" y="1" width="5" height="5" fill="#000"/><rect x="1" y="8" width="5" height="5" fill="#000"/><rect x="8" y="10" width="2" height="2" fill="#000"/><rect x="11" y="10" width="2" height="2" fill="#000"/></svg></div>
+    VULN<em>RA</em>
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="how-it-works.html">How it works</a>
+    <a href="compliance.html">Compliance</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="blog.html" class="active">Blog</a>
+    <a href="docs.html">Docs</a>
+  </div>
+  <div class="nav-right">
+    <a href="signin.html" class="btn-ghost">Sign In</a>
+    <a href="signup.html" class="btn-acid">Get Started →</a>
+  </div>
+</nav>
+
+<main>
+  <div class="blog-header">
+    <div class="page-eyebrow">Blog</div>
+    <h1 class="blog-title">LLM Security.<br>AI Compliance. <span class="accent">Red-Teaming.</span></h1>
+    <p class="blog-sub">In-depth research on prompt injection, jailbreaks, EU AI Act, India DPDP, and building secure AI systems. Written by the team that builds the scanner.</p>
+  </div>
+
+  <div class="blog-controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" placeholder="Search articles..." id="searchInput" oninput="filterCards()">
+    </div>
+    <div class="filter-pills">
+      <div class="pill active" data-cat="all" onclick="setFilter('all',this)">All</div>
+      <div class="pill" data-cat="security" onclick="setFilter('security',this)">Security</div>
+      <div class="pill" data-cat="compliance" onclick="setFilter('compliance',this)">Compliance</div>
+      <div class="pill" data-cat="tutorial" onclick="setFilter('tutorial',this)">Tutorial</div>
+      <div class="pill" data-cat="research" onclick="setFilter('research',this)">Research</div>
+      <div class="pill" data-cat="india" onclick="setFilter('india',this)">India DPDP</div>
+    </div>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="featured-wrap" id="featuredWrap">
+    <div class="featured-label">Featured Article</div>
+    <a href="#" class="featured-card">
+      <div class="featured-img">
+        <div class="featured-img-bg"></div>
+        <div class="featured-terminal">
+          <div class="ft-line-acid">$ vulnra scan --url https://api.example.com/chat --tier pro</div>
+          <div class="ft-line-muted">→ Initialising Garak v0.14.0 probe suite...</div>
+          <div class="ft-line-muted">→ Running 40 probes across 8 categories</div>
+          <div style="margin-top:8px"></div>
+          <div class="ft-line-acid">✓ PROBE dan.Dan11_0 .......... PASS</div>
+          <div class="ft-line-acid">✓ PROBE encoding.InjectAscii .. PASS</div>
+          <div class="ft-line-red">✗ PROBE injection.Crescendo ... FAIL [HIGH]</div>
+          <div class="ft-line-red">✗ PROBE leakage.SystemPrompt .. FAIL [CRITICAL]</div>
+          <div style="margin-top:8px"></div>
+          <div class="ft-line-muted">→ Generating compliance report...</div>
+          <div class="ft-line-acid">→ EU AI Act: Article 9, Article 13 — NON-COMPLIANT</div>
+          <div class="ft-line-acid">→ India DPDP: Section 8 — REQUIRES REMEDIATION</div>
+          <div style="margin-top:8px"></div>
+          <div style="color:var(--text)">Risk Score: <span style="color:var(--red);font-weight:700">8.4 / 10</span></div>
+        </div>
+      </div>
+      <div class="featured-body">
+        <div>
+          <div class="feat-cat"><div class="feat-cat-dot" style="background:var(--acid)"></div><span style="color:var(--acid);font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase">Tutorial</span></div>
+          <div class="feat-title">How to Red-Team Your LLM in 60 Seconds: A Step-by-Step Guide Using VULNRA</div>
+          <div class="feat-excerpt">Most developers shipping AI features have never run a single security test on their model endpoint. This guide walks through the exact process of finding prompt injection vulnerabilities, jailbreak vectors, and data exfiltration paths — and mapping every finding to the compliance framework you're liable for.</div>
+        </div>
+        <div class="feat-meta">
+          <div class="feat-meta-left">
+            <div class="feat-date">March 1, 2026</div>
+            <div class="feat-read">12 min read</div>
+          </div>
+          <span class="feat-arrow">→</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- ARTICLE GRID -->
+  <div class="blog-grid-wrap">
+    <div class="grid-header">
+      <div class="grid-count" id="gridCount">Showing 9 articles</div>
+    </div>
+    <div class="blog-grid" id="blogGrid">
+
+      <a href="#" class="blog-card" data-cat="compliance" data-title="EU AI Act Compliance Checklist for AI Developers">
+        <div class="card-cat cat-compliance"><div class="cat-dot"></div><span class="cat-text">Compliance</span></div>
+        <div class="card-title">EU AI Act Compliance Checklist for AI Developers: What You Need Before August 2026</div>
+        <div class="card-excerpt">The August 2026 enforcement deadline for high-risk AI systems is closer than most teams realise. Here is exactly what your AI product needs to be compliant — from risk management documentation to technical robustness testing.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Feb 22, 2026</div><div class="card-read">9 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="india" data-title="What is India DPDP and Why Your AI Product is at Risk">
+        <div class="card-cat cat-india"><div class="cat-dot"></div><span class="cat-text">India DPDP</span></div>
+        <div class="card-title">What is India DPDP and Why Your AI Product is at Risk</div>
+        <div class="card-excerpt">India's Digital Personal Data Protection Act 2023 creates liability for any AI system processing personal data of Indian citizens — including LLMs used in customer service, HR, healthcare, and finance. Here's what it means for your product.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Feb 15, 2026</div><div class="card-read">7 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="security" data-title="OWASP LLM Top 10 2025: What Changed and How to Test for It">
+        <div class="card-cat cat-security"><div class="cat-dot"></div><span class="cat-text">Security</span></div>
+        <div class="card-title">OWASP LLM Top 10 2025: What Changed and How to Test for Every Category</div>
+        <div class="card-excerpt">The 2025 update to OWASP LLM Top 10 adds five new vulnerability categories including System Prompt Leakage and Vector Embedding Weakness. We break down each one with concrete test cases and exploits.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Feb 8, 2026</div><div class="card-read">14 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="research" data-title="We Scanned 500 LLM Endpoints: Here's What We Found">
+        <div class="card-cat cat-research"><div class="cat-dot"></div><span class="cat-text">Research</span></div>
+        <div class="card-title">We Scanned 500 LLM Endpoints: Here's What We Found</div>
+        <div class="card-excerpt">847 instances of a specific encoding bypass vulnerability. 60% of tested endpoints were susceptible to system prompt leakage via indirect injection. The state of LLM security in production is worse than most security teams believe.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Jan 28, 2026</div><div class="card-read">11 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="tutorial" data-title="How to Add LLM Security to Your CI/CD Pipeline">
+        <div class="card-cat cat-tutorial"><div class="cat-dot"></div><span class="cat-text">Tutorial</span></div>
+        <div class="card-title">How to Add LLM Security Scanning to Your CI/CD Pipeline (GitHub Actions)</div>
+        <div class="card-excerpt">A single YAML file that fails your build if your LLM endpoint risk score exceeds a threshold. Once this is in your pipeline, every model deployment is automatically security-tested before it reaches production.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Jan 18, 2026</div><div class="card-read">6 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="india" data-title="DPDP vs GDPR: What Indian AI Companies Need to Know">
+        <div class="card-cat cat-india"><div class="cat-dot"></div><span class="cat-text">India DPDP</span></div>
+        <div class="card-title">DPDP vs GDPR: What Indian AI Companies Building for Europe Need to Know</div>
+        <div class="card-excerpt">If your AI product processes data from Indian and European users, you're subject to both DPDP and GDPR simultaneously. The requirements overlap — but they don't align perfectly. Here's the gap map.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Jan 10, 2026</div><div class="card-read">8 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="security" data-title="Prompt Injection vs Jailbreaking: What's the Difference?">
+        <div class="card-cat cat-security"><div class="cat-dot"></div><span class="cat-text">Security</span></div>
+        <div class="card-title">Prompt Injection vs Jailbreaking: What's the Actual Difference?</div>
+        <div class="card-excerpt">The two most common LLM attack types are often confused — even by security teams. Prompt injection exploits input handling. Jailbreaking bypasses alignment training. Understanding the distinction matters for how you defend against each one.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Dec 20, 2025</div><div class="card-read">5 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="research" data-title="MCP Security: The Attack Surface No One Is Talking About">
+        <div class="card-cat cat-research"><div class="cat-dot"></div><span class="cat-text">Research</span></div>
+        <div class="card-title">MCP Security: The Attack Surface No One Is Talking About</div>
+        <div class="card-excerpt">Over 13,000 MCP servers launched on GitHub in 2025. Each one exposes a set of tools that can be hijacked via crafted inputs. We analysed the attack surface and found privilege escalation, credential exfiltration, and tool injection vectors in the wild.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Dec 12, 2025</div><div class="card-read">13 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#" class="blog-card" data-cat="compliance" data-title="NIST AI RMF vs ISO 42001: Which Does Your AI Product Need?">
+        <div class="card-cat cat-compliance"><div class="cat-dot"></div><span class="cat-text">Compliance</span></div>
+        <div class="card-title">NIST AI RMF vs ISO 42001: Which Framework Does Your AI Product Actually Need?</div>
+        <div class="card-excerpt">Both frameworks are referenced by enterprise procurement teams and compliance auditors. But they serve different purposes, target different organisations, and have different certification paths. Here's how to decide which one to prioritise first.</div>
+        <div class="card-footer">
+          <div><div class="card-date">Dec 3, 2025</div><div class="card-read">10 min read</div></div>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+    <div class="empty-state" id="emptyState" style="display:none"><span>∅</span>No articles match your filter.</div>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="newsletter">
+    <div class="nl-inner">
+      <div class="nl-glow"></div>
+      <div class="nl-left">
+        <h3>One article per week. No fluff.</h3>
+        <p>LLM security research, compliance updates, and red-teaming techniques — straight to your inbox.</p>
+      </div>
+      <div class="nl-form">
+        <input class="nl-input" type="email" placeholder="you@company.com">
+        <button class="nl-btn" onclick="handleSubscribe(this)">Subscribe →</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-left">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
+  <div class="footer-links">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="acceptable-use.html">AUP</a>
+    <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+    <a href="mailto:hello@vulnra.ai">hello@vulnra.ai</a>
+  </div>
+</footer>
+
+<script>
+  let activeFilter = 'all';
+
+  function setFilter(cat, el) {
+    activeFilter = cat;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    filterCards();
+  }
+
+  function filterCards() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.blog-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const catMatch = activeFilter === 'all' || card.dataset.cat === activeFilter;
+      const titleMatch = card.dataset.title.toLowerCase().includes(query);
+      const textMatch = card.innerText.toLowerCase().includes(query);
+      const show = catMatch && (query === '' || titleMatch || textMatch);
+      card.style.display = show ? 'flex' : 'none';
+      if (show) visible++;
+    });
+    document.getElementById('gridCount').textContent = `Showing ${visible} article${visible !== 1 ? 's' : ''}`;
+    document.getElementById('emptyState').style.display = visible === 0 ? 'block' : 'none';
+    // hide featured if filtering
+    document.getElementById('featuredWrap').style.display = (activeFilter === 'all' && query === '') ? 'block' : 'none';
+  }
+
+  function handleSubscribe(btn) {
+    const input = btn.previousElementSibling;
+    if (!input.value || !input.value.includes('@')) {
+      input.style.borderColor = 'var(--red)';
+      setTimeout(() => input.style.borderColor = '', 1500);
+      return;
+    }
+    btn.textContent = '✓ Subscribed';
+    btn.style.background = '#3dffaa';
+    btn.disabled = true;
+  }
+</script>
+</body>
+</html>

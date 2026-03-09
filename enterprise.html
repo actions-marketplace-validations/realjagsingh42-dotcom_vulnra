@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VULNRA Enterprise — LLM Security for CISOs, Compliance Teams & Large Engineering Orgs</title>
+  <meta name="description" content="VULNRA Enterprise: on-premises deployment, SSO, custom compliance frameworks, dedicated SLA, and SOC 2 Type II certification in progress. Built for CISOs who need continuous LLM red-teaming at scale.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://vulnra.ai/enterprise.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VULNRA Enterprise — LLM Security at Scale for CISOs">
+  <meta property="og:description" content="On-prem deployment, SSO, unlimited scans, custom frameworks, dedicated SLA. Contact us for enterprise pricing.">
+  <meta property="og:url" content="https://vulnra.ai/enterprise.html">
+  <link rel="alternate" hreflang="en-in" href="https://vulnra.ai/enterprise.html">
+  <link rel="alternate" hreflang="en-eu" href="https://vulnra.ai/enterprise.html">
+  <link rel="alternate" hreflang="en" href="https://vulnra.ai/enterprise.html">
+  <link rel="alternate" hreflang="x-default" href="https://vulnra.ai/enterprise.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://vulnra.ai/enterprise.html",
+        "name": "VULNRA Enterprise",
+        "url": "https://vulnra.ai/enterprise.html",
+        "description": "Enterprise LLM security platform with on-premises deployment, SSO, custom compliance frameworks, and dedicated SLA.",
+        "breadcrumb": {"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://vulnra.ai/"},{"@type":"ListItem","position":2,"name":"Enterprise","item":"https://vulnra.ai/enterprise.html"}]}
+      },
+      {
+        "@type": "Product",
+        "name": "VULNRA Enterprise",
+        "description": "Self-hosted LLM red-teaming with unlimited scans, SSO, custom frameworks, SLA, and dedicated Slack support.",
+        "offers": {"@type":"Offer","priceCurrency":"USD","price":"499","priceSpecification":{"@type":"UnitPriceSpecification","price":"499","priceCurrency":"USD","unitText":"MONTH","minPrice":"499"}},
+        "brand": {"@type":"Organization","name":"VULNRA"}
+      }
+    ]
+  }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#060608;--bg1:#0a0b0f;--bg2:#0f1117;--bg3:#13151c;
+      --acid:#b8ff57;--acid2:rgba(184,255,87,.07);--acid3:rgba(184,255,87,.13);
+      --red:#ff3c5a;--amber:#ffb340;--blue:#4db8ff;--green:#3dffaa;--purple:#b48bff;
+      --gold:#ffd166;
+      --text:#e8edf4;--muted:rgba(232,237,244,.44);--muted2:rgba(232,237,244,.22);
+      --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
+      --mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:9998}
+    body::after{content:'';position:fixed;inset:-200%;width:400%;height:400%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9997;animation:grain .4s steps(1) infinite}
+    @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,-4%)}40%{transform:translate(-6%,3%)}60%{transform:translate(3%,-2%)}80%{transform:translate(-4%,6%)}100%{transform:translate(5%,-3%)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes borderPulse{0%,100%{border-color:rgba(184,255,87,.15)}50%{border-color:rgba(184,255,87,.35)}}
+    @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--acid)}
+    ::selection{background:var(--acid);color:#000}
+
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:60px;background:rgba(6,6,8,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border2)}
+    nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(184,255,87,.25),transparent)}
+    .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);text-decoration:none}
+    .nav-logo-mark{width:28px;height:28px;border-radius:5px;background:var(--acid);display:flex;align-items:center;justify-content:center}
+    .nav-logo-mark svg{width:14px;height:14px}
+    .nav-logo em{font-style:normal;color:var(--acid)}
+    .nav-links{display:flex;align-items:center;gap:36px}
+    .nav-links a{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-decoration:none;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:var(--acid)}
+    .nav-right{display:flex;align-items:center;gap:12px}
+    .btn-ghost{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:none;transition:color .2s}
+    .btn-ghost:hover{color:var(--text)}
+    .btn-acid{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:8px 18px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s}
+    .btn-acid:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(184,255,87,.28)}
+
+    /* HERO */
+    .hero{padding:100px 48px 80px;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 440px;gap:80px;align-items:center;position:relative}
+    .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(184,255,87,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(184,255,87,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 70% at 50% 50%,black 40%,transparent 100%)}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;animation:fadeUp .5s ease forwards;opacity:0}
+    .hero-eyebrow::before{content:'';display:block;width:16px;height:1px;background:var(--gold);opacity:.5}
+    .hero-title{font-family:var(--mono);font-size:clamp(30px,4vw,50px);font-weight:700;letter-spacing:-.035em;line-height:1.06;margin-bottom:20px;animation:fadeUp .5s ease forwards .1s;opacity:0}
+    .hero-title .accent{color:var(--acid)}
+    .hero-title .gold{color:var(--gold)}
+    .hero-sub{font-size:15.5px;color:var(--muted);line-height:1.78;font-weight:300;max-width:500px;margin-bottom:32px;animation:fadeUp .5s ease forwards .2s;opacity:0}
+    .hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;animation:fadeUp .5s ease forwards .3s;opacity:0}
+    .btn-enterprise{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:13px 28px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px}
+    .btn-enterprise:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(184,255,87,.3)}
+    .btn-demo{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--text);background:none;border:1px solid var(--border);padding:13px 22px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s}
+    .btn-demo:hover{border-color:rgba(255,255,255,.2);transform:translateY(-2px)}
+    .hero-trust{display:flex;align-items:center;gap:16px;margin-top:20px;animation:fadeUp .5s ease forwards .4s;opacity:0}
+    .trust-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted2)}
+    .trust-check{color:var(--green);font-size:11px}
+
+    /* HERO CARD */
+    .hero-card{background:var(--bg1);border:1px solid rgba(184,255,87,.15);border-radius:6px;padding:28px;animation:fadeUp .6s ease forwards .2s;opacity:0;animation:borderPulse 3s ease infinite}
+    .hc-label{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin-bottom:18px}
+    .hc-stat-row{display:flex;gap:0;margin-bottom:20px}
+    .hc-stat{flex:1;padding:16px;background:var(--bg2);border:1px solid var(--border2)}
+    .hc-stat:first-child{border-radius:4px 0 0 4px}
+    .hc-stat:last-child{border-radius:0 4px 4px 0}
+    .hc-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--acid);letter-spacing:-.02em}
+    .hc-desc{font-family:var(--mono);font-size:9px;color:var(--muted2);letter-spacing:.08em;margin-top:3px}
+    .hc-features{display:flex;flex-direction:column;gap:8px}
+    .hc-feat{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-weight:300;line-height:1.4}
+    .hc-feat-check{font-family:var(--mono);font-size:10px;color:var(--acid);flex-shrink:0;width:18px}
+    .hc-cta{margin-top:20px;display:flex;align-items:center;justify-content:space-between;padding-top:18px;border-top:1px solid var(--border2)}
+    .hc-price{font-family:var(--mono)}
+    .hc-price-val{font-size:22px;font-weight:700;color:var(--text)}
+    .hc-price-unit{font-size:10px;color:var(--muted2);display:block;margin-top:1px}
+    .hc-btn{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;background:var(--acid);color:#000;border:none;padding:9px 18px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .2s}
+    .hc-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(184,255,87,.25)}
+
+    /* SECTION UTILS */
+    .section-eyebrow{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--acid);margin-bottom:14px}
+    .section-eyebrow::before,.section-eyebrow::after{content:'';display:block;width:18px;height:1px;background:var(--acid);opacity:.35}
+    .section-title{font-family:var(--mono);font-size:clamp(20px,2.8vw,32px);font-weight:700;letter-spacing:-.025em;margin-bottom:10px}
+    .section-sub{font-size:14.5px;color:var(--muted);line-height:1.72;font-weight:300;max-width:540px;margin-bottom:40px}
+    .divider{height:1px;background:var(--border2);margin:0}
+    .content-wrap{max-width:1200px;margin:0 auto;padding:72px 48px}
+
+    /* SEGMENTS */
+    .segments{background:var(--bg1);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:72px 48px}
+    .seg-inner{max-width:1200px;margin:0 auto}
+    .seg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border2);border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-top:40px}
+    .seg-card{background:var(--bg);padding:30px 26px;transition:background .2s;position:relative;overflow:hidden}
+    .seg-card:hover{background:var(--bg2)}
+    .seg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform .3s;transform-origin:left}
+    .seg-card:hover::before{transform:scaleX(1)}
+    .seg-icon{font-size:24px;margin-bottom:14px}
+    .seg-title{font-family:var(--mono);font-size:14px;font-weight:700;margin-bottom:8px}
+    .seg-desc{font-size:13px;color:var(--muted);line-height:1.68;font-weight:300;margin-bottom:16px}
+    .seg-examples{font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:.06em;line-height:1.8}
+    .seg-pain{margin-top:12px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:3px;font-size:12px;color:var(--muted);font-weight:300;line-height:1.6;border-left:2px solid var(--gold)}
+
+    /* FEATURES DEEP DIVE */
+    .features-section{padding:72px 48px}
+    .feat-inner{max-width:1200px;margin:0 auto}
+    .feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border2);border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-top:40px}
+    .feat-card{background:var(--bg1);padding:30px 28px;transition:background .2s;position:relative}
+    .feat-card:hover{background:var(--bg2)}
+    .feat-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+    .feat-icon{font-size:22px}
+    .feat-tier{font-family:var(--mono);font-size:8px;letter-spacing:.14em;padding:3px 8px;border-radius:2px}
+    .ft-ent{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.2);color:var(--gold)}
+    .ft-pro{background:rgba(184,255,87,.07);border:1px solid rgba(184,255,87,.18);color:var(--acid)}
+    .feat-title{font-family:var(--mono);font-size:14px;font-weight:700;margin-bottom:8px}
+    .feat-desc{font-size:13px;color:var(--muted);line-height:1.68;font-weight:300}
+    .feat-detail{margin-top:14px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;font-family:var(--mono);font-size:10.5px;color:var(--muted2);line-height:1.7}
+
+    /* COMPARISON */
+    .comparison{background:var(--bg1);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:72px 48px}
+    .cmp-inner{max-width:1200px;margin:0 auto}
+    .cmp-table{width:100%;border-collapse:collapse;margin-top:40px}
+    .cmp-table thead th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:14px 20px;border-bottom:1px solid var(--border);text-align:left}
+    .cmp-table thead th:not(:first-child){text-align:center}
+    .col-manual{color:var(--muted2)}
+    .col-pro{color:var(--acid)}
+    .col-ent{color:var(--gold)}
+    .col-ent-header{color:var(--gold);background:rgba(255,209,102,.04);border-left:1px solid rgba(255,209,102,.1);border-right:1px solid rgba(255,209,102,.1)}
+    .cmp-table tbody tr{border-bottom:1px solid var(--border2);transition:background .15s}
+    .cmp-table tbody tr:last-child{border-bottom:none}
+    .cmp-table tbody tr:hover{background:rgba(255,255,255,.015)}
+    .cmp-table td{padding:13px 20px;font-size:13px;color:var(--muted)}
+    .cmp-table td:first-child{font-size:13px;color:var(--text);font-weight:400}
+    .cmp-table td:not(:first-child){text-align:center}
+    .td-ent{background:rgba(255,209,102,.02);border-left:1px solid rgba(255,209,102,.06);border-right:1px solid rgba(255,209,102,.06)}
+    .check-yes{color:var(--green);font-size:14px}
+    .check-no{color:var(--muted2);font-size:12px}
+    .check-partial{color:var(--amber);font-size:11px;font-family:var(--mono)}
+    .cmp-section-row td{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);padding:18px 20px 6px;background:transparent}
+
+    /* SECURITY CERTIFICATIONS */
+    .certs{padding:72px 48px}
+    .certs-inner{max-width:1200px;margin:0 auto}
+    .cert-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border2);border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-top:40px}
+    .cert-card{background:var(--bg1);padding:26px 22px;text-align:center;transition:background .2s}
+    .cert-card:hover{background:var(--bg2)}
+    .cert-badge{width:56px;height:56px;border-radius:10px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:26px}
+    .cert-name{font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:4px}
+    .cert-status-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px}
+    .cert-dot{width:5px;height:5px;border-radius:50%}
+    .cert-dot.live{background:var(--green)}
+    .cert-dot.progress{background:var(--amber)}
+    .cert-dot.planned{background:var(--muted2)}
+    .cert-status{font-family:var(--mono);font-size:9px;letter-spacing:.1em}
+    .cert-desc{font-size:11.5px;color:var(--muted);line-height:1.55;font-weight:300}
+
+    /* CONTACT FORM */
+    .contact-section{background:var(--bg1);border-top:1px solid var(--border2);padding:80px 48px}
+    .contact-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 520px;gap:80px;align-items:start}
+    .contact-left h2{font-family:var(--mono);font-size:clamp(22px,3vw,36px);font-weight:700;letter-spacing:-.025em;margin-bottom:14px}
+    .contact-left p{font-size:14px;color:var(--muted);line-height:1.76;font-weight:300;margin-bottom:24px}
+    .contact-info{display:flex;flex-direction:column;gap:12px}
+    .ci-row{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;color:var(--muted);font-weight:300}
+    .ci-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+    .ci-text strong{color:var(--text);font-weight:500;display:block;margin-bottom:2px;font-size:13px}
+    .contact-form{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:32px}
+    .form-title{font-family:var(--mono);font-size:13px;font-weight:600;margin-bottom:22px;letter-spacing:-.01em}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .form-label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
+    .form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+    .form-input::placeholder,.form-textarea::placeholder{color:var(--muted2)}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(184,255,87,.25)}
+    .form-select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(232,237,244,.3)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+    .form-select option{background:#0f1117}
+    .form-textarea{resize:vertical;min-height:90px;font-family:var(--sans)}
+    .form-submit{width:100%;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:13px;border-radius:3px;cursor:pointer;transition:all .25s;margin-top:6px}
+    .form-submit:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(184,255,87,.28)}
+    .form-note{font-family:var(--mono);font-size:9.5px;color:var(--muted2);text-align:center;margin-top:10px;line-height:1.6}
+    .success-msg{display:none;text-align:center;padding:24px;font-family:var(--mono);font-size:13px;color:var(--green);line-height:1.7}
+
+    footer{background:var(--bg);border-top:1px solid var(--border2);padding:28px 48px;display:flex;align-items:center;justify-content:space-between}
+    .footer-left{font-family:var(--mono);font-size:10.5px;color:var(--muted2)}
+    .footer-links{display:flex;gap:22px}
+    .footer-links a{font-family:var(--mono);font-size:10.5px;color:var(--muted2);text-decoration:none;transition:color .2s}
+    .footer-links a:hover{color:var(--acid)}
+
+    @media(max-width:1024px){.hero{grid-template-columns:1fr}.hero-card{display:none}.feat-grid{grid-template-columns:1fr}.cert-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:900px){nav{padding:0 20px}.nav-links{display:none}.hero,.segments,.features-section,.comparison,.certs,.contact-section{padding-left:20px;padding-right:20px}.seg-grid{grid-template-columns:1fr}.contact-inner{grid-template-columns:1fr}.cmp-table{font-size:11.5px}}
+    @media(max-width:600px){footer{flex-direction:column;gap:14px;text-align:center;padding:24px}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" fill="#000"/><rect x="8" y="1" width="5" height="5" fill="#000"/><rect x="1" y="8" width="5" height="5" fill="#000"/><rect x="8" y="10" width="2" height="2" fill="#000"/><rect x="11" y="10" width="2" height="2" fill="#000"/></svg></div>
+    VULN<em>RA</em>
+  </a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="compliance.html">Compliance</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="docs.html">Docs</a>
+    <a href="enterprise.html" class="active">Enterprise</a>
+  </div>
+  <div class="nav-right">
+    <a href="signin.html" class="btn-ghost">Sign In</a>
+    <a href="#contact" class="btn-acid">Talk to Sales →</a>
+  </div>
+</nav>
+
+<main>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div style="position:relative;z-index:1">
+      <div class="hero-eyebrow">Enterprise</div>
+      <h1 class="hero-title">LLM security at<br>enterprise <span class="accent">scale.</span><br>Without the <span class="gold">$50K contract.</span></h1>
+      <p class="hero-sub">VULNRA Enterprise gives your security team unlimited LLM red-teaming, on-premises deployment, SSO, custom compliance frameworks, and a dedicated SLA — starting at $499/month. No 3-month sales cycles. No procurement nightmares.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-enterprise">Talk to Sales →</a>
+        <a href="pricing.html" class="btn-demo">Compare plans</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item"><span class="trust-check">✓</span> No minimum contract term</div>
+        <div class="trust-item"><span class="trust-check">✓</span> SOC 2 in progress</div>
+        <div class="trust-item"><span class="trust-check">✓</span> Response within 4 hours</div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hc-label">Enterprise — What's Included</div>
+      <div class="hc-stat-row">
+        <div class="hc-stat">
+          <div class="hc-num">∞</div>
+          <div class="hc-desc">Scans / day</div>
+        </div>
+        <div class="hc-stat">
+          <div class="hc-num">5</div>
+          <div class="hc-desc">Frameworks</div>
+        </div>
+        <div class="hc-stat">
+          <div class="hc-num">4h</div>
+          <div class="hc-desc">SLA response</div>
+        </div>
+      </div>
+      <div class="hc-features">
+        <div class="hc-feat"><span class="hc-feat-check">→</span>On-premises Docker deployment</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>SSO via SAML / OIDC</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Custom compliance frameworks</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Dedicated Slack channel</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Priority scan engine access</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Audit log export</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Annual compliance PDF bundles</div>
+        <div class="hc-feat"><span class="hc-feat-check">→</span>Quarterly security review call</div>
+      </div>
+      <div class="hc-cta">
+        <div class="hc-price">
+          <span class="hc-price-val">$499</span>
+          <span class="hc-price-unit">/ month — or custom pricing</span>
+        </div>
+        <a href="#contact" class="hc-btn">Get a quote</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEGMENTS -->
+  <div class="segments">
+    <div class="seg-inner">
+      <div class="section-eyebrow">Who it's for</div>
+      <h2 class="section-title">Built for teams where AI security is non-negotiable</h2>
+      <p class="section-sub">VULNRA Enterprise targets three segments where LLM compliance pressure is highest and the cost of a breach is most consequential.</p>
+      <div class="seg-grid">
+        <div class="seg-card">
+          <div class="seg-icon">🏦</div>
+          <div class="seg-title">Indian Fintech & BFSI</div>
+          <div class="seg-desc">LLMs in customer service, fraud detection, and credit decisioning. RBI AI guidelines and DPDP create simultaneous compliance pressure.</div>
+          <div class="seg-examples">Razorpay · CRED · PhonePe · Zepto · BharatPe</div>
+          <div class="seg-pain">RBI's AI/ML guidelines require documented risk assessments for any AI system in credit or fraud detection. VULNRA provides the audit trail.</div>
+        </div>
+        <div class="seg-card">
+          <div class="seg-icon">🏥</div>
+          <div class="seg-title">Indian Healthtech</div>
+          <div class="seg-desc">LLMs for diagnosis support, patient triage, and medical record summarisation. Hallucination scoring and data exfiltration testing are critical here.</div>
+          <div class="seg-examples">Practo · PharmEasy · 1mg · MFine · Eka Care</div>
+          <div class="seg-pain">Healthcare AI that produces hallucinated clinical outputs creates direct patient harm liability. VULNRA's hallucination scoring module targets this directly.</div>
+        </div>
+        <div class="seg-card">
+          <div class="seg-icon">🌍</div>
+          <div class="seg-title">EU AI Act Deadline — August 2026</div>
+          <div class="seg-desc">Any company deploying high-risk AI systems for European users faces mandatory technical robustness testing under the EU AI Act. Fines up to €30M.</div>
+          <div class="seg-examples">Any EU company · Indian companies with EU users</div>
+          <div class="seg-pain">The August 2026 enforcement deadline creates urgency. No other self-serve tool maps simultaneously to EU AI Act Articles 9, 13, 15, and 17.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES DEEP DIVE -->
+  <div class="features-section">
+    <div class="feat-inner">
+      <div class="section-eyebrow">Enterprise Features</div>
+      <h2 class="section-title">Everything your security team needs</h2>
+      <p class="section-sub">Features built specifically for enterprise security requirements — not afterthoughts added to a self-serve product.</p>
+      <div class="feat-grid">
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">🏠</span>
+            <span class="feat-tier ft-ent">Enterprise Only</span>
+          </div>
+          <div class="feat-title">On-Premises Deployment</div>
+          <div class="feat-desc">Run VULNRA entirely within your own infrastructure. Docker image deployable on AWS, Azure, GCP, or bare metal. Your scan data never leaves your perimeter.</div>
+          <div class="feat-detail">docker pull vulnra/enterprise:latest<br>docker run -e VULNRA_LICENSE=xxx -p 8000:8000 vulnra/enterprise</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">🔑</span>
+            <span class="feat-tier ft-ent">Enterprise Only</span>
+          </div>
+          <div class="feat-title">SSO via SAML 2.0 / OIDC</div>
+          <div class="feat-desc">Integrate with Okta, Azure AD, Google Workspace, or any SAML 2.0 / OIDC provider. All users provisioned through your existing identity system. SCIM provisioning available.</div>
+          <div class="feat-detail">Supported: Okta · Azure AD · Google Workspace · OneLogin · Ping Identity · Custom IdP</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">📋</span>
+            <span class="feat-tier ft-ent">Enterprise Only</span>
+          </div>
+          <div class="feat-title">Custom Compliance Frameworks</div>
+          <div class="feat-desc">Map findings to your internal security policy, industry-specific regulation (RBI, HIPAA, FCA), or custom control framework — in addition to the 5 built-in frameworks.</div>
+          <div class="feat-detail">Add custom framework JSON → findings automatically mapped on next scan</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">📞</span>
+            <span class="feat-tier ft-ent">Enterprise Only</span>
+          </div>
+          <div class="feat-title">Dedicated Slack + SLA</div>
+          <div class="feat-desc">Shared Slack channel with the VULNRA engineering team. 4-hour response SLA for critical issues, 24-hour for standard. Quarterly security review call with the founders.</div>
+          <div class="feat-detail">SLA: P1 (Critical) 4h · P2 (High) 12h · P3 (Standard) 24h</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">📊</span>
+            <span class="feat-tier ft-pro">Pro +</span>
+          </div>
+          <div class="feat-title">Unlimited Scans + Sentinel</div>
+          <div class="feat-desc">No daily scan caps. Sentinel monitoring on unlimited endpoints with cron-based scheduling. Drift detection alerts your team the moment a model update introduces new vulnerabilities.</div>
+          <div class="feat-detail">Free: 1/day · Pro: 100/day · Enterprise: unlimited</div>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-header">
+            <span class="feat-icon">📁</span>
+            <span class="feat-tier ft-ent">Enterprise Only</span>
+          </div>
+          <div class="feat-title">Audit Log Export</div>
+          <div class="feat-desc">Full audit trail of every scan, API key usage, user action, and report download. Exportable as CSV or JSON. 12-month retention. Meets SOC 2 and ISO 27001 evidence requirements.</div>
+          <div class="feat-detail">Export: CSV · JSON · Splunk-compatible syslog</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="comparison">
+    <div class="cmp-inner">
+      <div class="section-eyebrow">Comparison</div>
+      <h2 class="section-title">Why not Mindgard or HiddenLayer?</h2>
+      <p class="section-sub">Enterprise LLM security platforms charge $50,000+ annually with 3-month sales cycles. VULNRA Enterprise delivers the same coverage — minus the procurement theatre.</p>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="col-manual">Manual Audit<br><span style="font-weight:300;font-size:9px">Schellman, etc.</span></th>
+            <th class="col-manual">Mindgard /<br>HiddenLayer</th>
+            <th class="col-pro">VULNRA Pro</th>
+            <th class="col-ent-header col-ent">VULNRA Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="cmp-section-row"><td colspan="5">Pricing & Access</td></tr>
+          <tr>
+            <td>Starting price</td>
+            <td>$16,000 / engagement</td>
+            <td>$50,000+ / year</td>
+            <td class="col-pro" style="font-family:var(--mono);font-size:12px">$49 / month</td>
+            <td class="td-ent col-ent" style="font-family:var(--mono);font-size:12px">$499 / month</td>
+          </tr>
+          <tr>
+            <td>Self-serve signup</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Time to first scan</td>
+            <td>2 weeks</td>
+            <td>3+ months</td>
+            <td class="col-pro" style="font-family:var(--mono);font-size:11px">&lt; 2 minutes</td>
+            <td class="td-ent col-ent" style="font-family:var(--mono);font-size:11px">&lt; 2 minutes</td>
+          </tr>
+          <tr class="cmp-section-row"><td colspan="5">Compliance Coverage</td></tr>
+          <tr>
+            <td>EU AI Act mapping</td>
+            <td><span class="check-partial">Partial</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>India DPDP mapping</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>NIST AI RMF</td>
+            <td><span class="check-partial">Partial</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>OWASP LLM Top 10</td>
+            <td><span class="check-partial">Partial</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr class="cmp-section-row"><td colspan="5">Deployment & Security</td></tr>
+          <tr>
+            <td>On-premises deployment</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>SSO (SAML / OIDC)</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Audit log export</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-no">✗</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>CI/CD integration</td>
+            <td><span class="check-no">✗</span></td>
+            <td><span class="check-partial">Custom</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Continuous monitoring</td>
+            <td><span class="check-no">Annual only</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td><span class="check-yes">✓</span></td>
+            <td class="td-ent"><span class="check-yes">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CERTIFICATIONS -->
+  <div class="certs">
+    <div class="certs-inner">
+      <div class="section-eyebrow">Security Posture</div>
+      <h2 class="section-title">Our certifications & controls</h2>
+      <div class="cert-grid">
+        <div class="cert-card">
+          <div class="cert-badge" style="background:rgba(61,255,170,.08);border:1px solid rgba(61,255,170,.15)">🔐</div>
+          <div class="cert-name">Encryption</div>
+          <div class="cert-status-row"><span class="cert-dot live"></span><span class="cert-status" style="color:var(--green)">Live</span></div>
+          <div class="cert-desc">AES-256 at rest, TLS 1.2+ in transit, all connections encrypted end-to-end</div>
+        </div>
+        <div class="cert-card">
+          <div class="cert-badge" style="background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.15)">🏆</div>
+          <div class="cert-name">SOC 2 Type II</div>
+          <div class="cert-status-row"><span class="cert-dot progress"></span><span class="cert-status" style="color:var(--amber)">In Progress</span></div>
+          <div class="cert-desc">Evidence collection underway via Vanta. Target certification Q3 2026</div>
+        </div>
+        <div class="cert-card">
+          <div class="cert-badge" style="background:rgba(77,184,255,.07);border:1px solid rgba(77,184,255,.15)">🛡</div>
+          <div class="cert-name">VAPT</div>
+          <div class="cert-status-row"><span class="cert-dot planned"></span><span class="cert-status" style="color:var(--muted2)">Planned Q2 2026</span></div>
+          <div class="cert-desc">External vulnerability assessment and penetration testing scheduled</div>
+        </div>
+        <div class="cert-card">
+          <div class="cert-badge" style="background:rgba(184,255,87,.06);border:1px solid rgba(184,255,87,.15)">📋</div>
+          <div class="cert-name">GDPR + DPDP</div>
+          <div class="cert-status-row"><span class="cert-dot live"></span><span class="cert-status" style="color:var(--green)">Live</span></div>
+          <div class="cert-desc">Privacy policy, DPA available, data processing agreements for enterprise on request</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT FORM -->
+  <div class="contact-section" id="contact">
+    <div class="contact-inner">
+      <div class="contact-left">
+        <div class="section-eyebrow">Get in Touch</div>
+        <h2>Talk to the<br>VULNRA team</h2>
+        <p>We respond to all enterprise enquiries within 4 hours during business hours (IST). No SDR handoffs — you speak directly with the founders.</p>
+        <div class="contact-info">
+          <div class="ci-row">
+            <span class="ci-icon">⚡</span>
+            <div class="ci-text">
+              <strong>Response time</strong>
+              Under 4 hours during business hours (IST / CET / EST)
+            </div>
+          </div>
+          <div class="ci-row">
+            <span class="ci-icon">💬</span>
+            <div class="ci-text">
+              <strong>What to expect</strong>
+              A 30-minute call with the founders. We'll run a live scan on your model endpoint together.
+            </div>
+          </div>
+          <div class="ci-row">
+            <span class="ci-icon">📄</span>
+            <div class="ci-text">
+              <strong>Security documentation</strong>
+              We can share current security controls, DPA, and compliance documentation under NDA on request.
+            </div>
+          </div>
+          <div class="ci-row">
+            <span class="ci-icon">✉</span>
+            <div class="ci-text">
+              <strong>Direct email</strong>
+              <a href="mailto:enterprise@vulnra.ai" style="color:var(--acid);text-decoration:none">enterprise@vulnra.ai</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <div class="form-title">Request enterprise access</div>
+        <div id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First name</label>
+              <input class="form-input" type="text" placeholder="Arjun">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last name</label>
+              <input class="form-input" type="text" placeholder="Sharma">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Work email</label>
+            <input class="form-input" id="contactEmail" type="email" placeholder="arjun@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company</label>
+            <input class="form-input" type="text" placeholder="Company name">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Team size</label>
+              <select class="form-select">
+                <option value="">Select...</option>
+                <option>1–10 engineers</option>
+                <option>11–50 engineers</option>
+                <option>51–200 engineers</option>
+                <option>200+ engineers</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Use case</label>
+              <select class="form-select">
+                <option value="">Select...</option>
+                <option>EU AI Act compliance</option>
+                <option>India DPDP compliance</option>
+                <option>CI/CD integration</option>
+                <option>Continuous monitoring</option>
+                <option>On-premises deployment</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Anything specific? (optional)</label>
+            <textarea class="form-textarea" placeholder="e.g. We need on-prem deployment, SSO with Okta, and EU AI Act Article 9 mapping for 3 LLM endpoints..."></textarea>
+          </div>
+          <button class="form-submit" onclick="submitForm(this)">Request Enterprise Access →</button>
+          <div class="form-note">We respond within 4 hours · No spam · Unsubscribe anytime</div>
+        </div>
+        <div class="success-msg" id="successMsg">
+          ✓ Request received.<br>
+          <span style="color:var(--muted);font-size:12px;font-family:var(--sans)">We'll be in touch within 4 hours at the email you provided.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-left">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
+  <div class="footer-links">
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="security.html">Security</a>
+    <a href="trust.html">Trust Center</a>
+    <a href="mailto:enterprise@vulnra.ai">enterprise@vulnra.ai</a>
+  </div>
+</footer>
+
+<script>
+  function submitForm(btn) {
+    const email = document.getElementById('contactEmail').value;
+    if (!email || !email.includes('@')) {
+      document.getElementById('contactEmail').style.borderColor = 'var(--red)';
+      setTimeout(() => document.getElementById('contactEmail').style.borderColor = '', 1500);
+      return;
+    }
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById('contactForm').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    }, 800);
+  }
+</script>
+</body>
+</html>
