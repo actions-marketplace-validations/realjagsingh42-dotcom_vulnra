@@ -2078,8 +2078,8 @@
 
     .footer-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-      gap: 40px;
+      grid-template-columns: 1.5fr repeat(6, 1fr);
+      gap: 32px;
       margin-bottom: 60px;
     }
 
@@ -2126,7 +2126,7 @@
       color: var(--muted2);
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .footer-grid {
         grid-template-columns: 1fr 1fr 1fr;
       }
@@ -2860,19 +2860,42 @@
       <div class="footer-col">
         <h4>Product</h4>
         <ul>
-          <li><a href="how-it-works.html">Documentation</a></li>
+          <li><a href="how-it-works.html">How It Works</a></li>
+          <li><a href="scanner.html">Scanner</a></li>
           <li><a href="api-docs.html">API Reference</a></li>
-          <li><a href="scanner.html">Interactive Scanner</a></li>
-          <li><a href="pricing.html">Pricing Plans</a></li>
+          <li><a href="pricing.html">Pricing</a></li>
           <li><a href="status.html">System Status</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Compliance</h4>
+        <h4>Platform</h4>
         <ul>
-          <li><a href="eu-ai-act.html">EU AI Act Guide</a></li>
-          <li><a href="dpdp-guide.html">India DPDP Guide</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="docs.html">Documentation</a></li>
+          <li><a href="integrations.html">Integrations</a></li>
+          <li><a href="report-sample.html">Sample Report</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="case-studies.html">Case Studies</a></li>
+          <li><a href="compare.html">Compare</a></li>
+          <li><a href="roadmap.html">Roadmap</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Compliance & Security</h4>
+        <ul>
+          <li><a href="security.html">Security</a></li>
+          <li><a href="trust.html">Trust Center</a></li>
+          <li><a href="eu-ai-act.html">EU AI Act</a></li>
+          <li><a href="dpdp-guide.html">DPDP Guide</a></li>
           <li><a href="compliance.html">Compliance Mapping</a></li>
           <li><a href="vuln-db.html">Vulnerability DB</a></li>
         </ul>
@@ -2881,10 +2904,21 @@
       <div class="footer-col">
         <h4>Company</h4>
         <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="enterprise.html">Enterprise</a></li>
           <li><a href="open-source.html">Open Source</a></li>
-          <li><a href="affiliates.html">Affiliate Program</a></li>
-          <li><a href="investors.html">Investors & Press</a></li>
-          <li><a href="contact.html">Contact Support</a></li>
+          <li><a href="affiliates.html">Affiliates</a></li>
+          <li><a href="investors.html">Investors</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="signin.html">Sign In</a></li>
+          <li><a href="signup.html">Sign Up</a></li>
+          <li><a href="profile.html">Profile</a></li>
         </ul>
       </div>
 
