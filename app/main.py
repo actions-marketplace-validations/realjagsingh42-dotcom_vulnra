@@ -9,6 +9,8 @@ import socket
 from typing import Optional, List
 from urllib.parse import urlparse
 
+from supabase import create_client
+
 from fastapi import FastAPI, BackgroundTasks, Request, HTTPException, Depends, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
@@ -50,6 +52,17 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
+
+_sb = None
+
+def get_supabase():
+    global _sb
+    if _sb is None:
+        url = os.environ.get("SUPABASE_URL", "")
+        key = os.environ.get("SUPABASE_SERVICE_KEY", "")
+        if url and key:
+            _sb = create_client(url, key)
+    return _sb
 
 # ── Environment Validation ─────────────────────────────────────────────────────
 REQUIRED_ENV_VARS = ["REDIS_URL"]
@@ -358,6 +371,26 @@ async def _run_scan_internal(scan_id: str, url: str, tier: str) -> dict:
             "completed_at": time.time(),
         }
     scan_set(scan_id, data)
+    
+    # Save to Supabase if available
+    try:
+        sb = get_supabase()
+        if sb:
+            sb.table("scans").upsert({
+                "id":           scan_id,
+                "user_id":      "00000000-0000-0000-0000-000000000000",
+                "target_url":   url,
+                "tier":         tier,
+                "status":       "complete",
+                "scan_engine":  data.get("scan_engine"),
+                "risk_score":   data.get("risk_score"),
+                "findings":     data.get("findings"),
+                "compliance":   data.get("compliance"),
+                "completed_at": "now()",
+            }).execute()
+    except Exception as e:
+        print(f"[SUPABASE] save failed: {e}")
+    
     return data
 
 # ════════════════════════════════════════════════════════════════════════════════
