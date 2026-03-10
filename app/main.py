@@ -629,6 +629,46 @@ def debug_redis():
     except Exception as e:
         return {"connected": False, "error": str(e), "url_prefix": settings.redis_url[:20] + "…"}
 
+@app.post("/auth/log-login")
+async def log_login(request: Request, authorization: Optional[str] = Header(None)):
+    try:
+        body = await request.json()
+        
+        sb = get_supabase()
+        if not sb:
+            return {"status": "skipped"}
+
+        user_id = None
+
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+            user_resp = sb.auth.get_user(token)
+            if user_resp and user_resp.user:
+                user_id = user_resp.user.id
+
+        if not user_id:
+            return {"status": "skipped", "reason": "no user id"}
+
+        ip = (
+            request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+            or request.client.host
+        )
+
+        sb.table("login_activity").insert({
+            "user_id":        user_id,
+            "provider":       body.get("provider", "email"),
+            "ip_address":     ip,
+            "user_agent":     body.get("user_agent", ""),
+            "success":        body.get("success", True),
+            "failure_reason": body.get("failure_reason"),
+        }).execute()
+
+        return {"status": "logged"}
+
+    except Exception as e:
+        print(f"[LOGIN LOG] failed: {e}")
+        return {"status": "error", "detail": str(e)}
+
 # ════════════════════════════════════════════════════════════════════════════════
 # STATIC FILE SERVING  (must come LAST — catches everything not matched above)
 # ════════════════════════════════════════════════════════════════════════════════

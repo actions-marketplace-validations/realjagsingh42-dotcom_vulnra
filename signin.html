@@ -225,6 +225,107 @@
       border-bottom: 1px solid var(--border2)
     }
 
+    /* ── Neon logo ── */
+    .nav-logo-mark {
+      animation: neonBoxPulse 2s ease-in-out infinite;
+      position: relative;
+    }
+
+    .nav-logo-mark::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px solid rgba(184, 255, 87, .25);
+      animation: expandRing 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .nsq {
+      fill: #b8ff57;
+    }
+
+    .nsq1 {
+      animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+    }
+
+    .nsq2 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+    }
+
+    .nsq3 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+    }
+
+    .nsq4 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+    }
+
+    .ndot1 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+    }
+
+    .ndot2 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+    }
+
+    @keyframes neonBoxPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+        border-color: rgba(184, 255, 87, .9);
+      }
+
+      50% {
+        box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+        border-color: #d4ff8a;
+      }
+    }
+
+    @keyframes expandRing {
+      0% {
+        transform: scale(1);
+        opacity: .7;
+      }
+
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes neonSqSeq {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+      }
+
+      40%,
+      60% {
+        opacity: .08;
+        filter: none;
+      }
+    }
+
+    @keyframes neonDotPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+      }
+
+      50% {
+        opacity: .1;
+        filter: none;
+      }
+    }
+
     nav::after {
       content: '';
       position: absolute;
@@ -248,18 +349,103 @@
     }
 
     .nav-logo-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 5px;
-      background: var(--acid);
-      display: flex;
-      align-items: center;
-      justify-content: center
+      animation: neonBoxPulse 2s ease-in-out infinite;
+      position: relative;
     }
 
-    .nav-logo-mark svg {
-      width: 14px;
-      height: 14px
+    .nav-logo-mark::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px solid rgba(184, 255, 87, .25);
+      animation: expandRing 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .nsq {
+      fill: #b8ff57;
+    }
+
+    .nsq1 {
+      animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+    }
+
+    .nsq2 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+    }
+
+    .nsq3 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+    }
+
+    .nsq4 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+    }
+
+    .ndot1 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+    }
+
+    .ndot2 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+    }
+
+    @keyframes neonBoxPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+        border-color: rgba(184, 255, 87, .9);
+      }
+
+      50% {
+        box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+        border-color: #d4ff8a;
+      }
+    }
+
+    @keyframes expandRing {
+      0% {
+        transform: scale(1);
+        opacity: .7;
+      }
+
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes neonSqSeq {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+      }
+
+      40%,
+      60% {
+        opacity: .08;
+        filter: none;
+      }
+    }
+
+    @keyframes neonDotPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+      }
+
+      50% {
+        opacity: .1;
+        filter: none;
+      }
     }
 
     .nav-logo em {
@@ -895,13 +1081,26 @@
 
   <nav>
     <a href="index.html" class="nav-logo">
-      <div class="nav-logo-mark">
-        <svg viewBox="0 0 14 14" fill="none">
-          <rect x="1" y="1" width="5" height="5" fill="#000" />
-          <rect x="8" y="1" width="5" height="5" fill="#000" />
-          <rect x="1" y="8" width="5" height="5" fill="#000" />
-          <rect x="8" y="10" width="2" height="2" fill="#000" />
-          <rect x="11" y="10" width="2" height="2" fill="#000" />
+      <div class="nav-logo-mark" style="
+        width: 28px;
+        height: 28px;
+        border-radius: 5px;
+        background: #060608;
+        border: 1.5px solid #b8ff57;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: neonBoxPulse 2s ease-in-out infinite;
+        flex-shrink: 0;
+        position: relative;
+      ">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+          <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
         </svg>
       </div>
       VULN<em>RA</em>
@@ -1161,6 +1360,7 @@
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
       if (error) {
         setBtn(false);
+        await logLoginActivity('email', false, error.message);
         if (error.message.includes('Email not confirmed')) {
           showError('Please verify your email first. Check your inbox.');
         } else if (error.message.includes('Invalid login')) {
@@ -1173,6 +1373,8 @@
       // Success — onAuthStateChange will redirect
       setBtn(false);
       showSuccess('Authenticated. Redirecting…');
+      await logLoginActivity('email', true);
+      window.location.href = 'scanner.html';
     }
 
     // ── OAuth ──────────────────────────────────────────────────────
@@ -1192,8 +1394,22 @@
         btn.disabled = false;
         btn.textContent = provider === 'google' ? 'Google' : 'GitHub';
         showError(error.message);
+        await logLoginActivity(provider, false, error.message);
       }
       // If no error, browser will redirect to OAuth provider
+    }
+
+    async function logLoginActivity(provider, success, failureReason = null) {
+      await fetch('https://vulnra-production.up.railway.app/auth/log-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          success,
+          failure_reason: failureReason,
+          user_agent: navigator.userAgent
+        })
+      })
     }
 
     // ── Password reset ─────────────────────────────────────────────
