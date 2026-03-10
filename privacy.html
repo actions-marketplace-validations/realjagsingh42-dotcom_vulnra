@@ -131,9 +131,11 @@
     .toc{background:var(--bg1);border:1px solid var(--border);border-radius:5px;padding:24px 28px;margin-bottom:56px;animation:fadeUp .5s ease forwards .35s;opacity:0}
     .toc-title{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin-bottom:16px}
     .toc-list{list-style:none;display:flex;flex-direction:column;gap:8px}
-    .toc-list a{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.05em;transition:color .2s;display:flex;align-items:center;gap:8px}
-    .toc-list a::before{content:'→';color:var(--acid);font-size:10px}
-    .toc-list a:hover{color:var(--acid)}
+    .toc-list li{display:flex;align-items:center;gap:8px}
+    .toc-arrow{color:var(--acid);font-size:10px}
+    .toc-list a{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.05em;transition:color .2s}
+    .toc-list li:hover .toc-arrow{color:var(--acid)}
+    .toc-list li:hover a{color:var(--acid)}
 
     /* SECTIONS */
     .legal-section{margin-bottom:52px;animation:fadeUp .5s ease forwards .4s;opacity:0}
@@ -212,18 +214,18 @@
     <nav class="toc" aria-label="Table of contents">
       <div class="toc-title">Contents</div>
       <ol class="toc-list">
-        <li><a href="#s1">Information We Collect</a></li>
-        <li><a href="#s2">How We Use Your Data</a></li>
-        <li><a href="#s3">Legal Bases for Processing</a></li>
-        <li><a href="#s4">Data We Do Not Collect</a></li>
-        <li><a href="#s5">Data Retention</a></li>
-        <li><a href="#s6">Third-Party Services</a></li>
-        <li><a href="#s7">International Transfers</a></li>
-        <li><a href="#s8">Your Rights (GDPR)</a></li>
-        <li><a href="#s9">Your Rights (India DPDP)</a></li>
-        <li><a href="#s10">Cookies</a></li>
-        <li><a href="#s11">Children's Privacy</a></li>
-        <li><a href="#s12">Contact & Grievance</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s1">Information We Collect</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s2">How We Use Your Data</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s3">Legal Bases for Processing</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s4">Data We Do Not Collect</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s5">Data Retention</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s6">Third-Party Services</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s7">International Transfers</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s8">Your Rights (GDPR)</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s9">Your Rights (India DPDP)</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s10">Cookies</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s11">Children's Privacy</a></li>
+        <li><span class="toc-arrow">→</span><a href="#s12">Contact & Grievance</a></li>
       </ol>
     </nav>
 
