@@ -111,10 +111,235 @@
         .links a:hover {
             color: var(--acid)
         }
+
+        /* ── Neon logo ── */
+        .nav-logo-mark {
+            animation: neonBoxPulse 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        .nav-logo-mark::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            border: 1px solid rgba(184, 255, 87, .25);
+            animation: expandRing 2s ease-out infinite;
+            pointer-events: none;
+        }
+
+        .nsq {
+            fill: #b8ff57;
+        }
+
+        .nsq1 {
+            animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+        }
+
+        .nsq2 {
+            animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+        }
+
+        .nsq3 {
+            animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+        }
+
+        .nsq4 {
+            animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+        }
+
+        .ndot1 {
+            fill: #b8ff57;
+            animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+        }
+
+        .ndot2 {
+            fill: #b8ff57;
+            animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+        }
+
+        @keyframes neonBoxPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+                border-color: rgba(184, 255, 87, .9);
+            }
+
+            50% {
+                box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+                border-color: #d4ff8a;
+            }
+        }
+
+        @keyframes expandRing {
+            0% {
+                transform: scale(1);
+                opacity: .7;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        @keyframes neonSqSeq {
+
+            0%,
+            100% {
+                opacity: 1;
+                filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+            }
+
+            40%,
+            60% {
+                opacity: .08;
+                filter: none;
+            }
+        }
+
+        @keyframes neonDotPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+            }
+
+            50% {
+                opacity: .1;
+                filter: none;
+            }
+        }
     </style>
 </head>
 
 <body>
+
+    <!-- VULNRA Loader -->
+    <div id="vLoader" style="
+    position:fixed;inset:0;background:#060608;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9990;transition:opacity .5s ease,visibility .5s ease;
+    font-family:'IBM Plex Mono',monospace;gap:0;
+  ">
+        <!-- corners -->
+        <div
+            style="position:absolute;top:28px;left:28px;width:24px;height:24px;border-top:1px solid rgba(184,255,87,.35);border-left:1px solid rgba(184,255,87,.35)">
+        </div>
+        <div
+            style="position:absolute;top:28px;right:28px;width:24px;height:24px;border-top:1px solid rgba(184,255,87,.35);border-right:1px solid rgba(184,255,87,.35)">
+        </div>
+        <div
+            style="position:absolute;bottom:28px;left:28px;width:24px;height:24px;border-bottom:1px solid rgba(184,255,87,.35);border-left:1px solid rgba(184,255,87,.35)">
+        </div>
+        <div
+            style="position:absolute;bottom:28px;right:28px;width:24px;height:24px;border-bottom:1px solid rgba(184,255,87,.35);border-right:1px solid rgba(184,255,87,.35)">
+        </div>
+
+        <!-- mark -->
+        <div style="position:relative;margin-bottom:36px;">
+            <div
+                style="position:absolute;inset:-20px;border-radius:50%;border:1px solid transparent;border-top-color:rgba(184,255,87,.6);border-right-color:rgba(184,255,87,.12);animation:vOrbit 2s linear infinite;">
+            </div>
+            <div
+                style="position:absolute;inset:-12px;border-radius:50%;border:1px solid transparent;border-bottom-color:rgba(184,255,87,.35);border-left-color:rgba(184,255,87,.08);animation:vOrbit 3.2s linear infinite reverse;">
+            </div>
+            <div
+                style="width:72px;height:72px;border-radius:13px;background:#060608;border:1.5px solid #b8ff57;display:flex;align-items:center;justify-content:center;animation:neonBoxPulse 2s ease-in-out infinite;position:relative;">
+                <div
+                    style="position:absolute;inset:-1px;border-radius:inherit;border:1px solid rgba(184,255,87,.25);animation:expandRing 2s ease-out infinite;pointer-events:none;">
+                </div>
+                <svg width="38" height="38" viewBox="0 0 20 20" fill="none">
+                    <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+                    <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+                    <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- title + status -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px;">
+            <div
+                style="font-size:13px;font-weight:700;letter-spacing:.2em;color:#b8ff57;text-shadow:0 0 12px rgba(184,255,87,.5)">
+                VULNRA</div>
+            <div
+                style="display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.14em;color:rgba(184,255,87,.45);">
+                <span id="vLoaderStatus">INITIALISING</span>
+                <span
+                    style="display:inline-block;width:7px;height:11px;background:#b8ff57;animation:vBlink .7s steps(1) infinite;box-shadow:0 0 6px #b8ff57;"></span>
+            </div>
+        </div>
+
+        <!-- progress -->
+        <div style="width:220px;display:flex;flex-direction:column;gap:6px;">
+            <div
+                style="display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;color:rgba(184,255,87,.3);">
+                <span>BOOT SEQUENCE</span>
+                <span id="vLoaderPct">0%</span>
+            </div>
+            <div style="height:2px;background:rgba(184,255,87,.1);border-radius:1px;overflow:hidden;">
+                <div id="vLoaderBar"
+                    style="height:100%;width:0%;background:#b8ff57;border-radius:1px;box-shadow:0 0 8px rgba(184,255,87,.7);transition:width .2s ease;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes vOrbit {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes vBlink {
+
+            0%,
+            50% {
+                opacity: 1
+            }
+
+            51%,
+            100% {
+                opacity: 0
+            }
+        }
+    </style>
+
+    <script>
+        (function () {
+            const msgs = ['INITIALISING', 'LOADING PROBES', 'MAPPING FRAMEWORKS', 'VERIFYING AUTH', 'READY'];
+            const bar = document.getElementById('vLoaderBar');
+            const pct = document.getElementById('vLoaderPct');
+            const status = document.getElementById('vLoaderStatus');
+            const loader = document.getElementById('vLoader');
+            let p = 0, mi = 0;
+            const iv = setInterval(() => {
+                p = Math.min(100, p + 1.4 + Math.random());
+                bar.style.width = p + '%';
+                pct.textContent = Math.floor(p) + '%';
+                mi = Math.floor((p / 100) * (msgs.length - 1));
+                status.textContent = msgs[mi];
+                if (p >= 100) {
+                    clearInterval(iv);
+                    bar.style.width = '100%';
+                    pct.textContent = '100%';
+                    status.textContent = 'READY';
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        loader.style.visibility = 'hidden';
+                    }, 300);
+                }
+            }, 28);
+        })();
+    </script>
+    <!-- END Loader -->
+
     <div class="container">
         <div class="glitch">404</div>
         <h1>ERROR_404: ENDPOINT NOT FOUND</h1>

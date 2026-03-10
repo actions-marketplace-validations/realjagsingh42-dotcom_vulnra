@@ -119,8 +119,117 @@
       font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.18em;
-      color: var(--acid);
+      color: var(--text);
       text-decoration: none;
+    }
+
+    .nav-logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      background: #060608;
+      border: 1.5px solid #b8ff57;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: neonBoxPulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-logo-mark::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      border: 1px solid rgba(184, 255, 87, .25);
+      animation: expandRing 2s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .nsq {
+      fill: #b8ff57;
+    }
+
+    .nsq1 {
+      animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+    }
+
+    .nsq2 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+    }
+
+    .nsq3 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+    }
+
+    .nsq4 {
+      animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+    }
+
+    .ndot1 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+    }
+
+    .ndot2 {
+      fill: #b8ff57;
+      animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+    }
+
+    @keyframes neonBoxPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+        border-color: rgba(184, 255, 87, .9);
+      }
+
+      50% {
+        box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+        border-color: #d4ff8a;
+      }
+    }
+
+    @keyframes expandRing {
+      0% {
+        transform: scale(1);
+        opacity: .7;
+      }
+
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    @keyframes neonSqSeq {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+      }
+
+      40%,
+      60% {
+        opacity: .08;
+        filter: none;
+      }
+    }
+
+    @keyframes neonDotPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+      }
+
+      50% {
+        opacity: .1;
+        filter: none;
+      }
     }
 
     .nav-right {
@@ -1178,11 +1287,16 @@
   <!-- NAV -->
   <nav class="nav">
     <a href="index.html" class="nav-brand">
-      <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-        <polygon points="16,2 30,28 2,28" stroke="#b8ff57" stroke-width="1.5" fill="none" />
-        <polygon points="16,9 24,24 8,24" fill="#b8ff57" opacity="0.2" />
-        <line x1="16" y1="9" x2="16" y2="21" stroke="#b8ff57" stroke-width="1.5" />
-      </svg>
+      <div class="nav-logo-mark">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+          <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
+        </svg>
+      </div>
       VULNRA
     </a>
     <div class="nav-right">

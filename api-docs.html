@@ -1,225 +1,302 @@
-<!DOCTYPE html>
-<html lang="en">
+<link rel="stylesheet" href="loader.css">
+<link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+    rel="stylesheet">
+<style>
+    /* Reuse styles from privacy.html meta-templating */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0
+    }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VULNRA API Reference — LLM Security Scanner REST API | vulnra.ai</title>
-    <meta name="description"
-        content="Integrate VULNRA's LLM red-teaming engine into your CI/CD pipeline. REST API with compliance PDF generation, risk scoring, and support for EU AI Act, NIST, OWASP, and India DPDP.">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://vulnra.ai/api-docs">
+    :root {
+        --bg: #060608;
+        --bg1: #0a0b0f;
+        --bg2: #0f1117;
+        --bg3: #151820;
+        --acid: #b8ff57;
+        --acid2: rgba(184, 255, 87, .08);
+        --acid3: rgba(184, 255, 87, .18);
+        --red: #ff3c5a;
+        --amber: #ffb340;
+        --blue: #4db8ff;
+        --text: #e8edf4;
+        --muted: rgba(232, 237, 244, .42);
+        --muted2: rgba(232, 237, 244, .2);
+        --muted3: rgba(232, 237, 244, .1);
+        --border: rgba(255, 255, 255, .07);
+        --border2: rgba(255, 255, 255, .04);
+        --mono: 'IBM Plex Mono', monospace;
+        --sans: 'DM Sans', sans-serif;
+    }
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="VULNRA API — Red-Team Any LLM Endpoint Programmatically">
-    <meta property="og:description"
-        content="POST your LLM endpoint. Get back a risk score, findings list, and compliance-mapped audit in JSON or PDF.">
-    <meta property="og:url" content="https://vulnra.ai/api-docs">
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        line-height: 1.6
+    }
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "VULNRA API Reference",
-    "description": "REST API documentation for VULNRA LLM security scanner.",
-    "url": "https://vulnra.ai/api-docs"
-  }
-  </script>
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        height: 60px;
+        background: rgba(6, 6, 8, .9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border2)
+    }
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
-        rel="stylesheet">
-    <style>
-        /* Reuse styles from privacy.html meta-templating */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
+    .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        text-decoration: none
+    }
+
+    .nav-logo-mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 5px;
+        background: var(--acid);
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+
+    .nav-logo em {
+        font-style: normal;
+        color: var(--acid)
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 36px
+    }
+
+    .nav-links a {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color .2s
+    }
+
+    .nav-links a:hover {
+        color: var(--acid)
+    }
+
+    .page-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 120px 48px 96px
+    }
+
+    .page-title {
+        font-family: var(--mono);
+        font-size: clamp(28px, 4vw, 46px);
+        font-weight: 700;
+        margin-bottom: 24px
+    }
+
+    .code-block {
+        background: var(--bg1);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--blue);
+        overflow-x: auto
+    }
+
+    .endpoint-row {
+        display: grid;
+        grid-template-columns: 100px 1fr 1fr 120px;
+        gap: 15px;
+        padding: 12px;
+        border-bottom: 1px solid var(--border2);
+        font-size: 13px
+    }
+
+    .method {
+        font-weight: 700;
+        color: var(--acid)
+    }
+
+    .legal-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 24px 0
+    }
+
+    .legal-table th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted2)
+    }
+
+    .legal-table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border2);
+        font-size: 13px;
+        color: var(--muted)
+    }
+
+    footer {
+        border-top: 1px solid var(--border2);
+        padding: 28px 48px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--muted2)
+    }
+
+    .faq-item {
+        margin-bottom: 24px
+    }
+
+    .faq-q {
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px
+    }
+
+    /* ── Neon logo ── */
+    .nav-logo-mark {
+        animation: neonBoxPulse 2s ease-in-out infinite;
+        position: relative;
+    }
+
+    .nav-logo-mark::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        border: 1px solid rgba(184, 255, 87, .25);
+        animation: expandRing 2s ease-out infinite;
+        pointer-events: none;
+    }
+
+    .nsq {
+        fill: #b8ff57;
+    }
+
+    .nsq1 {
+        animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+    }
+
+    .nsq2 {
+        animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+    }
+
+    .nsq3 {
+        animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+    }
+
+    .nsq4 {
+        animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+    }
+
+    .ndot1 {
+        fill: #b8ff57;
+        animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+    }
+
+    .ndot2 {
+        fill: #b8ff57;
+        animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+    }
+
+    @keyframes neonBoxPulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+            border-color: rgba(184, 255, 87, .9);
         }
 
-        :root {
-            --bg: #060608;
-            --bg1: #0a0b0f;
-            --bg2: #0f1117;
-            --bg3: #151820;
-            --acid: #b8ff57;
-            --acid2: rgba(184, 255, 87, .08);
-            --acid3: rgba(184, 255, 87, .18);
-            --red: #ff3c5a;
-            --amber: #ffb340;
-            --blue: #4db8ff;
-            --text: #e8edf4;
-            --muted: rgba(232, 237, 244, .42);
-            --muted2: rgba(232, 237, 244, .2);
-            --muted3: rgba(232, 237, 244, .1);
-            --border: rgba(255, 255, 255, .07);
-            --border2: rgba(255, 255, 255, .04);
-            --mono: 'IBM Plex Mono', monospace;
-            --sans: 'DM Sans', sans-serif;
+        50% {
+            box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+            border-color: #d4ff8a;
+        }
+    }
+
+    @keyframes expandRing {
+        0% {
+            transform: scale(1);
+            opacity: .7;
         }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--sans);
-            line-height: 1.6
+        100% {
+            transform: scale(1.6);
+            opacity: 0;
+        }
+    }
+
+    @keyframes neonSqSeq {
+
+        0%,
+        100% {
+            opacity: 1;
+            filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
         }
 
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 48px;
-            height: 60px;
-            background: rgba(6, 6, 8, .9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border2)
+        40%,
+        60% {
+            opacity: .08;
+            filter: none;
+        }
+    }
+
+    @keyframes neonDotPulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
         }
 
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: var(--mono);
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text);
-            text-decoration: none
+        50% {
+            opacity: .1;
+            filter: none;
         }
-
-        .nav-logo-mark {
-            width: 28px;
-            height: 28px;
-            border-radius: 5px;
-            background: var(--acid);
-            display: flex;
-            align-items: center;
-            justify-content: center
-        }
-
-        .nav-logo em {
-            font-style: normal;
-            color: var(--acid)
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 36px
-        }
-
-        .nav-links a {
-            font-family: var(--mono);
-            font-size: 10.5px;
-            color: var(--muted);
-            text-decoration: none;
-            transition: color .2s
-        }
-
-        .nav-links a:hover {
-            color: var(--acid)
-        }
-
-        .page-wrap {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 120px 48px 96px
-        }
-
-        .page-title {
-            font-family: var(--mono);
-            font-size: clamp(28px, 4vw, 46px);
-            font-weight: 700;
-            margin-bottom: 24px
-        }
-
-        .code-block {
-            background: var(--bg1);
-            border: 1px solid var(--border);
-            border-radius: 5px;
-            padding: 20px;
-            margin: 20px 0;
-            font-family: var(--mono);
-            font-size: 13px;
-            color: var(--blue);
-            overflow-x: auto
-        }
-
-        .endpoint-row {
-            display: grid;
-            grid-template-columns: 100px 1fr 1fr 120px;
-            gap: 15px;
-            padding: 12px;
-            border-bottom: 1px solid var(--border2);
-            font-size: 13px
-        }
-
-        .method {
-            font-weight: 700;
-            color: var(--acid)
-        }
-
-        .legal-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 24px 0
-        }
-
-        .legal-table th {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--muted2)
-        }
-
-        .legal-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border2);
-            font-size: 13px;
-            color: var(--muted)
-        }
-
-        footer {
-            border-top: 1px solid var(--border2);
-            padding: 28px 48px;
-            display: flex;
-            justify-content: space-between;
-            font-family: var(--mono);
-            font-size: 10.5px;
-            color: var(--muted2)
-        }
-
-        .faq-item {
-            margin-bottom: 24px
-        }
-
-        .faq-q {
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 8px
-        }
-    </style>
+    }
+</style>
 </head>
 
 <body>
+
+
     <nav>
         <a href="index.html" class="nav-logo">
             <div class="nav-logo-mark">
-                <svg viewBox="0 0 14 14" fill="none">
-                    <rect x="1" y="1" width="5" height="5" fill="#000" />
-                    <rect x="8" y="1" width="5" height="5" fill="#000" />
-                    <rect x="1" y="8" width="5" height="5" fill="#000" />
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                    <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+                    <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+                    <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+                    <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
                 </svg>
             </div>
             VULN<em>RA</em>
@@ -311,13 +388,25 @@
         </div>
     </main>
 
-    <footer>
-        <div>© 2025 VULNRA. MIT Licensed.</div>
-        <div style="display:flex;gap:20px">
-            <a href="privacy.html" style="color:inherit;text-decoration:none">Privacy</a>
-            <a href="terms.html" style="color:inherit;text-decoration:none">Terms</a>
+    <footer
+        style="padding: 40px 48px; border-top: 1px solid var(--border2); display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        <div class="footer-links" style="display: flex; gap: 24px;">
+            <a href="privacy.html"
+                style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Privacy</a>
+            <a href="security.html"
+                style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Security</a>
+            <a href="trust.html"
+                style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Trust</a>
+            <a href="enterprise.html"
+                style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Enterprise</a>
+            <a href="contact.html"
+                style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Contact</a>
         </div>
+        <div style="font-family: var(--mono); font-size: 10.5px; color: var(--muted2);">© 2025 VULNRA. MIT Licensed.
+            Built
+            on NVIDIA Garak.</div>
     </footer>
+    <script src="loader.js"></script>
 </body>
 
 </html>

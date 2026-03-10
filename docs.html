@@ -1,19 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Reference & Documentation — VULNRA LLM Security Scanner</title>
-  <meta name="description" content="VULNRA API reference. Integrate LLM security scanning into your CI/CD pipeline. REST endpoints, authentication, code samples in Python, JavaScript, and cURL.">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://vulnra.ai/docs.html">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="VULNRA API Docs — Integrate LLM Security Into Your Pipeline">
-  <meta property="og:description" content="Complete API reference for VULNRA. Authentication, scan endpoints, PDF reports, Sentinel monitoring, and code samples.">
-  <meta property="og:url" content="https://vulnra.ai/docs.html">
-  <link rel="alternate" hreflang="en" href="https://vulnra.ai/docs.html">
-  <link rel="alternate" hreflang="x-default" href="https://vulnra.ai/docs.html">
-  <script type="application/ld+json">
+<link rel="stylesheet" href="loader.css">
+<link rel="canonical" href="https://vulnra.ai/docs.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="VULNRA API Docs — Integrate LLM Security Into Your Pipeline">
+<meta property="og:description"
+  content="Complete API reference for VULNRA. Authentication, scan endpoints, PDF reports, Sentinel monitoring, and code samples.">
+<meta property="og:url" content="https://vulnra.ai/docs.html">
+<link rel="alternate" hreflang="en" href="https://vulnra.ai/docs.html">
+<link rel="alternate" hreflang="x-default" href="https://vulnra.ai/docs.html">
+<script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "TechArticle",
@@ -30,315 +24,1507 @@
     }
   }
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#060608;--bg1:#0a0b0f;--bg2:#0f1117;--bg3:#13151c;
-      --acid:#b8ff57;--acid2:rgba(184,255,87,.07);--acid3:rgba(184,255,87,.14);
-      --red:#ff3c5a;--amber:#ffb340;--blue:#4db8ff;--green:#3dffaa;--purple:#b48bff;
-      --text:#e8edf4;--muted:rgba(232,237,244,.44);--muted2:rgba(232,237,244,.22);
-      --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
-      --mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif;
-      --sidebar:260px;--nav-h:60px
+<link
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap"
+  rel="stylesheet">
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+  }
+
+  :root {
+    --bg: #060608;
+    --bg1: #0a0b0f;
+    --bg2: #0f1117;
+    --bg3: #13151c;
+    --acid: #b8ff57;
+    --acid2: rgba(184, 255, 87, .07);
+    --acid3: rgba(184, 255, 87, .14);
+    --red: #ff3c5a;
+    --amber: #ffb340;
+    --blue: #4db8ff;
+    --green: #3dffaa;
+    --purple: #b48bff;
+    --text: #e8edf4;
+    --muted: rgba(232, 237, 244, .44);
+    --muted2: rgba(232, 237, 244, .22);
+    --border: rgba(255, 255, 255, .07);
+    --border2: rgba(255, 255, 255, .04);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --sidebar: 260px;
+    --nav-h: 60px
+  }
+
+  html {
+    scroll-behavior: smooth
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .02) 2px, rgba(0, 0, 0, .02) 4px);
+    pointer-events: none;
+    z-index: 9998
+  }
+
+  ::-webkit-scrollbar {
+    width: 3px
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg)
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(184, 255, 87, .4)
+  }
+
+  ::selection {
+    background: var(--acid);
+    color: #000
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: var(--nav-h);
+    background: rgba(6, 6, 8, .95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border)
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    color: var(--text);
+    text-decoration: none
+  }
+
+  .nav-logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    background: #060608;
+    border: 1.5px solid #b8ff57;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: neonBoxPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .nav-logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid rgba(184, 255, 87, .25);
+    animation: expandRing 2s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .nsq {
+    fill: #b8ff57;
+  }
+
+  .nsq1 {
+    animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+  }
+
+  .nsq2 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+  }
+
+  .nsq3 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+  }
+
+  .nsq4 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+  }
+
+  .ndot1 {
+    fill: #b8ff57;
+    animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+  }
+
+  .ndot2 {
+    fill: #b8ff57;
+    animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+  }
+
+  @keyframes neonBoxPulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+      border-color: rgba(184, 255, 87, .9);
     }
-    html{scroll-behavior:smooth}
-    body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
-    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);pointer-events:none;z-index:9998}
-    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(184,255,87,.4)}
-    ::selection{background:var(--acid);color:#000}
 
-    /* NAV */
-    nav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:var(--nav-h);background:rgba(6,6,8,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
-    .nav-logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--text);text-decoration:none}
-    .nav-logo-mark{width:28px;height:28px;border-radius:5px;background:var(--acid);display:flex;align-items:center;justify-content:center}
-    .nav-logo-mark svg{width:14px;height:14px}
-    .nav-logo em{font-style:normal;color:var(--acid)}
-    .nav-center{display:flex;align-items:center;gap:6px}
-    .nav-breadcrumb{font-family:var(--mono);font-size:10.5px;color:var(--muted2);display:flex;align-items:center;gap:6px}
-    .nav-breadcrumb a{color:var(--muted2);text-decoration:none;transition:color .15s}
-    .nav-breadcrumb a:hover{color:var(--acid)}
-    .nav-breadcrumb span{color:var(--muted2);opacity:.4}
-    .nav-right{display:flex;align-items:center;gap:12px}
-    .btn-ghost{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:none;transition:color .2s}
-    .btn-ghost:hover{color:var(--text)}
-    .btn-acid{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.12em;background:var(--acid);color:#000;border:none;padding:8px 18px;border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s}
-    .btn-acid:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(184,255,87,.25)}
+    50% {
+      box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+      border-color: #d4ff8a;
+    }
+  }
 
-    /* LAYOUT */
-    .docs-layout{display:flex;margin-top:var(--nav-h);min-height:calc(100vh - var(--nav-h))}
+  @keyframes expandRing {
+    0% {
+      transform: scale(1);
+      opacity: .7;
+    }
 
-    /* SIDEBAR */
-    .sidebar{width:var(--sidebar);flex-shrink:0;position:fixed;top:var(--nav-h);left:0;bottom:0;background:var(--bg1);border-right:1px solid var(--border2);overflow-y:auto;padding:24px 0}
-    .sidebar::-webkit-scrollbar{width:2px}
-    .sidebar-search{padding:0 16px 16px;border-bottom:1px solid var(--border2);margin-bottom:8px}
-    .sidebar-search input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:7px 10px;font-family:var(--mono);font-size:10px;color:var(--text);outline:none;transition:border-color .2s}
-    .sidebar-search input::placeholder{color:var(--muted2)}
-    .sidebar-search input:focus{border-color:rgba(184,255,87,.2)}
-    .sidebar-group{margin-bottom:4px}
-    .sidebar-group-title{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted2);padding:10px 16px 4px}
-    .sidebar-link{display:flex;align-items:center;gap:8px;padding:6px 16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--muted);text-decoration:none;transition:all .15s;border-left:2px solid transparent;cursor:pointer}
-    .sidebar-link:hover{color:var(--text);background:var(--acid2)}
-    .sidebar-link.active{color:var(--acid);border-left-color:var(--acid);background:var(--acid2)}
-    .sidebar-method{font-size:7.5px;letter-spacing:.1em;padding:2px 5px;border-radius:2px;font-weight:600;flex-shrink:0}
-    .m-post{background:rgba(184,255,87,.12);color:var(--acid)}
-    .m-get{background:rgba(77,184,255,.1);color:var(--blue)}
-    .m-delete{background:rgba(255,60,90,.1);color:var(--red)}
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
 
-    /* MAIN CONTENT */
-    .docs-main{margin-left:var(--sidebar);flex:1;padding:48px 64px 96px;max-width:900px}
+  @keyframes neonSqSeq {
 
-    /* SECTION */
-    .doc-section{margin-bottom:80px;scroll-margin-top:80px}
-    .doc-section:first-child{margin-bottom:72px}
-    .section-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--acid);margin-bottom:14px}
-    .section-badge::before{content:'';display:block;width:16px;height:1px;background:var(--acid);opacity:.4}
-    h1.doc-h1{font-family:var(--mono);font-size:clamp(24px,3.5vw,38px);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
-    h1.doc-h1 .accent{color:var(--acid)}
-    .doc-lead{font-size:15px;color:var(--muted);line-height:1.78;font-weight:300;max-width:580px;margin-bottom:32px}
-    h2.doc-h2{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px;padding-top:8px}
-    h3.doc-h3{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:-.01em;margin-bottom:10px;color:var(--text)}
-    .doc-p{font-size:14px;color:var(--muted);line-height:1.78;font-weight:300;margin-bottom:16px}
-    .doc-p strong{color:var(--text);font-weight:500}
-    .doc-p a{color:var(--acid);text-decoration:none}
-    .doc-p a:hover{text-decoration:underline}
-    .doc-divider{height:1px;background:var(--border2);margin:40px 0}
+    0%,
+    100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+    }
 
-    /* QUICK START CARDS */
-    .quickstart-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border2);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:32px}
-    .qs-card{background:var(--bg1);padding:20px 18px;cursor:pointer;transition:background .2s;text-decoration:none;display:block}
-    .qs-card:hover{background:var(--bg2)}
-    .qs-icon{font-size:20px;margin-bottom:8px}
-    .qs-title{font-family:var(--mono);font-size:12px;font-weight:600;margin-bottom:4px}
-    .qs-desc{font-size:11.5px;color:var(--muted);line-height:1.5;font-weight:300}
+    40%,
+    60% {
+      opacity: .08;
+      filter: none;
+    }
+  }
 
-    /* BASE URL BANNER */
-    .base-url{display:flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:12px 16px;margin-bottom:24px;font-family:var(--mono);font-size:11.5px}
-    .base-label{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);flex-shrink:0}
-    .base-value{color:var(--acid);flex:1}
-    .copy-btn{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted2);background:none;border:1px solid var(--border);border-radius:2px;padding:3px 8px;cursor:pointer;transition:all .15s}
-    .copy-btn:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
+  @keyframes neonDotPulse {
 
-    /* INFO BOXES */
-    .info-box{border-radius:4px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.65;font-weight:300}
-    .info-box strong{font-weight:600}
-    .info-note{background:rgba(77,184,255,.06);border-left:3px solid var(--blue);color:rgba(232,237,244,.7)}
-    .info-note strong{color:var(--blue)}
-    .info-warn{background:rgba(255,179,64,.06);border-left:3px solid var(--amber);color:rgba(232,237,244,.7)}
-    .info-warn strong{color:var(--amber)}
-    .info-tip{background:rgba(184,255,87,.05);border-left:3px solid var(--acid);color:rgba(232,237,244,.7)}
-    .info-tip strong{color:var(--acid)}
+    0%,
+    100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+    }
 
-    /* CODE BLOCKS */
-    .code-block{position:relative;margin-bottom:24px}
-    .code-header{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;padding:8px 14px}
-    .code-lang{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2)}
-    .code-copy{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted2);background:none;border:none;cursor:pointer;transition:color .15s;padding:0}
-    .code-copy:hover{color:var(--acid)}
-    pre{background:var(--bg3);border:1px solid var(--border);border-radius:0 0 4px 4px;padding:20px;overflow-x:auto;margin:0}
-    pre::-webkit-scrollbar{height:3px}pre::-webkit-scrollbar-thumb{background:var(--border)}
-    code{font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--text)}
-    .standalone code{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:11.5px;color:var(--acid)}
-    .c-comment{color:rgba(232,237,244,.3)}
-    .c-key{color:var(--blue)}
-    .c-str{color:var(--green)}
-    .c-num{color:var(--amber)}
-    .c-kw{color:var(--purple)}
-    .c-method{color:var(--acid)}
-    .c-var{color:var(--text)}
-    .c-path{color:var(--amber)}
+    50% {
+      opacity: .1;
+      filter: none;
+    }
+  }
 
-    /* ENDPOINT BLOCKS */
-    .endpoint{background:var(--bg1);border:1px solid var(--border);border-radius:5px;margin-bottom:32px;overflow:hidden}
-    .endpoint-header{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .15s}
-    .endpoint-header:hover{background:var(--bg2)}
-    .ep-method{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border-radius:3px;flex-shrink:0}
-    .ep-post{background:rgba(184,255,87,.12);border:1px solid rgba(184,255,87,.2);color:var(--acid)}
-    .ep-get{background:rgba(77,184,255,.1);border:1px solid rgba(77,184,255,.18);color:var(--blue)}
-    .ep-path{font-family:var(--mono);font-size:13px;letter-spacing:.03em;flex:1}
-    .ep-summary{font-size:12.5px;color:var(--muted);font-weight:300}
-    .ep-chevron{color:var(--muted2);font-size:11px;transition:transform .2s;margin-left:auto}
-    .ep-body{padding:20px 20px 24px;border-top:1px solid var(--border2)}
-    .ep-desc{font-size:13.5px;color:var(--muted);line-height:1.7;font-weight:300;margin-bottom:20px}
-    .params-title{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px}
-    .params-table{width:100%;border-collapse:collapse;margin-bottom:20px}
-    .params-table th{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);text-align:left;padding:6px 10px;border-bottom:1px solid var(--border2)}
-    .params-table td{font-size:12.5px;padding:9px 10px;border-bottom:1px solid var(--border2);vertical-align:top}
-    .params-table tr:last-child td{border-bottom:none}
-    .param-name{font-family:var(--mono);font-size:11.5px;color:var(--acid)}
-    .param-type{font-family:var(--mono);font-size:10px;color:var(--muted2)}
-    .param-required{font-family:var(--mono);font-size:9px;letter-spacing:.08em;padding:2px 6px;border-radius:2px}
-    .pr-yes{background:rgba(255,60,90,.08);border:1px solid rgba(255,60,90,.15);color:var(--red)}
-    .pr-no{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--muted2)}
-    .param-desc{font-size:12.5px;color:var(--muted);font-weight:300;line-height:1.5}
-    .response-block{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:16px;margin-top:16px}
-    .response-label{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-    .response-status{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;background:rgba(61,255,170,.1);border:1px solid rgba(61,255,170,.2);color:var(--green)}
+  .nav-logo em {
+    font-style: normal;
+    color: var(--acid)
+  }
 
-    /* TABS */
-    .lang-tabs{display:flex;gap:0;margin-bottom:0}
-    .lang-tab{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;padding:7px 14px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;color:var(--muted2);cursor:pointer;transition:all .15s;first-child:{border-radius:4px 0 0 0};margin-right:-1px}
-    .lang-tab:first-child{border-radius:4px 0 0 0}
-    .lang-tab.active{background:var(--bg2);color:var(--text);border-bottom-color:var(--bg2)}
-    .lang-tab:hover:not(.active){color:var(--muted)}
-    .tab-content{display:none}
-    .tab-content.active{display:block}
+  .nav-center {
+    display: flex;
+    align-items: center;
+    gap: 6px
+  }
 
-    /* RATE LIMITS TABLE */
-    .limits-table{width:100%;border-collapse:collapse;margin-bottom:20px}
-    .limits-table th{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
-    .limits-table td{font-size:13px;padding:10px 12px;border-bottom:1px solid var(--border2)}
-    .limits-table tr:last-child td{border-bottom:none}
-    td.tier-free{color:var(--muted)}
-    td.tier-pro{color:var(--acid);font-family:var(--mono);font-size:12px}
-    td.tier-ent{color:var(--blue);font-family:var(--mono);font-size:12px}
+  .nav-breadcrumb {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted2);
+    display: flex;
+    align-items: center;
+    gap: 6px
+  }
 
-    /* ERROR TABLE */
-    .error-table{width:100%;border-collapse:collapse}
-    .error-table th{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
-    .error-table td{font-size:12.5px;padding:9px 12px;border-bottom:1px solid var(--border2);vertical-align:top}
-    .error-table tr:last-child td{border-bottom:none}
-    .e-code{font-family:var(--mono);font-size:11px}
-    .e-400{color:var(--amber)}
-    .e-401{color:var(--red)}
-    .e-429{color:var(--purple)}
-    .e-500{color:var(--red)}
-    .e-desc{font-size:12.5px;color:var(--muted);font-weight:300}
+  .nav-breadcrumb a {
+    color: var(--muted2);
+    text-decoration: none;
+    transition: color .15s
+  }
 
-    footer{background:var(--bg);border-top:1px solid var(--border2);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;margin-left:var(--sidebar)}
-    .footer-left{font-family:var(--mono);font-size:10.5px;color:var(--muted2)}
-    .footer-links{display:flex;gap:22px}
-    .footer-links a{font-family:var(--mono);font-size:10.5px;color:var(--muted2);text-decoration:none;transition:color .2s}
-    .footer-links a:hover{color:var(--acid)}
+  .nav-breadcrumb a:hover {
+    color: var(--acid)
+  }
 
-    @media(max-width:900px){
-      .sidebar{display:none}
-      .docs-main{margin-left:0;padding:100px 24px 72px}
-      footer{margin-left:0;padding:24px;flex-direction:column;gap:12px;text-align:center}
-      .quickstart-grid{grid-template-columns:1fr}
-      nav{padding:0 20px}
+  .nav-breadcrumb span {
+    color: var(--muted2);
+    opacity: .4
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px
+  }
+
+  .btn-ghost {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color .2s
+  }
+
+  .btn-ghost:hover {
+    color: var(--text)
+  }
+
+  .btn-acid {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    background: var(--acid);
+    color: #000;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .25s
+  }
+
+  .btn-acid:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(184, 255, 87, .25)
+  }
+
+  /* LAYOUT */
+  .docs-layout {
+    display: flex;
+    margin-top: var(--nav-h);
+    min-height: calc(100vh - var(--nav-h))
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar);
+    flex-shrink: 0;
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    bottom: 0;
+    background: var(--bg1);
+    border-right: 1px solid var(--border2);
+    overflow-y: auto;
+    padding: 24px 0
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 2px
+  }
+
+  .sidebar-search {
+    padding: 0 16px 16px;
+    border-bottom: 1px solid var(--border2);
+    margin-bottom: 8px
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 7px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s
+  }
+
+  .sidebar-search input::placeholder {
+    color: var(--muted2)
+  }
+
+  .sidebar-search input:focus {
+    border-color: rgba(184, 255, 87, .2)
+  }
+
+  .sidebar-group {
+    margin-bottom: 4px
+  }
+
+  .sidebar-group-title {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    padding: 10px 16px 4px
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all .15s;
+    border-left: 2px solid transparent;
+    cursor: pointer
+  }
+
+  .sidebar-link:hover {
+    color: var(--text);
+    background: var(--acid2)
+  }
+
+  .sidebar-link.active {
+    color: var(--acid);
+    border-left-color: var(--acid);
+    background: var(--acid2)
+  }
+
+  .sidebar-method {
+    font-size: 7.5px;
+    letter-spacing: .1em;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-weight: 600;
+    flex-shrink: 0
+  }
+
+  .m-post {
+    background: rgba(184, 255, 87, .12);
+    color: var(--acid)
+  }
+
+  .m-get {
+    background: rgba(77, 184, 255, .1);
+    color: var(--blue)
+  }
+
+  .m-delete {
+    background: rgba(255, 60, 90, .1);
+    color: var(--red)
+  }
+
+  /* MAIN CONTENT */
+  .docs-main {
+    margin-left: var(--sidebar);
+    flex: 1;
+    padding: 48px 64px 96px;
+    max-width: 900px
+  }
+
+  /* SECTION */
+  .doc-section {
+    margin-bottom: 80px;
+    scroll-margin-top: 80px
+  }
+
+  .doc-section:first-child {
+    margin-bottom: 72px
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--acid);
+    margin-bottom: 14px
+  }
+
+  .section-badge::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: var(--acid);
+    opacity: .4
+  }
+
+  h1.doc-h1 {
+    font-family: var(--mono);
+    font-size: clamp(24px, 3.5vw, 38px);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    margin-bottom: 14px
+  }
+
+  h1.doc-h1 .accent {
+    color: var(--acid)
+  }
+
+  .doc-lead {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.78;
+    font-weight: 300;
+    max-width: 580px;
+    margin-bottom: 32px
+  }
+
+  h2.doc-h2 {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+    padding-top: 8px
+  }
+
+  h3.doc-h3 {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin-bottom: 10px;
+    color: var(--text)
+  }
+
+  .doc-p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.78;
+    font-weight: 300;
+    margin-bottom: 16px
+  }
+
+  .doc-p strong {
+    color: var(--text);
+    font-weight: 500
+  }
+
+  .doc-p a {
+    color: var(--acid);
+    text-decoration: none
+  }
+
+  .doc-p a:hover {
+    text-decoration: underline
+  }
+
+  .doc-divider {
+    height: 1px;
+    background: var(--border2);
+    margin: 40px 0
+  }
+
+  /* QUICK START CARDS */
+  .quickstart-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 32px
+  }
+
+  .qs-card {
+    background: var(--bg1);
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: background .2s;
+    text-decoration: none;
+    display: block
+  }
+
+  .qs-card:hover {
+    background: var(--bg2)
+  }
+
+  .qs-icon {
+    font-size: 20px;
+    margin-bottom: 8px
+  }
+
+  .qs-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px
+  }
+
+  .qs-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300
+  }
+
+  /* BASE URL BANNER */
+  .base-url {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-family: var(--mono);
+    font-size: 11.5px
+  }
+
+  .base-label {
+    font-size: 8.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    flex-shrink: 0
+  }
+
+  .base-value {
+    color: var(--acid);
+    flex: 1
+  }
+
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: var(--muted2);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all .15s
+  }
+
+  .copy-btn:hover {
+    border-color: rgba(255, 255, 255, .15);
+    color: var(--text)
+  }
+
+  /* INFO BOXES */
+  .info-box {
+    border-radius: 4px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.65;
+    font-weight: 300
+  }
+
+  .info-box strong {
+    font-weight: 600
+  }
+
+  .info-note {
+    background: rgba(77, 184, 255, .06);
+    border-left: 3px solid var(--blue);
+    color: rgba(232, 237, 244, .7)
+  }
+
+  .info-note strong {
+    color: var(--blue)
+  }
+
+  .info-warn {
+    background: rgba(255, 179, 64, .06);
+    border-left: 3px solid var(--amber);
+    color: rgba(232, 237, 244, .7)
+  }
+
+  .info-warn strong {
+    color: var(--amber)
+  }
+
+  .info-tip {
+    background: rgba(184, 255, 87, .05);
+    border-left: 3px solid var(--acid);
+    color: rgba(232, 237, 244, .7)
+  }
+
+  .info-tip strong {
+    color: var(--acid)
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    position: relative;
+    margin-bottom: 24px
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 8px 14px
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted2)
+  }
+
+  .code-copy {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: var(--muted2);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color .15s;
+    padding: 0
+  }
+
+  .code-copy:hover {
+    color: var(--acid)
+  }
+
+  pre {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 0 0 4px 4px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 0
+  }
+
+  pre::-webkit-scrollbar {
+    height: 3px
+  }
+
+  pre::-webkit-scrollbar-thumb {
+    background: var(--border)
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.75;
+    color: var(--text)
+  }
+
+  .standalone code {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11.5px;
+    color: var(--acid)
+  }
+
+  .c-comment {
+    color: rgba(232, 237, 244, .3)
+  }
+
+  .c-key {
+    color: var(--blue)
+  }
+
+  .c-str {
+    color: var(--green)
+  }
+
+  .c-num {
+    color: var(--amber)
+  }
+
+  .c-kw {
+    color: var(--purple)
+  }
+
+  .c-method {
+    color: var(--acid)
+  }
+
+  .c-var {
+    color: var(--text)
+  }
+
+  .c-path {
+    color: var(--amber)
+  }
+
+  /* ENDPOINT BLOCKS */
+  .endpoint {
+    background: var(--bg1);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    margin-bottom: 32px;
+    overflow: hidden
+  }
+
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border2);
+    cursor: pointer;
+    transition: background .15s
+  }
+
+  .endpoint-header:hover {
+    background: var(--bg2)
+  }
+
+  .ep-method {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    padding: 4px 10px;
+    border-radius: 3px;
+    flex-shrink: 0
+  }
+
+  .ep-post {
+    background: rgba(184, 255, 87, .12);
+    border: 1px solid rgba(184, 255, 87, .2);
+    color: var(--acid)
+  }
+
+  .ep-get {
+    background: rgba(77, 184, 255, .1);
+    border: 1px solid rgba(77, 184, 255, .18);
+    color: var(--blue)
+  }
+
+  .ep-path {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .03em;
+    flex: 1
+  }
+
+  .ep-summary {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 300
+  }
+
+  .ep-chevron {
+    color: var(--muted2);
+    font-size: 11px;
+    transition: transform .2s;
+    margin-left: auto
+  }
+
+  .ep-body {
+    padding: 20px 20px 24px;
+    border-top: 1px solid var(--border2)
+  }
+
+  .ep-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 20px
+  }
+
+  .params-title {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 10px
+  }
+
+  .params-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px
+  }
+
+  .params-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border2)
+  }
+
+  .params-table td {
+    font-size: 12.5px;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border2);
+    vertical-align: top
+  }
+
+  .params-table tr:last-child td {
+    border-bottom: none
+  }
+
+  .param-name {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--acid)
+  }
+
+  .param-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2)
+  }
+
+  .param-required {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .08em;
+    padding: 2px 6px;
+    border-radius: 2px
+  }
+
+  .pr-yes {
+    background: rgba(255, 60, 90, .08);
+    border: 1px solid rgba(255, 60, 90, .15);
+    color: var(--red)
+  }
+
+  .pr-no {
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--border2);
+    color: var(--muted2)
+  }
+
+  .param-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5
+  }
+
+  .response-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-top: 16px
+  }
+
+  .response-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px
+  }
+
+  .response-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: rgba(61, 255, 170, .1);
+    border: 1px solid rgba(61, 255, 170, .2);
+    color: var(--green)
+  }
+
+  /* TABS */
+  .lang-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0
+  }
+
+  .lang-tab {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    padding: 7px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all .15s;
+
+
+    margin-right: -1px
+  }
+
+  .lang-tab:first-child {
+    border-radius: 4px 0 0 0
+  }
+
+  .lang-tab.active {
+    background: var(--bg2);
+    color: var(--text);
+    border-bottom-color: var(--bg2)
+  }
+
+  .lang-tab:hover:not(.active) {
+    color: var(--muted)
+  }
+
+  .tab-content {
+    display: none
+  }
+
+  .tab-content.active {
+    display: block
+  }
+
+  /* RATE LIMITS TABLE */
+  .limits-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px
+  }
+
+  .limits-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border)
+  }
+
+  .limits-table td {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border2)
+  }
+
+  .limits-table tr:last-child td {
+    border-bottom: none
+  }
+
+  td.tier-free {
+    color: var(--muted)
+  }
+
+  td.tier-pro {
+    color: var(--acid);
+    font-family: var(--mono);
+    font-size: 12px
+  }
+
+  td.tier-ent {
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 12px
+  }
+
+  /* ERROR TABLE */
+  .error-table {
+    width: 100%;
+    border-collapse: collapse
+  }
+
+  .error-table th {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border)
+  }
+
+  .error-table td {
+    font-size: 12.5px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border2);
+    vertical-align: top
+  }
+
+  .error-table tr:last-child td {
+    border-bottom: none
+  }
+
+  .e-code {
+    font-family: var(--mono);
+    font-size: 11px
+  }
+
+  .e-400 {
+    color: var(--amber)
+  }
+
+  .e-401 {
+    color: var(--red)
+  }
+
+  .e-429 {
+    color: var(--purple)
+  }
+
+  .e-500 {
+    color: var(--red)
+  }
+
+  .e-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 300
+  }
+
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border2);
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-left: var(--sidebar)
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted2)
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 22px
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--muted2);
+    text-decoration: none;
+    transition: color .2s
+  }
+
+  .footer-links a:hover {
+    color: var(--acid)
+  }
+
+  @media(max-width:900px) {
+    .sidebar {
+      display: none
+    }
+
+    .docs-main {
+      margin-left: 0;
+      padding: 100px 24px 72px
+    }
+
+    footer {
+      margin-left: 0;
+      padding: 24px;
+      flex-direction: column;
+      gap: 12px;
+      text-align: center
+    }
+
+    .quickstart-grid {
+      grid-template-columns: 1fr
+    }
+
+    nav {
+      padding: 0 20px
+    }
+  }
+
+  /* ── Neon logo ── */
+  .nav-logo-mark {
+    animation: neonBoxPulse 2s ease-in-out infinite;
+    position: relative;
+  }
+
+  .nav-logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid rgba(184, 255, 87, .25);
+    animation: expandRing 2s ease-out infinite;
+    pointer-events: none;
+  }
+
+  .nsq {
+    fill: #b8ff57;
+  }
+
+  .nsq1 {
+    animation: neonSqSeq 2.4s ease-in-out infinite 0s;
+  }
+
+  .nsq2 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .3s;
+  }
+
+  .nsq3 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .6s;
+  }
+
+  .nsq4 {
+    animation: neonSqSeq 2.4s ease-in-out infinite .9s;
+  }
+
+  .ndot1 {
+    fill: #b8ff57;
+    animation: neonDotPulse 1.2s ease-in-out infinite 0s;
+  }
+
+  .ndot2 {
+    fill: #b8ff57;
+    animation: neonDotPulse 1.2s ease-in-out infinite .5s;
+  }
+
+  @keyframes neonBoxPulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 8px rgba(184, 255, 87, .4), 0 0 20px rgba(184, 255, 87, .15), inset 0 0 10px rgba(184, 255, 87, .04);
+      border-color: rgba(184, 255, 87, .9);
+    }
+
+    50% {
+      box-shadow: 0 0 16px rgba(184, 255, 87, .7), 0 0 40px rgba(184, 255, 87, .3), 0 0 80px rgba(184, 255, 87, .1), inset 0 0 20px rgba(184, 255, 87, .08);
+      border-color: #d4ff8a;
+    }
+  }
+
+  @keyframes expandRing {
+    0% {
+      transform: scale(1);
+      opacity: .7;
+    }
+
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes neonSqSeq {
+
+    0%,
+    100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+    }
+
+    40%,
+    60% {
+      opacity: .08;
+      filter: none;
+    }
+  }
+
+  @keyframes neonDotPulse {
+
+    0%,
+    100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+    }
+
+    50% {
+      opacity: .1;
+      filter: none;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- VULNRA Loader -->
+  <div id="vLoader" style="
+    position:fixed;inset:0;background:#060608;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    z-index:9990;transition:opacity .5s ease,visibility .5s ease;
+    font-family:'IBM Plex Mono',monospace;gap:0;
+  ">
+    <!-- corners -->
+    <div
+      style="position:absolute;top:28px;left:28px;width:24px;height:24px;border-top:1px solid rgba(184,255,87,.35);border-left:1px solid rgba(184,255,87,.35)">
+    </div>
+    <div
+      style="position:absolute;top:28px;right:28px;width:24px;height:24px;border-top:1px solid rgba(184,255,87,.35);border-right:1px solid rgba(184,255,87,.35)">
+    </div>
+    <div
+      style="position:absolute;bottom:28px;left:28px;width:24px;height:24px;border-bottom:1px solid rgba(184,255,87,.35);border-left:1px solid rgba(184,255,87,.35)">
+    </div>
+    <div
+      style="position:absolute;bottom:28px;right:28px;width:24px;height:24px;border-bottom:1px solid rgba(184,255,87,.35);border-right:1px solid rgba(184,255,87,.35)">
+    </div>
+
+    <!-- mark -->
+    <div style="position:relative;margin-bottom:36px;">
+      <div
+        style="position:absolute;inset:-20px;border-radius:50%;border:1px solid transparent;border-top-color:rgba(184,255,87,.6);border-right-color:rgba(184,255,87,.12);animation:vOrbit 2s linear infinite;">
+      </div>
+      <div
+        style="position:absolute;inset:-12px;border-radius:50%;border:1px solid transparent;border-bottom-color:rgba(184,255,87,.35);border-left-color:rgba(184,255,87,.08);animation:vOrbit 3.2s linear infinite reverse;">
+      </div>
+      <div
+        style="width:72px;height:72px;border-radius:13px;background:#060608;border:1.5px solid #b8ff57;display:flex;align-items:center;justify-content:center;animation:neonBoxPulse 2s ease-in-out infinite;position:relative;">
+        <div
+          style="position:absolute;inset:-1px;border-radius:inherit;border:1px solid rgba(184,255,87,.25);animation:expandRing 2s ease-out infinite;pointer-events:none;">
+        </div>
+        <svg width="38" height="38" viewBox="0 0 20 20" fill="none">
+          <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+          <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- title + status -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:32px;">
+      <div
+        style="font-size:13px;font-weight:700;letter-spacing:.2em;color:#b8ff57;text-shadow:0 0 12px rgba(184,255,87,.5)">
+        VULNRA</div>
+      <div
+        style="display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.14em;color:rgba(184,255,87,.45);">
+        <span id="vLoaderStatus">INITIALISING</span>
+        <span
+          style="display:inline-block;width:7px;height:11px;background:#b8ff57;animation:vBlink .7s steps(1) infinite;box-shadow:0 0 6px #b8ff57;"></span>
+      </div>
+    </div>
+
+    <!-- progress -->
+    <div style="width:220px;display:flex;flex-direction:column;gap:6px;">
+      <div
+        style="display:flex;justify-content:space-between;font-size:9px;letter-spacing:.14em;color:rgba(184,255,87,.3);">
+        <span>BOOT SEQUENCE</span>
+        <span id="vLoaderPct">0%</span>
+      </div>
+      <div style="height:2px;background:rgba(184,255,87,.1);border-radius:1px;overflow:hidden;">
+        <div id="vLoaderBar"
+          style="height:100%;width:0%;background:#b8ff57;border-radius:1px;box-shadow:0 0 8px rgba(184,255,87,.7);transition:width .2s ease;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes vOrbit {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes vBlink {
+
+      0%,
+      50% {
+        opacity: 1
+      }
+
+      51%,
+      100% {
+        opacity: 0
+      }
     }
   </style>
-</head>
-<body>
-<nav>
-  <a href="index.html" class="nav-logo">
-    <div class="nav-logo-mark"><svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" fill="#000"/><rect x="8" y="1" width="5" height="5" fill="#000"/><rect x="1" y="8" width="5" height="5" fill="#000"/><rect x="8" y="10" width="2" height="2" fill="#000"/><rect x="11" y="10" width="2" height="2" fill="#000"/></svg></div>
-    VULN<em>RA</em>
-  </a>
-  <div class="nav-breadcrumb">
-    <a href="index.html">Home</a>
-    <span>/</span>
-    <span style="color:var(--text)">Docs</span>
-  </div>
-  <div class="nav-right">
-    <a href="https://github.com" target="_blank" rel="noopener" class="btn-ghost">GitHub ↗</a>
-    <a href="signup.html" class="btn-acid">Get API Key →</a>
-  </div>
-</nav>
 
-<div class="docs-layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-search">
-      <input type="text" placeholder="Search docs..." oninput="searchDocs(this.value)">
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Getting Started</div>
-      <a class="sidebar-link active" onclick="scrollTo('overview')">Overview</a>
-      <a class="sidebar-link" onclick="scrollTo('quickstart')">Quick Start</a>
-      <a class="sidebar-link" onclick="scrollTo('auth')">Authentication</a>
-      <a class="sidebar-link" onclick="scrollTo('base-url')">Base URL & Headers</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Scan API</div>
-      <a class="sidebar-link" onclick="scrollTo('scan-start')"><span class="sidebar-method m-post">POST</span>/scan</a>
-      <a class="sidebar-link" onclick="scrollTo('scan-poll')"><span class="sidebar-method m-get">GET</span>/scan/{id}</a>
-      <a class="sidebar-link" onclick="scrollTo('scan-list')"><span class="sidebar-method m-get">GET</span>/scans</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Reports</div>
-      <a class="sidebar-link" onclick="scrollTo('report-gen')"><span class="sidebar-method m-post">POST</span>/report/generate</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Monitoring</div>
-      <a class="sidebar-link" onclick="scrollTo('sentinel-create')"><span class="sidebar-method m-post">POST</span>/sentinel/create</a>
-      <a class="sidebar-link" onclick="scrollTo('sentinel-delete')"><span class="sidebar-method m-delete">DEL</span>/sentinel/{id}</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">System</div>
-      <a class="sidebar-link" onclick="scrollTo('health')"><span class="sidebar-method m-get">GET</span>/health</a>
-      <a class="sidebar-link" onclick="scrollTo('debug-redis')"><span class="sidebar-method m-get">GET</span>/debug/redis</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Reference</div>
-      <a class="sidebar-link" onclick="scrollTo('rate-limits')">Rate Limits</a>
-      <a class="sidebar-link" onclick="scrollTo('errors')">Error Codes</a>
-      <a class="sidebar-link" onclick="scrollTo('findings')">Findings Object</a>
-      <a class="sidebar-link" onclick="scrollTo('frameworks')">Compliance Frameworks</a>
-    </div>
-    <div class="sidebar-group">
-      <div class="sidebar-group-title">Guides</div>
-      <a class="sidebar-link" onclick="scrollTo('github-action')">GitHub Action</a>
-      <a class="sidebar-link" onclick="scrollTo('sdk')">SDK Reference</a>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="docs-main">
-
-    <!-- OVERVIEW -->
-    <section class="doc-section" id="overview">
-      <div class="section-badge">API Reference</div>
-      <h1 class="doc-h1">VULNRA<br><span class="accent">API Documentation</span></h1>
-      <p class="doc-lead">The VULNRA API lets you programmatically scan LLM endpoints for jailbreaks, prompt injections, encoding bypasses, and compliance violations. Integrate security testing into CI/CD pipelines, automate compliance reporting, or build custom dashboards.</p>
-
-      <div class="quickstart-grid">
-        <a href="#" onclick="scrollTo('quickstart')" class="qs-card">
-          <div class="qs-icon">⚡</div>
-          <div class="qs-title">Quick Start</div>
-          <div class="qs-desc">Run your first scan in under 2 minutes.</div>
-        </a>
-        <a href="#" onclick="scrollTo('github-action')" class="qs-card">
-          <div class="qs-icon">⚙</div>
-          <div class="qs-title">GitHub Action</div>
-          <div class="qs-desc">One YAML file. Fail builds on risk score.</div>
-        </a>
-        <a href="#" onclick="scrollTo('errors')" class="qs-card">
-          <div class="qs-icon">⊘</div>
-          <div class="qs-title">Error Reference</div>
-          <div class="qs-desc">HTTP status codes and error shapes.</div>
-        </a>
+  <script>
+    (function () {
+      const msgs = ['INITIALISING', 'LOADING PROBES', 'MAPPING FRAMEWORKS', 'VERIFYING AUTH', 'READY'];
+      const bar = document.getElementById('vLoaderBar');
+      const pct = document.getElementById('vLoaderPct');
+      const status = document.getElementById('vLoaderStatus');
+      const loader = document.getElementById('vLoader');
+      let p = 0, mi = 0;
+      const iv = setInterval(() => {
+        p = Math.min(100, p + 1.4 + Math.random());
+        bar.style.width = p + '%';
+        pct.textContent = Math.floor(p) + '%';
+        mi = Math.floor((p / 100) * (msgs.length - 1));
+        status.textContent = msgs[mi];
+        if (p >= 100) {
+          clearInterval(iv);
+          bar.style.width = '100%';
+          pct.textContent = '100%';
+          status.textContent = 'READY';
+          setTimeout(() => {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+          }, 300);
+        }
+      }, 28);
+    })();
+  </script>
+  <!-- END Loader -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-mark">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+          <rect class="nsq nsq1" x="1" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq2" x="11.5" y="1" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq3" x="1" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <rect class="nsq nsq4" x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" />
+          <circle class="ndot1" cx="14.25" cy="16.75" r="1.1" />
+          <circle class="ndot2" cx="17.25" cy="16.75" r="1.1" />
+        </svg>
       </div>
+      VULN<em>RA</em>
+    </a>
+    <div class="nav-breadcrumb">
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <span style="color:var(--text)">Docs</span>
+    </div>
+    <div class="nav-right">
+      <a href="https://github.com" target="_blank" rel="noopener" class="btn-ghost">GitHub ↗</a>
+      <a href="signup.html" class="btn-acid">Get API Key →</a>
+    </div>
+  </nav>
 
-      <div class="info-note info-box"><strong>Note:</strong> The VULNRA API is currently in public beta. Breaking changes are versioned. Subscribe to the <a href="changelog.html">changelog</a> for notices.</div>
-    </section>
-
-    <div class="doc-divider"></div>
-
-    <!-- QUICK START -->
-    <section class="doc-section" id="quickstart">
-      <h2 class="doc-h2">Quick Start</h2>
-      <p class="doc-p">Make your first API call in two steps: get an API key from your dashboard, then POST to <code class="standalone">/scan</code>.</p>
-
-      <div class="lang-tabs" id="qs-tabs">
-        <div class="lang-tab active" onclick="switchTab('qs','curl',this)">cURL</div>
-        <div class="lang-tab" onclick="switchTab('qs','python',this)">Python</div>
-        <div class="lang-tab" onclick="switchTab('qs','js',this)">JavaScript</div>
+  <div class="docs-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-search">
+        <input type="text" placeholder="Search docs..." oninput="searchDocs(this.value)">
       </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Getting Started</div>
+        <a class="sidebar-link active" onclick="scrollTo('overview')">Overview</a>
+        <a class="sidebar-link" onclick="scrollTo('quickstart')">Quick Start</a>
+        <a class="sidebar-link" onclick="scrollTo('auth')">Authentication</a>
+        <a class="sidebar-link" onclick="scrollTo('base-url')">Base URL & Headers</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Scan API</div>
+        <a class="sidebar-link" onclick="scrollTo('scan-start')"><span
+            class="sidebar-method m-post">POST</span>/scan</a>
+        <a class="sidebar-link" onclick="scrollTo('scan-poll')"><span
+            class="sidebar-method m-get">GET</span>/scan/{id}</a>
+        <a class="sidebar-link" onclick="scrollTo('scan-list')"><span class="sidebar-method m-get">GET</span>/scans</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Reports</div>
+        <a class="sidebar-link" onclick="scrollTo('report-gen')"><span
+            class="sidebar-method m-post">POST</span>/report/generate</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Monitoring</div>
+        <a class="sidebar-link" onclick="scrollTo('sentinel-create')"><span
+            class="sidebar-method m-post">POST</span>/sentinel/create</a>
+        <a class="sidebar-link" onclick="scrollTo('sentinel-delete')"><span
+            class="sidebar-method m-delete">DEL</span>/sentinel/{id}</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">System</div>
+        <a class="sidebar-link" onclick="scrollTo('health')"><span class="sidebar-method m-get">GET</span>/health</a>
+        <a class="sidebar-link" onclick="scrollTo('debug-redis')"><span
+            class="sidebar-method m-get">GET</span>/debug/redis</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Reference</div>
+        <a class="sidebar-link" onclick="scrollTo('rate-limits')">Rate Limits</a>
+        <a class="sidebar-link" onclick="scrollTo('errors')">Error Codes</a>
+        <a class="sidebar-link" onclick="scrollTo('findings')">Findings Object</a>
+        <a class="sidebar-link" onclick="scrollTo('frameworks')">Compliance Frameworks</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-title">Guides</div>
+        <a class="sidebar-link" onclick="scrollTo('github-action')">GitHub Action</a>
+        <a class="sidebar-link" onclick="scrollTo('sdk')">SDK Reference</a>
+      </div>
+    </aside>
 
-      <div id="qs-curl" class="tab-content active">
-        <div class="code-block">
-          <pre><code><span class="c-comment"># Start a scan</span>
+    <!-- MAIN -->
+    <main class="docs-main">
+
+      <!-- OVERVIEW -->
+      <section class="doc-section" id="overview">
+        <div class="section-badge">API Reference</div>
+        <h1 class="doc-h1">VULNRA<br><span class="accent">API Documentation</span></h1>
+        <p class="doc-lead">The VULNRA API lets you programmatically scan LLM endpoints for jailbreaks, prompt
+          injections, encoding bypasses, and compliance violations. Integrate security testing into CI/CD pipelines,
+          automate compliance reporting, or build custom dashboards.</p>
+
+        <div class="quickstart-grid">
+          <a href="#" onclick="scrollTo('quickstart')" class="qs-card">
+            <div class="qs-icon">⚡</div>
+            <div class="qs-title">Quick Start</div>
+            <div class="qs-desc">Run your first scan in under 2 minutes.</div>
+          </a>
+          <a href="#" onclick="scrollTo('github-action')" class="qs-card">
+            <div class="qs-icon">⚙</div>
+            <div class="qs-title">GitHub Action</div>
+            <div class="qs-desc">One YAML file. Fail builds on risk score.</div>
+          </a>
+          <a href="#" onclick="scrollTo('errors')" class="qs-card">
+            <div class="qs-icon">⊘</div>
+            <div class="qs-title">Error Reference</div>
+            <div class="qs-desc">HTTP status codes and error shapes.</div>
+          </a>
+        </div>
+
+        <div class="info-note info-box"><strong>Note:</strong> The VULNRA API is currently in public beta. Breaking
+          changes are versioned. Subscribe to the <a href="changelog.html">changelog</a> for notices.</div>
+      </section>
+
+      <div class="doc-divider"></div>
+
+      <!-- QUICK START -->
+      <section class="doc-section" id="quickstart">
+        <h2 class="doc-h2">Quick Start</h2>
+        <p class="doc-p">Make your first API call in two steps: get an API key from your dashboard, then POST to <code
+            class="standalone">/scan</code>.</p>
+
+        <div class="lang-tabs" id="qs-tabs">
+          <div class="lang-tab active" onclick="switchTab('qs','curl',this)">cURL</div>
+          <div class="lang-tab" onclick="switchTab('qs','python',this)">Python</div>
+          <div class="lang-tab" onclick="switchTab('qs','js',this)">JavaScript</div>
+        </div>
+
+        <div id="qs-curl" class="tab-content active">
+          <div class="code-block">
+            <pre><code><span class="c-comment"># Start a scan</span>
 <span class="c-method">curl</span> -X POST <span class="c-str">"https://vulnra-production.up.railway.app/scan"</span> \
   -H <span class="c-str">"X-API-Key: vk_your_api_key"</span> \
   -H <span class="c-str">"Content-Type: application/json"</span> \
   -d <span class="c-str">'{"url":"https://api.example.com/chat","tier":"pro"}'</span></code></pre>
+          </div>
         </div>
-      </div>
-      <div id="qs-python" class="tab-content">
-        <div class="code-block">
-          <pre><code><span class="c-kw">import</span> <span class="c-var">requests</span>
+        <div id="qs-python" class="tab-content">
+          <div class="code-block">
+            <pre><code><span class="c-kw">import</span> <span class="c-var">requests</span>
 
 <span class="c-var">API_KEY</span> = <span class="c-str">"vk_your_api_key"</span>
 <span class="c-var">BASE_URL</span> = <span class="c-str">"https://vulnra-production.up.railway.app"</span>
@@ -353,11 +1539,11 @@
 <span class="c-var">result</span> = <span class="c-var">response</span>.<span class="c-method">json</span>()
 <span class="c-kw">print</span>(<span class="c-str">f"Risk Score: {result['risk_score']}"</span>)
 <span class="c-kw">print</span>(<span class="c-str">f"Findings: {len(result['findings'])}"</span>)</code></pre>
+          </div>
         </div>
-      </div>
-      <div id="qs-js" class="tab-content">
-        <div class="code-block">
-          <pre><code><span class="c-kw">const</span> <span class="c-var">scan</span> = <span class="c-kw">await</span> <span class="c-method">fetch</span>(
+        <div id="qs-js" class="tab-content">
+          <div class="code-block">
+            <pre><code><span class="c-kw">const</span> <span class="c-var">scan</span> = <span class="c-kw">await</span> <span class="c-method">fetch</span>(
   <span class="c-str">`https://vulnra-production.up.railway.app/scan?url=${encodeURIComponent(targetUrl)}&tier=pro`</span>,
   { headers: { <span class="c-str">'X-API-Key'</span>: <span class="c-str">'vk_your_api_key'</span> }, method: <span class="c-str">'POST'</span> }
 );
@@ -365,74 +1551,114 @@
 <span class="c-kw">const</span> <span class="c-var">result</span> = <span class="c-kw">await</span> <span class="c-var">scan</span>.<span class="c-method">json</span>();
 <span class="c-var">console</span>.<span class="c-method">log</span>(<span class="c-str">`Risk Score: ${result.risk_score}`</span>);
 <span class="c-var">console</span>.<span class="c-method">log</span>(<span class="c-str">`Findings: ${result.findings.length}`</span>);</code></pre>
+          </div>
         </div>
-      </div>
 
-      <p class="doc-p">A successful scan returns the full result object immediately (synchronous mode). See the <a href="#">POST /scan</a> reference for all parameters.</p>
-    </section>
+        <p class="doc-p">A successful scan returns the full result object immediately (synchronous mode). See the <a
+            href="#">POST /scan</a> reference for all parameters.</p>
+      </section>
 
-    <div class="doc-divider"></div>
+      <div class="doc-divider"></div>
 
-    <!-- AUTH -->
-    <section class="doc-section" id="auth">
-      <h2 class="doc-h2">Authentication</h2>
-      <p class="doc-p">All API requests require an API key passed in the <code class="standalone">X-API-Key</code> header. Get your key from the <a href="scanner.html">scanner dashboard</a> under Settings → API Keys.</p>
+      <!-- AUTH -->
+      <section class="doc-section" id="auth">
+        <h2 class="doc-h2">Authentication</h2>
+        <p class="doc-p">All API requests require an API key passed in the <code class="standalone">X-API-Key</code>
+          header. Get your key from the <a href="scanner.html">scanner dashboard</a> under Settings → API Keys.</p>
 
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Request Header</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
-        <pre><code>X-API-Key: vk_xxxxxxxxxxxxxxxxxxxx</code></pre>
-      </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Request Header</span><button class="code-copy"
+              onclick="copyCode(this)">Copy</button></div>
+          <pre><code>X-API-Key: vk_xxxxxxxxxxxxxxxxxxxx</code></pre>
+        </div>
 
-      <div class="info-warn info-box"><strong>Security:</strong> Never expose your API key in client-side code or public repositories. Use environment variables. Rotate keys immediately if compromised via the dashboard.</div>
+        <div class="info-warn info-box"><strong>Security:</strong> Never expose your API key in client-side code or
+          public repositories. Use environment variables. Rotate keys immediately if compromised via the dashboard.
+        </div>
 
-      <h3 class="doc-h3">Key format</h3>
-      <p class="doc-p">All API keys follow the format <code class="standalone">vk_</code> followed by 20 alphanumeric characters. Keys are scoped to your account tier and enforce the rate limits of your plan.</p>
-    </section>
+        <h3 class="doc-h3">Key format</h3>
+        <p class="doc-p">All API keys follow the format <code class="standalone">vk_</code> followed by 20 alphanumeric
+          characters. Keys are scoped to your account tier and enforce the rate limits of your plan.</p>
+      </section>
 
-    <div class="doc-divider"></div>
+      <div class="doc-divider"></div>
 
-    <!-- BASE URL -->
-    <section class="doc-section" id="base-url">
-      <h2 class="doc-h2">Base URL & Headers</h2>
-      <div class="base-url">
-        <span class="base-label">Production</span>
-        <span class="base-value">https://vulnra-production.up.railway.app</span>
-        <button class="copy-btn" onclick="copyText('https://vulnra-production.up.railway.app',this)">Copy</button>
-      </div>
-      <p class="doc-p">All endpoints accept and return <code class="standalone">application/json</code> except <code class="standalone">/report/generate</code> which returns <code class="standalone">application/pdf</code>.</p>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Required Headers</span></div>
-        <pre><code>X-API-Key: vk_your_api_key
+      <!-- BASE URL -->
+      <section class="doc-section" id="base-url">
+        <h2 class="doc-h2">Base URL & Headers</h2>
+        <div class="base-url">
+          <span class="base-label">Production</span>
+          <span class="base-value">https://vulnra-production.up.railway.app</span>
+          <button class="copy-btn" onclick="copyText('https://vulnra-production.up.railway.app',this)">Copy</button>
+        </div>
+        <p class="doc-p">All endpoints accept and return <code class="standalone">application/json</code> except <code
+            class="standalone">/report/generate</code> which returns <code class="standalone">application/pdf</code>.
+        </p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Required Headers</span></div>
+          <pre><code>X-API-Key: vk_your_api_key
 Content-Type: application/json</code></pre>
-      </div>
-    </section>
-
-    <div class="doc-divider"></div>
-
-    <!-- POST /scan -->
-    <section class="doc-section" id="scan-start">
-      <h2 class="doc-h2">Endpoints</h2>
-      <div class="endpoint">
-        <div class="endpoint-header" onclick="toggleEndpoint(this)">
-          <span class="ep-method ep-post">POST</span>
-          <span class="ep-path">/scan</span>
-          <span class="ep-summary">Start a security scan</span>
-          <span class="ep-chevron">▾</span>
         </div>
-        <div class="ep-body">
-          <p class="ep-desc">Initiates a security scan against the target LLM endpoint. Returns the full result immediately in synchronous mode, or a <code class="standalone">scan_id</code> in queued mode when Celery is available. All findings are tier-gated — free tier returns 1 blurred finding, Pro returns all.</p>
-          <div class="params-title">Query Parameters</div>
-          <table class="params-table">
-            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
-            <tr><td class="param-name">url</td><td class="param-type">string</td><td><span class="param-required pr-yes">required</span></td><td class="param-desc">Full URL of the target LLM REST API endpoint. Must be HTTPS. RFC 1918 ranges and localhost are blocked.</td></tr>
-            <tr><td class="param-name">tier</td><td class="param-type">string</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc">Scan tier: <code class="standalone">free</code> | <code class="standalone">pro</code> | <code class="standalone">enterprise</code>. Defaults to your account tier.</td></tr>
-            <tr><td class="param-name">strategy</td><td class="param-type">string</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc"><code class="standalone">single_turn</code> (default) or <code class="standalone">multi_turn</code>. Multi-turn available on Pro+.</td></tr>
-            <tr><td class="param-name">scan_type</td><td class="param-type">string</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc"><code class="standalone">endpoint</code> (default) | <code class="standalone">mcp</code>. MCP scanner in beta.</td></tr>
-          </table>
-          <div class="params-title">Response — 200 OK</div>
-          <div class="response-block">
-            <div class="response-label"><span class="response-status">200 OK</span> application/json</div>
-            <pre style="border:none;padding:0;background:transparent"><code>{
+      </section>
+
+      <div class="doc-divider"></div>
+
+      <!-- POST /scan -->
+      <section class="doc-section" id="scan-start">
+        <h2 class="doc-h2">Endpoints</h2>
+        <div class="endpoint">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="ep-method ep-post">POST</span>
+            <span class="ep-path">/scan</span>
+            <span class="ep-summary">Start a security scan</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body">
+            <p class="ep-desc">Initiates a security scan against the target LLM endpoint. Returns the full result
+              immediately in synchronous mode, or a <code class="standalone">scan_id</code> in queued mode when Celery
+              is available. All findings are tier-gated — free tier returns 1 blurred finding, Pro returns all.</p>
+            <div class="params-title">Query Parameters</div>
+            <table class="params-table">
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td class="param-name">url</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-yes">required</span></td>
+                <td class="param-desc">Full URL of the target LLM REST API endpoint. Must be HTTPS. RFC 1918 ranges and
+                  localhost are blocked.</td>
+              </tr>
+              <tr>
+                <td class="param-name">tier</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc">Scan tier: <code class="standalone">free</code> | <code
+                    class="standalone">pro</code> | <code class="standalone">enterprise</code>. Defaults to your account
+                  tier.</td>
+              </tr>
+              <tr>
+                <td class="param-name">strategy</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc"><code class="standalone">single_turn</code> (default) or <code
+                    class="standalone">multi_turn</code>. Multi-turn available on Pro+.</td>
+              </tr>
+              <tr>
+                <td class="param-name">scan_type</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc"><code class="standalone">endpoint</code> (default) | <code
+                    class="standalone">mcp</code>. MCP scanner in beta.</td>
+              </tr>
+            </table>
+            <div class="params-title">Response — 200 OK</div>
+            <div class="response-block">
+              <div class="response-label"><span class="response-status">200 OK</span> application/json</div>
+              <pre style="border:none;padding:0;background:transparent"><code>{
   <span class="c-key">"scan_id"</span>:    <span class="c-str">"sc_9f2a1b3c4d"</span>,
   <span class="c-key">"status"</span>:     <span class="c-str">"complete"</span>,
   <span class="c-key">"risk_score"</span>: <span class="c-num">7.4</span>,
@@ -461,132 +1687,249 @@ Content-Type: application/json</code></pre>
   },
   <span class="c-key">"duration_ms"</span>: <span class="c-num">58420</span>
 }</code></pre>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- GET /scan/{id} -->
-    <section class="doc-section" id="scan-poll">
-      <div class="endpoint">
-        <div class="endpoint-header" onclick="toggleEndpoint(this)">
-          <span class="ep-method ep-get">GET</span>
-          <span class="ep-path">/scan/{scan_id}</span>
-          <span class="ep-summary">Poll scan status or retrieve completed result</span>
-          <span class="ep-chevron">▾</span>
+      <!-- GET /scan/{id} -->
+      <section class="doc-section" id="scan-poll">
+        <div class="endpoint">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="ep-method ep-get">GET</span>
+            <span class="ep-path">/scan/{scan_id}</span>
+            <span class="ep-summary">Poll scan status or retrieve completed result</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body">
+            <p class="ep-desc">Returns the current status of a scan. When <code
+                class="standalone">status === "complete"</code> the full findings object is included. When running in
+              synchronous mode, the POST /scan response already contains the full result — polling is only needed in
+              Celery-queued mode.</p>
+            <div class="params-title">Path Parameters</div>
+            <table class="params-table">
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td class="param-name">scan_id</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-yes">required</span></td>
+                <td class="param-desc">The <code class="standalone">scan_id</code> returned from POST /scan.</td>
+              </tr>
+            </table>
+            <div class="info-tip info-box"><strong>Polling tip:</strong> If you're using async mode, poll every 3
+              seconds. Most scans complete in under 60 seconds. Abandon polling after 120 seconds and re-submit.</div>
+          </div>
         </div>
-        <div class="ep-body">
-          <p class="ep-desc">Returns the current status of a scan. When <code class="standalone">status === "complete"</code> the full findings object is included. When running in synchronous mode, the POST /scan response already contains the full result — polling is only needed in Celery-queued mode.</p>
-          <div class="params-title">Path Parameters</div>
-          <table class="params-table">
-            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
-            <tr><td class="param-name">scan_id</td><td class="param-type">string</td><td><span class="param-required pr-yes">required</span></td><td class="param-desc">The <code class="standalone">scan_id</code> returned from POST /scan.</td></tr>
-          </table>
-          <div class="info-tip info-box"><strong>Polling tip:</strong> If you're using async mode, poll every 3 seconds. Most scans complete in under 60 seconds. Abandon polling after 120 seconds and re-submit.</div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- POST /report/generate -->
-    <section class="doc-section" id="report-gen">
-      <div class="endpoint">
-        <div class="endpoint-header" onclick="toggleEndpoint(this)">
-          <span class="ep-method ep-post">POST</span>
-          <span class="ep-path">/report/generate</span>
-          <span class="ep-summary">Generate a compliance-mapped PDF audit report</span>
-          <span class="ep-chevron">▾</span>
-        </div>
-        <div class="ep-body">
-          <p class="ep-desc">Accepts the full scan result JSON and returns a formatted compliance audit PDF. The report includes risk score, all findings with severity, framework citations (EU AI Act, DPDP, NIST, OWASP), and an executive summary section. Available on Pro and Enterprise tiers.</p>
-          <div class="params-title">Request Body (application/json)</div>
-          <table class="params-table">
-            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
-            <tr><td class="param-name">scan_result</td><td class="param-type">object</td><td><span class="param-required pr-yes">required</span></td><td class="param-desc">Full scan result object as returned by POST /scan or GET /scan/{id}.</td></tr>
-          </table>
-          <div class="params-title">Response</div>
-          <div class="response-block">
-            <div class="response-label"><span class="response-status">200 OK</span> application/pdf</div>
-            <pre style="border:none;padding:0;background:transparent"><code><span class="c-comment"># Binary PDF stream. Save with Content-Disposition header.</span>
+      <!-- POST /report/generate -->
+      <section class="doc-section" id="report-gen">
+        <div class="endpoint">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="ep-method ep-post">POST</span>
+            <span class="ep-path">/report/generate</span>
+            <span class="ep-summary">Generate a compliance-mapped PDF audit report</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body">
+            <p class="ep-desc">Accepts the full scan result JSON and returns a formatted compliance audit PDF. The
+              report includes risk score, all findings with severity, framework citations (EU AI Act, DPDP, NIST,
+              OWASP), and an executive summary section. Available on Pro and Enterprise tiers.</p>
+            <div class="params-title">Request Body (application/json)</div>
+            <table class="params-table">
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td class="param-name">scan_result</td>
+                <td class="param-type">object</td>
+                <td><span class="param-required pr-yes">required</span></td>
+                <td class="param-desc">Full scan result object as returned by POST /scan or GET /scan/{id}.</td>
+              </tr>
+            </table>
+            <div class="params-title">Response</div>
+            <div class="response-block">
+              <div class="response-label"><span class="response-status">200 OK</span> application/pdf</div>
+              <pre style="border:none;padding:0;background:transparent"><code><span class="c-comment"># Binary PDF stream. Save with Content-Disposition header.</span>
 Content-Disposition: attachment; filename="vulnra-audit-sc_9f2a1b3c4d.pdf"
 Content-Type: application/pdf</code></pre>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <div class="doc-divider"></div>
+      <div class="doc-divider"></div>
 
-    <!-- SENTINEL -->
-    <section class="doc-section" id="sentinel-create">
-      <h2 class="doc-h2">Sentinel Monitoring</h2>
-      <p class="doc-p">Sentinel lets you schedule recurring scans on a cron expression. VULNRA re-runs the probe suite on schedule and alerts you via Slack or email when new vulnerabilities appear or the risk score increases by more than 1.0 point.</p>
-      <div class="info-note info-box"><strong>Availability:</strong> Sentinel is available on Pro and Enterprise tiers. Coming Q2 2026 — subscribe to the <a href="changelog.html">changelog</a> for launch notification.</div>
-      <div class="endpoint">
-        <div class="endpoint-header" onclick="toggleEndpoint(this)">
-          <span class="ep-method ep-post">POST</span>
-          <span class="ep-path">/sentinel/create</span>
-          <span class="ep-summary">Create a scheduled monitoring watch</span>
-          <span class="ep-chevron">▾</span>
+      <!-- SENTINEL -->
+      <section class="doc-section" id="sentinel-create">
+        <h2 class="doc-h2">Sentinel Monitoring</h2>
+        <p class="doc-p">Sentinel lets you schedule recurring scans on a cron expression. VULNRA re-runs the probe suite
+          on schedule and alerts you via Slack or email when new vulnerabilities appear or the risk score increases by
+          more than 1.0 point.</p>
+        <div class="info-note info-box"><strong>Availability:</strong> Sentinel is available on Pro and Enterprise
+          tiers. Coming Q2 2026 — subscribe to the <a href="changelog.html">changelog</a> for launch notification.</div>
+        <div class="endpoint">
+          <div class="endpoint-header" onclick="toggleEndpoint(this)">
+            <span class="ep-method ep-post">POST</span>
+            <span class="ep-path">/sentinel/create</span>
+            <span class="ep-summary">Create a scheduled monitoring watch</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body">
+            <div class="params-title">Request Body</div>
+            <table class="params-table">
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Required</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td class="param-name">url</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-yes">required</span></td>
+                <td class="param-desc">Target LLM endpoint URL to monitor.</td>
+              </tr>
+              <tr>
+                <td class="param-name">cron</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-yes">required</span></td>
+                <td class="param-desc">Standard cron expression. Example: <code class="standalone">0 9 * * 1</code> for
+                  weekly Monday 9am UTC.</td>
+              </tr>
+              <tr>
+                <td class="param-name">alert_webhook</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc">Slack incoming webhook URL for alert delivery.</td>
+              </tr>
+              <tr>
+                <td class="param-name">alert_email</td>
+                <td class="param-type">string</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc">Email address for alert delivery. Defaults to account email.</td>
+              </tr>
+              <tr>
+                <td class="param-name">drift_threshold</td>
+                <td class="param-type">number</td>
+                <td><span class="param-required pr-no">optional</span></td>
+                <td class="param-desc">Alert when risk score increases by this amount. Default: <code
+                    class="standalone">1.0</code>.</td>
+              </tr>
+            </table>
+          </div>
         </div>
-        <div class="ep-body">
-          <div class="params-title">Request Body</div>
-          <table class="params-table">
-            <tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr>
-            <tr><td class="param-name">url</td><td class="param-type">string</td><td><span class="param-required pr-yes">required</span></td><td class="param-desc">Target LLM endpoint URL to monitor.</td></tr>
-            <tr><td class="param-name">cron</td><td class="param-type">string</td><td><span class="param-required pr-yes">required</span></td><td class="param-desc">Standard cron expression. Example: <code class="standalone">0 9 * * 1</code> for weekly Monday 9am UTC.</td></tr>
-            <tr><td class="param-name">alert_webhook</td><td class="param-type">string</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc">Slack incoming webhook URL for alert delivery.</td></tr>
-            <tr><td class="param-name">alert_email</td><td class="param-type">string</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc">Email address for alert delivery. Defaults to account email.</td></tr>
-            <tr><td class="param-name">drift_threshold</td><td class="param-type">number</td><td><span class="param-required pr-no">optional</span></td><td class="param-desc">Alert when risk score increases by this amount. Default: <code class="standalone">1.0</code>.</td></tr>
-          </table>
+      </section>
+
+      <div class="doc-divider"></div>
+
+      <!-- RATE LIMITS -->
+      <section class="doc-section" id="rate-limits">
+        <h2 class="doc-h2">Rate Limits</h2>
+        <p class="doc-p">Rate limits are enforced per API key. Exceeding the limit returns a <code
+            class="standalone">429 Too Many Requests</code> response with a <code class="standalone">Retry-After</code>
+          header.</p>
+        <table class="limits-table">
+          <tr>
+            <th>Tier</th>
+            <th>Scans / Day</th>
+            <th>API Requests / Min</th>
+            <th>PDF Reports / Day</th>
+          </tr>
+          <tr>
+            <td>Free</td>
+            <td class="tier-free">1</td>
+            <td class="tier-free">10</td>
+            <td class="tier-free">1</td>
+          </tr>
+          <tr>
+            <td>Pro</td>
+            <td class="tier-pro">100</td>
+            <td class="tier-pro">60</td>
+            <td class="tier-pro">100</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="tier-ent">Unlimited</td>
+            <td class="tier-ent">600</td>
+            <td class="tier-ent">Unlimited</td>
+          </tr>
+        </table>
+      </section>
+
+      <div class="doc-divider"></div>
+
+      <!-- ERRORS -->
+      <section class="doc-section" id="errors">
+        <h2 class="doc-h2">Error Codes</h2>
+        <p class="doc-p">All errors return a JSON object with <code class="standalone">error</code> and <code
+            class="standalone">detail</code> fields.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">Error Shape</span></div>
+          <pre><code>{ <span class="c-key">"error"</span>: <span class="c-str">"PRIVATE_IP_BLOCKED"</span>, <span class="c-key">"detail"</span>: <span class="c-str">"Private IP ranges are not permitted as scan targets."</span> }</code></pre>
         </div>
-      </div>
-    </section>
+        <table class="error-table">
+          <tr>
+            <th>Status</th>
+            <th>Error Code</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td class="e-code e-400">400</td>
+            <td class="e-code" style="font-size:11px">PRIVATE_IP_BLOCKED</td>
+            <td class="e-desc">Target URL resolves to a private IP range, localhost, or cloud metadata endpoint.</td>
+          </tr>
+          <tr>
+            <td class="e-code e-400">400</td>
+            <td class="e-code" style="font-size:11px">INVALID_URL</td>
+            <td class="e-desc">The target URL is malformed or not HTTPS.</td>
+          </tr>
+          <tr>
+            <td class="e-code e-401">401</td>
+            <td class="e-code" style="font-size:11px">INVALID_API_KEY</td>
+            <td class="e-desc">API key is missing, malformed, or revoked.</td>
+          </tr>
+          <tr>
+            <td class="e-code e-401">403</td>
+            <td class="e-code" style="font-size:11px">TIER_INSUFFICIENT</td>
+            <td class="e-desc">The requested feature (e.g. multi-turn) requires a higher tier.</td>
+          </tr>
+          <tr>
+            <td class="e-code e-429">429</td>
+            <td class="e-code" style="font-size:11px">RATE_LIMIT_EXCEEDED</td>
+            <td class="e-desc">Daily or per-minute scan limit reached. Check <code class="standalone">Retry-After</code>
+              header.</td>
+          </tr>
+          <tr>
+            <td class="e-code e-500">500</td>
+            <td class="e-code" style="font-size:11px">SCAN_ENGINE_ERROR</td>
+            <td class="e-desc">Internal error in the scan engine. Retry after 30 seconds. If persistent, contact
+              support.</td>
+          </tr>
+        </table>
+      </section>
 
-    <div class="doc-divider"></div>
+      <div class="doc-divider"></div>
 
-    <!-- RATE LIMITS -->
-    <section class="doc-section" id="rate-limits">
-      <h2 class="doc-h2">Rate Limits</h2>
-      <p class="doc-p">Rate limits are enforced per API key. Exceeding the limit returns a <code class="standalone">429 Too Many Requests</code> response with a <code class="standalone">Retry-After</code> header.</p>
-      <table class="limits-table">
-        <tr><th>Tier</th><th>Scans / Day</th><th>API Requests / Min</th><th>PDF Reports / Day</th></tr>
-        <tr><td>Free</td><td class="tier-free">1</td><td class="tier-free">10</td><td class="tier-free">1</td></tr>
-        <tr><td>Pro</td><td class="tier-pro">100</td><td class="tier-pro">60</td><td class="tier-pro">100</td></tr>
-        <tr><td>Enterprise</td><td class="tier-ent">Unlimited</td><td class="tier-ent">600</td><td class="tier-ent">Unlimited</td></tr>
-      </table>
-    </section>
+      <!-- GITHUB ACTION -->
+      <section class="doc-section" id="github-action">
+        <h2 class="doc-h2">GitHub Action</h2>
+        <p class="doc-p">Add LLM security scanning to any repository. The action calls the VULNRA API and fails the
+          build if the risk score exceeds your threshold. Once in your CI pipeline, every model deployment is
+          automatically tested.</p>
 
-    <div class="doc-divider"></div>
-
-    <!-- ERRORS -->
-    <section class="doc-section" id="errors">
-      <h2 class="doc-h2">Error Codes</h2>
-      <p class="doc-p">All errors return a JSON object with <code class="standalone">error</code> and <code class="standalone">detail</code> fields.</p>
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">Error Shape</span></div>
-        <pre><code>{ <span class="c-key">"error"</span>: <span class="c-str">"PRIVATE_IP_BLOCKED"</span>, <span class="c-key">"detail"</span>: <span class="c-str">"Private IP ranges are not permitted as scan targets."</span> }</code></pre>
-      </div>
-      <table class="error-table">
-        <tr><th>Status</th><th>Error Code</th><th>Description</th></tr>
-        <tr><td class="e-code e-400">400</td><td class="e-code" style="font-size:11px">PRIVATE_IP_BLOCKED</td><td class="e-desc">Target URL resolves to a private IP range, localhost, or cloud metadata endpoint.</td></tr>
-        <tr><td class="e-code e-400">400</td><td class="e-code" style="font-size:11px">INVALID_URL</td><td class="e-desc">The target URL is malformed or not HTTPS.</td></tr>
-        <tr><td class="e-code e-401">401</td><td class="e-code" style="font-size:11px">INVALID_API_KEY</td><td class="e-desc">API key is missing, malformed, or revoked.</td></tr>
-        <tr><td class="e-code e-401">403</td><td class="e-code" style="font-size:11px">TIER_INSUFFICIENT</td><td class="e-desc">The requested feature (e.g. multi-turn) requires a higher tier.</td></tr>
-        <tr><td class="e-code e-429">429</td><td class="e-code" style="font-size:11px">RATE_LIMIT_EXCEEDED</td><td class="e-desc">Daily or per-minute scan limit reached. Check <code class="standalone">Retry-After</code> header.</td></tr>
-        <tr><td class="e-code e-500">500</td><td class="e-code" style="font-size:11px">SCAN_ENGINE_ERROR</td><td class="e-desc">Internal error in the scan engine. Retry after 30 seconds. If persistent, contact support.</td></tr>
-      </table>
-    </section>
-
-    <div class="doc-divider"></div>
-
-    <!-- GITHUB ACTION -->
-    <section class="doc-section" id="github-action">
-      <h2 class="doc-h2">GitHub Action</h2>
-      <p class="doc-p">Add LLM security scanning to any repository. The action calls the VULNRA API and fails the build if the risk score exceeds your threshold. Once in your CI pipeline, every model deployment is automatically tested.</p>
-
-      <div class="code-block">
-        <div class="code-header"><span class="code-lang">.github/workflows/ai-security.yml</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
-        <pre><code><span class="c-key">name</span>: <span class="c-str">VULNRA LLM Security Scan</span>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">.github/workflows/ai-security.yml</span><button
+              class="code-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code><span class="c-key">name</span>: <span class="c-str">VULNRA LLM Security Scan</span>
 
 <span class="c-key">on</span>:
   <span class="c-key">push</span>:
@@ -605,107 +1948,150 @@ Content-Type: application/pdf</code></pre>
           <span class="c-key">api_key</span>: <span class="c-str">${{ secrets.VULNRA_API_KEY }}</span>
           <span class="c-key">fail_threshold</span>: <span class="c-num">7.0</span>
           <span class="c-key">tier</span>: <span class="c-str">pro</span></code></pre>
-      </div>
+        </div>
 
-      <p class="doc-p">Add <code class="standalone">VULNRA_API_KEY</code> and <code class="standalone">LLM_ENDPOINT</code> to your repository's <strong>Settings → Secrets</strong>. The action exits with code 1 if <code class="standalone">risk_score > fail_threshold</code>, blocking the merge.</p>
-      <div class="info-note info-box"><strong>Coming soon:</strong> The <code class="standalone">vulnra/vulnra-action</code> GitHub Action is in development. <a href="changelog.html">Subscribe to the changelog</a> for the release announcement.</div>
-    </section>
+        <p class="doc-p">Add <code class="standalone">VULNRA_API_KEY</code> and <code
+            class="standalone">LLM_ENDPOINT</code> to your repository's <strong>Settings → Secrets</strong>. The action
+          exits with code 1 if <code class="standalone">risk_score > fail_threshold</code>, blocking the merge.</p>
+        <div class="info-note info-box"><strong>Coming soon:</strong> The <code
+            class="standalone">vulnra/vulnra-action</code> GitHub Action is in development. <a
+            href="changelog.html">Subscribe to the changelog</a> for the release announcement.</div>
+      </section>
 
-    <div class="doc-divider"></div>
+      <div class="doc-divider"></div>
 
-    <!-- FRAMEWORKS -->
-    <section class="doc-section" id="frameworks">
-      <h2 class="doc-h2">Compliance Frameworks</h2>
-      <p class="doc-p">Every finding is automatically mapped to the applicable articles, sections, and controls across all five frameworks VULNRA supports.</p>
-      <table class="limits-table">
-        <tr><th>Framework</th><th>Key</th><th>Mapped Provisions</th><th>Max Penalty</th></tr>
-        <tr><td>EU AI Act</td><td class="tier-pro">eu_ai_act</td><td style="font-size:12px;color:var(--muted)">Articles 9, 13, 15, 17</td><td style="font-size:12px;color:var(--muted)">€30M or 6% global turnover</td></tr>
-        <tr><td>India DPDP</td><td class="tier-pro">dpdp</td><td style="font-size:12px;color:var(--muted)">Sections 8, 11, 16</td><td style="font-size:12px;color:var(--muted)">₹250 crore per incident</td></tr>
-        <tr><td>NIST AI RMF</td><td class="tier-pro">nist</td><td style="font-size:12px;color:var(--muted)">GOVERN 1.1, MAP 2.1, MEASURE 2.5, MANAGE 1.1</td><td style="font-size:12px;color:var(--muted)">N/A</td></tr>
-        <tr><td>OWASP LLM Top 10</td><td class="tier-pro">owasp</td><td style="font-size:12px;color:var(--muted)">LLM01–LLM10 (2025 version)</td><td style="font-size:12px;color:var(--muted)">N/A</td></tr>
-        <tr><td>ISO 42001</td><td class="tier-pro">iso_42001</td><td style="font-size:12px;color:var(--muted)">Clause 6.1, 9.1, Annex A</td><td style="font-size:12px;color:var(--muted)">N/A</td></tr>
-      </table>
-    </section>
+      <!-- FRAMEWORKS -->
+      <section class="doc-section" id="frameworks">
+        <h2 class="doc-h2">Compliance Frameworks</h2>
+        <p class="doc-p">Every finding is automatically mapped to the applicable articles, sections, and controls across
+          all five frameworks VULNRA supports.</p>
+        <table class="limits-table">
+          <tr>
+            <th>Framework</th>
+            <th>Key</th>
+            <th>Mapped Provisions</th>
+            <th>Max Penalty</th>
+          </tr>
+          <tr>
+            <td>EU AI Act</td>
+            <td class="tier-pro">eu_ai_act</td>
+            <td style="font-size:12px;color:var(--muted)">Articles 9, 13, 15, 17</td>
+            <td style="font-size:12px;color:var(--muted)">€30M or 6% global turnover</td>
+          </tr>
+          <tr>
+            <td>India DPDP</td>
+            <td class="tier-pro">dpdp</td>
+            <td style="font-size:12px;color:var(--muted)">Sections 8, 11, 16</td>
+            <td style="font-size:12px;color:var(--muted)">₹250 crore per incident</td>
+          </tr>
+          <tr>
+            <td>NIST AI RMF</td>
+            <td class="tier-pro">nist</td>
+            <td style="font-size:12px;color:var(--muted)">GOVERN 1.1, MAP 2.1, MEASURE 2.5, MANAGE 1.1</td>
+            <td style="font-size:12px;color:var(--muted)">N/A</td>
+          </tr>
+          <tr>
+            <td>OWASP LLM Top 10</td>
+            <td class="tier-pro">owasp</td>
+            <td style="font-size:12px;color:var(--muted)">LLM01–LLM10 (2025 version)</td>
+            <td style="font-size:12px;color:var(--muted)">N/A</td>
+          </tr>
+          <tr>
+            <td>ISO 42001</td>
+            <td class="tier-pro">iso_42001</td>
+            <td style="font-size:12px;color:var(--muted)">Clause 6.1, 9.1, Annex A</td>
+            <td style="font-size:12px;color:var(--muted)">N/A</td>
+          </tr>
+        </table>
+      </section>
 
-  </main>
-</div>
-
-<footer>
-  <div class="footer-left">© 2025 VULNRA. MIT Licensed. Built on NVIDIA Garak.</div>
-  <div class="footer-links">
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-    <a href="changelog.html">Changelog</a>
-    <a href="https://github.com" target="_blank" rel="noopener">GitHub</a>
-    <a href="mailto:hello@vulnra.ai">hello@vulnra.ai</a>
+    </main>
   </div>
-</footer>
 
-<script>
-  // Tab switcher
-  function switchTab(group, tab, el) {
-    document.querySelectorAll(`[id^="${group}-"]`).forEach(t => t.classList.remove('active'));
-    document.querySelectorAll(`#${group}-tabs .lang-tab`).forEach(t => t.classList.remove('active'));
-    document.getElementById(`${group}-${tab}`).classList.add('active');
-    el.classList.add('active');
-  }
+  <footer
+    style="padding: 40px 48px; border-top: 1px solid var(--border2); display: flex; flex-direction: column; align-items: center; gap: 20px;">
+    <div class="footer-links" style="display: flex; gap: 24px;">
+      <a href="privacy.html"
+        style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Privacy</a>
+      <a href="security.html"
+        style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Security</a>
+      <a href="trust.html"
+        style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Trust</a>
+      <a href="enterprise.html"
+        style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Enterprise</a>
+      <a href="contact.html"
+        style="color: var(--muted); text-decoration: none; transition: color .2s; font-family: var(--mono); font-size: 10.5px;">Contact</a>
+    </div>
+    <div style="font-family: var(--mono); font-size: 10.5px; color: var(--muted2);">© 2025 VULNRA. MIT Licensed. Built
+      on NVIDIA Garak.</div>
+  </footer>
 
-  // Sidebar scroll
-  function scrollTo(id) {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-  }
+  <script>
+    // Tab switcher
+    function switchTab(group, tab, el) {
+      document.querySelectorAll(`[id^="${group}-"]`).forEach(t => t.classList.remove('active'));
+      document.querySelectorAll(`#${group}-tabs .lang-tab`).forEach(t => t.classList.remove('active'));
+      document.getElementById(`${group}-${tab}`).classList.add('active');
+      el.classList.add('active');
+    }
 
-  // Endpoint toggle
-  function toggleEndpoint(header) {
-    const body = header.nextElementSibling;
-    const chevron = header.querySelector('.ep-chevron');
-    const isOpen = body.style.display !== 'none';
-    body.style.display = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
-  }
+    // Sidebar scroll
+    function scrollTo(id) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
 
-  // Copy code
-  function copyCode(btn) {
-    const code = btn.closest('.code-block').querySelector('code').innerText;
-    navigator.clipboard.writeText(code).then(() => {
-      btn.textContent = '✓ Copied';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    });
-  }
+    // Endpoint toggle
+    function toggleEndpoint(header) {
+      const body = header.nextElementSibling;
+      const chevron = header.querySelector('.ep-chevron');
+      const isOpen = body.style.display !== 'none';
+      body.style.display = isOpen ? 'none' : 'block';
+      chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+    }
 
-  function copyText(text, btn) {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '✓';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
-    });
-  }
+    // Copy code
+    function copyCode(btn) {
+      const code = btn.closest('.code-block').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = '✓ Copied';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
 
-  // Sidebar highlight on scroll
-  const sections = document.querySelectorAll('.doc-section');
-  const sidebarLinks = document.querySelectorAll('.sidebar-link');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        sidebarLinks.forEach(l => l.classList.remove('active'));
-        const match = [...sidebarLinks].find(l => {
-          const onclick = l.getAttribute('onclick');
-          return onclick && onclick.includes(entry.target.id);
-        });
-        if (match) match.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-20% 0px -70% 0px' });
-  sections.forEach(s => observer.observe(s));
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
 
-  function searchDocs(q) {
-    const links = document.querySelectorAll('.sidebar-link');
-    links.forEach(l => {
-      l.style.display = q === '' || l.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-    });
-  }
-</script>
+    // Sidebar highlight on scroll
+    const sections = document.querySelectorAll('.doc-section');
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          sidebarLinks.forEach(l => l.classList.remove('active'));
+          const match = [...sidebarLinks].find(l => {
+            const onclick = l.getAttribute('onclick');
+            return onclick && onclick.includes(entry.target.id);
+          });
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+
+    function searchDocs(q) {
+      const links = document.querySelectorAll('.sidebar-link');
+      links.forEach(l => {
+        l.style.display = q === '' || l.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+      });
+    }
+  </script>
 </body>
+
 </html>

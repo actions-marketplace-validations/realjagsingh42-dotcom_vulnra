@@ -8,3 +8,4 @@ ruff==0.11.2
 black==25.1.0
 mypy==1.15.0
 pre-commit==4.2.0
+supabase
