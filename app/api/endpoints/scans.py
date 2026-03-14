@@ -13,6 +13,7 @@ from app.core.security import get_current_user
 from app.core.utils import is_safe_url
 from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_tier
 from app.services.scan_service import run_scan_internal
+from app.services.mcp_scanner import scan_mcp_server, MCPScanResult
 
 router = APIRouter()
 
@@ -220,3 +221,97 @@ async def start_multi_turn_scan(
         "attack_type": scan_data.attack_type,
         "message": f"Multi-turn {scan_data.attack_type} scan started at {scan_data.tier} tier."
     }
+
+
+class MCPServerRequest(BaseModel):
+    """Request model for MCP server scanning"""
+    server_url: HttpUrl
+    
+    @validator("server_url")
+    def validate_server_url(cls, v):
+        url_str = str(v)
+        # Basic validation for MCP server URLs
+        if not url_str.startswith(("http://", "https://")):
+            raise ValueError("URL must start with http:// or https://")
+        return v
+
+
+@router.post("/scan/mcp")
+@limiter.limit(RATE_LIMITS["free"])
+async def scan_mcp_endpoint(
+    request: Request,
+    scan_data: MCPServerRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Scan an MCP server for vulnerabilities"""
+    from fastapi.responses import JSONResponse
+    
+    server_url = str(scan_data.server_url)
+    
+    # SSRF check
+    if not is_safe_url(server_url):
+        raise HTTPException(status_code=400, detail="Invalid server URL (private IPs or local hostnames blocked).")
+    
+    # Quota check
+    user_id = current_user["id"]
+    user_tier = current_user["tier"]
+    quota = check_scan_quota(user_id, user_tier)
+    if not quota["allowed"]:
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "quota_exceeded",
+                "message": quota["reason"],
+                "upgrade": "https://vulnra.lemonsqueezy.com/checkout"
+            },
+            headers={
+                "X-RateLimit-Limit": str(RATE_LIMITS.get(user_tier, RATE_LIMITS["free"]).split("/")[0]),
+                "X-RateLimit-Remaining": "0",
+                "X-RateLimit-Reset": str(int(time.time()) + 60)
+            }
+        )
+    
+    try:
+        # Perform the MCP scan
+        scan_result = await scan_mcp_server(server_url)
+        
+        # Format response
+        response_data = {
+            "server_url": scan_result.server_url,
+            "status": scan_result.status,
+            "tools_found": scan_result.tools_found,
+            "risk_score": scan_result.risk_score,
+            "overall_severity": scan_result.overall_severity,
+            "scan_duration": scan_result.scan_duration,
+            "vulnerabilities": [
+                {
+                    "id": v.id,
+                    "name": v.name,
+                    "description": v.description,
+                    "severity": v.severity,
+                    "cvss_score": v.cvss_score,
+                    "owasp_category": v.owasp_category,
+                    "mitre_technique": v.mitre_technique,
+                    "evidence": v.evidence,
+                    "remediation": v.remediation,
+                }
+                for v in scan_result.vulnerabilities
+            ],
+        }
+        
+        # Add rate limit headers
+        rate_limit_str = RATE_LIMITS.get(user_tier, RATE_LIMITS["free"])
+        rate_limit_count = int(rate_limit_str.split("/")[0])
+        
+        return JSONResponse(
+            content=response_data,
+            headers={
+                "X-RateLimit-Limit": str(rate_limit_count),
+                "X-RateLimit-Remaining": str(max(0, rate_limit_count - 1)),
+                "X-RateLimit-Reset": str(int(time.time()) + 60)
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"MCP scan error for {server_url}: {e}")
+        raise HTTPException(status_code=500, detail=f"Scan failed: {str(e)}")

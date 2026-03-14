@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
-import { Shield, LogOut, BarChart3, Settings, Activity, Timer, Zap } from "lucide-react";
+import { Shield, LogOut, BarChart3, Settings, Activity, Timer, Zap, Server } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
@@ -169,6 +169,14 @@ export default function ScannerLayout({ user }: { user: User }) {
             </div>
             VULNRA <em className="text-acid not-italic tracking-tighter ml-1">PLATFORM</em>
           </div>
+          <div className="h-5 w-[1px] bg-v-border mx-2" />
+          <a 
+            href="/mcp-scanner" 
+            className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors"
+          >
+            <Server className="w-3.5 h-3.5" />
+            MCP_SCANNER
+          </a>
           <div className="h-5 w-[1px] bg-v-border mx-2" />
           <div className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider">
             SYSTEM_STATUS: <span className="text-acid animate-pulse">OPTIMAL</span>
