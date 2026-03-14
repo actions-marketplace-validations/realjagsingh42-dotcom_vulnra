@@ -273,6 +273,28 @@ export default function ScannerLayout({ user }: { user: User }) {
                             OWASP: {f.owasp_name}
                           </div>
                         )}
+                        {f.compliance?.mitre_atlas && (
+                          <div className="mt-2 space-y-1">
+                            {f.compliance.mitre_atlas.techniques && (
+                              <div className="flex items-center gap-1 flex-wrap">
+                                {f.compliance.mitre_atlas.techniques.map((tech: string) => (
+                                  <span key={tech} className="text-[8px] px-1.5 py-0.5 bg-purple-100/20 text-purple-300 border border-purple-300/30 rounded font-mono">
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            {f.compliance.mitre_atlas.tactics && (
+                              <div className="flex items-center gap-1 flex-wrap text-[8px] text-purple-200/70">
+                                {f.compliance.mitre_atlas.tactics.map((tactic: string) => (
+                                  <span key={tactic} className="px-1 py-0.5 bg-purple-50/10 rounded">
+                                    {tactic}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                        {f.reasoning && (
                          <div className="mt-2 text-[9px] text-v-muted2 border-t border-v-border2 pt-2 italic">
                            "{f.reasoning}"
