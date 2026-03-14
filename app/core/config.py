@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     supabase_url: str = Field(default="", alias="SUPABASE_URL")
     supabase_key: str = Field(default="", alias="SUPABASE_SERVICE_KEY")
 
+    # Rate Limiting
+    rate_limit_free: str = Field(default="1/minute", env="RATE_LIMIT_FREE")
+    rate_limit_pro: str = Field(default="10/minute", env="RATE_LIMIT_PRO")
+    rate_limit_enterprise: str = Field(default="100/minute", env="RATE_LIMIT_ENTERPRISE")
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
