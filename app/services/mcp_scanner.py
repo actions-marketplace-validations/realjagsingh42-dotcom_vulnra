@@ -23,8 +23,6 @@ from pydantic import BaseModel, Field
 from app.core.compliance import (
     MITRE_ATLAS_TECHNIQUES,
     OWASP_LLM_CATEGORIES,
-    map_to_mitre_atlas,
-    map_to_owasp,
 )
 
 logger = logging.getLogger(__name__)
