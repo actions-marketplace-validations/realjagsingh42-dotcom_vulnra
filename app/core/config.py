@@ -40,6 +40,16 @@ class Settings(BaseSettings):
     rate_limit_pro: str = Field(default="10/minute", env="RATE_LIMIT_PRO")
     rate_limit_enterprise: str = Field(default="100/minute", env="RATE_LIMIT_ENTERPRISE")
 
+    # Lemon Squeezy Billing
+    lemonsqueezy_api_key: str = Field(default="", env="LEMON_SQUEEZY_API_KEY")
+    lemonsqueezy_store_id: str = Field(default="", env="LEMON_SQUEEZY_STORE_ID")
+    lemonsqueezy_webhook_secret: str = Field(default="", env="LEMON_SQUEEZY_WEBHOOK_SECRET")
+    lemonsqueezy_pro_variant_id: int = Field(default=0, env="LEMON_SQUEEZY_PRO_VARIANT_ID")
+    lemonsqueezy_enterprise_variant_id: int = Field(default=0, env="LEMON_SQUEEZY_ENTERPRISE_VARIANT_ID")
+    
+    # Frontend URL for redirects
+    frontend_url: str = Field(default="http://localhost:3000", env="FRONTEND_URL")
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )

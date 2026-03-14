@@ -111,3 +111,23 @@ def check_scan_quota(user_id: str, tier: str) -> dict:
     except Exception as e:
         logger.error(f"Quota check failed for {user_id}: {e}")
         return {"allowed": True}
+
+def update_user_subscription(email: str, tier: str, subscription_id: Optional[str] = None):
+    """Update user subscription tier in Supabase."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return
+        
+        # Find user by email and update their tier
+        user_res = sb.table("profiles").select("id").eq("email", email).execute()
+        if user_res.data and len(user_res.data) > 0:
+            user_id = user_res.data[0]["id"]
+            sb.table("profiles").update({
+                "tier": tier,
+                "subscription_id": subscription_id,
+                "updated_at": "now()"
+            }).eq("id", user_id).execute()
+            logger.info(f"Updated subscription for {email} to tier {tier}")
+    except Exception as e:
+        logger.error(f"Failed to update subscription for {email}: {e}")

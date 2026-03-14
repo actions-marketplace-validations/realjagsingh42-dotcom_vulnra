@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings, validate_config, logger
-from app.api.endpoints import scans
+from app.api.endpoints import scans, billing
 from app.core.rate_limiter import TIER_LIMITS, set_limiter
 from app.core.security import get_current_user
 
@@ -148,6 +148,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 app.include_router(scans.router, tags=["scans"])
+app.include_router(billing.router, prefix="/billing", tags=["billing"])
 
 @app.get("/health")
 def health():
