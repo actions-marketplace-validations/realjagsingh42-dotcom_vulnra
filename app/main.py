@@ -419,31 +419,57 @@ def _mock_findings(tier: str) -> List[dict]:
 
 # ── Core scan logic ───────────────────────────────────────────────────────────
 async def _run_scan_internal(scan_id: str, url: str, tier: str) -> dict:
+    """Synchronous fallback for scans (runs both engines)."""
+    findings = []
+    compliance = {}
+    scan_engines = []
+    max_risk = 0.0
+    
+    # ── 1. Garak Scan ───────────────────────────────────────────
     try:
         from app.garak_engine import run_garak_scan
-        result = run_garak_scan(scan_id, url, tier)
-        data = {
-            "scan_id":      scan_id,
-            "url":          url,
-            "tier":         tier,
-            "status":       "complete",
-            "risk_score":   result.get("risk_score", round(random.uniform(5.5, 9.2), 1)),
-            "findings":     result.get("findings", _mock_findings(tier)),
-            "compliance":   result.get("compliance", {"blurred": tier in ("free", "basic")}),
-            "scan_engine":  "garak",
-            "completed_at": time.time(),
-        }
+        garak_res = run_garak_scan(scan_id, url, tier)
+        if garak_res.get("status") == "complete":
+            findings.extend(garak_res.get("findings", []))
+            _merge_compliance_internal(compliance, garak_res.get("compliance", {}))
+            scan_engines.append(garak_res.get("scan_engine", "garak"))
+            max_risk = max(max_risk, float(garak_res.get("risk_score", 0)))
     except Exception as e:
-        logger.error(f"Garak scan failed for {scan_id}: {e}")
-        data = {
-            "scan_id":      scan_id,
-            "url":          url,
-            "tier":         tier,
-            "status":       "failed",
-            "risk_score":   0.0,
-            "error":        "Internal scan engine error",
-            "completed_at": time.time(),
-        }
+        logger.error(f"Garak engine failed: {e}")
+
+    # ── 2. DeepTeam Scan ────────────────────────────────────────
+    try:
+        from app.deepteam_engine import run_deepteam_scan
+        if os.environ.get("OPENAI_API_KEY"):
+            dt_res = run_deepteam_scan(scan_id, url, tier)
+            if dt_res.get("status") == "complete":
+                findings.extend(dt_res.get("findings", []))
+                _merge_compliance_internal(compliance, dt_res.get("compliance", {}))
+                scan_engines.append(dt_res.get("scan_engine", "deepteam_v1"))
+                max_risk = max(max_risk, float(dt_res.get("risk_score", 0)))
+        else:
+            logger.warning("Skipping DeepTeam scan: OPENAI_API_KEY missing.")
+    except Exception as e:
+        logger.error(f"DeepTeam engine failed: {e}")
+
+    # ── 3. Finalize ──────────────────────────────────────────────
+    findings.sort(key=lambda x: ({"HIGH": 0, "MEDIUM": 1, "LOW": 2}.get(x.get("severity"), 3), -float(x.get("hit_rate", 0))))
+
+    data = {
+        "scan_id":      scan_id,
+        "url":          url,
+        "tier":         tier,
+        "status":       "complete" if scan_engines else "failed",
+        "risk_score":   max_risk,
+        "findings":     findings,
+        "compliance":   compliance,
+        "scan_engines": scan_engines,
+        "completed_at": time.time(),
+    }
+    
+    if not scan_engines:
+        data["error"] = "All scan engines failed"
+    
     scan_set(scan_id, data)
     
     # Save to Supabase if available
@@ -455,8 +481,8 @@ async def _run_scan_internal(scan_id: str, url: str, tier: str) -> dict:
                 "user_id":      "00000000-0000-0000-0000-000000000000",
                 "target_url":   url,
                 "tier":         tier,
-                "status":       "complete",
-                "scan_engine":  data.get("scan_engine"),
+                "status":       data["status"],
+                "scan_engine":  ",".join(scan_engines) if scan_engines else "none",
                 "risk_score":   data.get("risk_score"),
                 "findings":     data.get("findings"),
                 "compliance":   data.get("compliance"),
@@ -466,6 +492,23 @@ async def _run_scan_internal(scan_id: str, url: str, tier: str) -> dict:
         print(f"[SUPABASE] save failed: {e}")
     
     return data
+
+def _merge_compliance_internal(base: dict, new: dict):
+    if not new or new.get("blurred"): return
+    for fw, data in new.items():
+        if fw in ("blurred", "hint"): continue
+        if fw not in base:
+            base[fw] = data
+        else:
+            for key in ("articles", "sections", "functions"):
+                if key in data:
+                    s = set(base[fw].get(key, []))
+                    s.update(data[key])
+                    base[fw][key] = sorted(list(s))
+            if "fine_eur" in data:
+                base[fw]["fine_eur"] = max(base[fw].get("fine_eur", 0), data["fine_eur"])
+            if "fine_inr" in data:
+                base[fw]["fine_inr"] = max(base[fw].get("fine_inr", 0), data["fine_inr"])
 
 # ════════════════════════════════════════════════════════════════════════════════
 # API ROUTES  (must be registered BEFORE the static mount)

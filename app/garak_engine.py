@@ -13,7 +13,8 @@ import pathlib
 import subprocess
 import logging
 import shlex
-from typing import Optional, List, Dict, Any
+import random
+from typing import Optional, List, Dict, Any, Set, cast
 
 # ── Logging Setup ─────────────────────────────────────────────────────────────
 logger = logging.getLogger("vulnra.garak")
@@ -111,6 +112,7 @@ def _find_garak_python() -> Optional[str]:
             # Simple check
             res = subprocess.run([str(c), "-m", "garak", "--version"], capture_output=True, timeout=10, text=True)
             if res.returncode == 0:
+                logger.info(f"Using Garak Python: {c}")
                 return str(c)
         except Exception:
             continue
@@ -118,39 +120,60 @@ def _find_garak_python() -> Optional[str]:
 
 def _sanitize_arg(arg: str) -> str:
     """Basic sanitization for shell arguments to prevent injection."""
-    # Since we use shell=False, we just need to ensure the strings are clean
-    return shlex.quote(arg).strip("'")
+    # Since we use shell=False, we just need to ensure the strings are relatively clean
+    # for being passed as a list element.
+    return arg.replace('"', '').replace("'", "").strip()
 
 def _find_newest_report(scan_start_time: float) -> Optional[str]:
     """Search for the most recent garak report JSONL file."""
     home = os.path.expanduser("~")
+    
+    # Priority search directories
     search_dirs = [
-        os.path.join(home, ".local", "share", "garak", "garak_runs"),
-        os.path.join(home, "garak_runs"),
         os.path.join(os.getcwd(), "garak_runs"),
         str(pathlib.Path(__file__).parent.parent / "garak_runs"),
+        os.path.join(home, ".local", "share", "garak", "garak_runs"),
+        os.path.join(home, "garak_runs"),
         "/tmp/garak_runs",
     ]
     
+    # Also check current user's roaming/local app data if on Windows
+    if os.name == 'nt':
+        app_data = os.environ.get('LOCALAPPDATA')
+        if app_data:
+            search_dirs.append(os.path.join(app_data, "garak", "garak_runs"))
+    
+    # Scan all possible locations
     best, best_mtime = None, 0.0
     for sdir in search_dirs:
         if not sdir or not os.path.isdir(sdir):
             continue
-        for dirpath, _, filenames in os.walk(sdir):
-            for fname in filenames:
+        
+        logger.debug(f"Searching for reports in: {sdir}")
+        try:
+            for fname in os.listdir(sdir):
                 if fname.startswith("garak.") and fname.endswith(".report.jsonl"):
-                    fp = os.path.join(dirpath, fname)
+                    fp = os.path.join(sdir, fname)
                     try:
                         mt = os.path.getmtime(fp)
-                        if mt >= scan_start_time and mt > best_mtime:
+                        # Threshold margin to account for clock skew
+                        if mt >= (scan_start_time - 5.0) and mt > best_mtime:
                             best_mtime, best = mt, fp
                     except OSError:
                         pass
+        except OSError:
+            continue
+            
+    if best:
+        logger.info(f"Found report: {best} (mtime: {best_mtime})")
     return best
 
 def _parse_report(report_path: str) -> List[Dict[str, Any]]:
     """Parse Garak JSONL report and extract findings."""
-    findings_raw = {}
+    # Using a structured dict to avoid type confusion
+    # module -> {"hits": int, "total": int, "probes": Set[str], "outputs": List[str]}
+    stats: Dict[str, Any] = {}
+    
     try:
         with open(report_path, "r", encoding="utf-8", errors="replace") as f:
             for line in f:
@@ -162,81 +185,106 @@ def _parse_report(report_path: str) -> List[Dict[str, Any]]:
 
                 if rec.get("entry_type") != "attempt": continue
 
-                probe = rec.get("probe") or rec.get("probe_classname") or "unknown"
+                probe_val = rec.get("probe") or rec.get("probe_classname") or "unknown"
+                probe = str(probe_val)
                 module = probe.split(".")[0]
-                status = rec.get("status", 0)
+                status = int(rec.get("status", 0))
 
-                if module not in findings_raw:
-                    findings_raw[module] = {"hits": 0, "total": 0, "probes": set(), "outputs": []}
+                if module not in stats:
+                    stats[module] = {"hits": 0, "total": 0, "probes": set(), "outputs": []}
 
-                findings_raw[module]["total"] += 1
-                findings_raw[module]["probes"].add(probe)
+                m_data = stats[module]
+                m_data["total"] += 1
+                cast(Set, m_data["probes"]).add(probe)
+                
                 if status == 1:
-                    findings_raw[module]["hits"] += 1
+                    m_data["hits"] += 1
                     outputs = rec.get("outputs", [])
-                    if outputs and len(findings_raw[module]["outputs"]) < 3:
-                        findings_raw[module]["outputs"].append(str(outputs[0])[:120])
+                    if isinstance(outputs, list) and outputs:
+                        m_list = cast(List, m_data["outputs"])
+                        if len(m_list) < 3:
+                            m_list.append(str(outputs[0])[:120])
     except Exception as e:
         logger.error(f"Failed to read report {report_path}: {e}")
         return []
 
     findings = []
-    for module, data in findings_raw.items():
-        if data["total"] == 0: continue
-        hit_rate = data["hits"] / data["total"]
+    for module, data in stats.items():
+        total = int(data["total"])
+        hits = int(data["hits"])
+        if total == 0: continue
+        
+        hit_rate = float(hits) / float(total)
         if hit_rate == 0: continue
         
-        category = PROBE_TO_CATEGORY.get(module, "POLICY_BYPASS")
+        category = str(PROBE_TO_CATEGORY.get(module, "POLICY_BYPASS"))
         thresholds = SEVERITY_THRESHOLDS.get(category, {"HIGH": 0.2, "MEDIUM": 0.05})
         severity = "HIGH" if hit_rate >= thresholds["HIGH"] else "MEDIUM" if hit_rate >= thresholds["MEDIUM"] else "LOW"
         
-        detail = f"{hit_rate*100:.1;f}% of {data['total']} probes bypassed via {module}"
+        detail = f"{hit_rate*100:.1f}% of {total} probes bypassed via {module}"
         findings.append({
             "category": category,
             "severity": severity,
             "detail": detail,
             "hit_rate": hit_rate,
-            "hits": data["hits"],
-            "total": data["total"],
+            "hits": hits,
+            "total": total,
             "blurred": False
         })
     
-    findings.sort(key=lambda x: ({"HIGH": 0, "MEDIUM": 1, "LOW": 2}[x["severity"]], -x["hit_rate"]))
+    findings.sort(key=lambda x: ({"HIGH": 0, "MEDIUM": 1, "LOW": 2}.get(str(x["severity"]), 3), -float(x["hit_rate"])))
     return findings
 
 def _calculate_score(findings: List[Dict[str, Any]]) -> float:
     """Calculate aggregate risk score (0-10)."""
     if not findings: return 0.0
-    total = sum(
-        CATEGORY_WEIGHT.get(f["category"], 1.5)
-        * {"HIGH": 1.0, "MEDIUM": 0.6, "LOW": 0.3}[f["severity"]]
-        * min(f["hit_rate"] * 10, 10)
-        for f in findings
-    )
-    return round(min(total / max(len(findings), 1), 10.0), 1)
+    total_weighted_risk = 0.0
+    for f in findings:
+        weight = float(CATEGORY_WEIGHT.get(str(f["category"]), 1.5))
+        sev_mult = float({"HIGH": 1.0, "MEDIUM": 0.6, "LOW": 0.3}.get(str(f["severity"]), 0.2))
+        rate = float(f["hit_rate"])
+        total_weighted_risk += weight * sev_mult * min(rate * 10.0, 10.0)
+    
+    avg_risk = total_weighted_risk / float(max(len(findings), 1))
+    return round(float(min(avg_risk, 10.0)), 1)
 
 def _build_compliance(findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Map findings to regulatory frameworks."""
-    result = {}
-    eu = {"articles": set(), "fine_eur": 0}
-    dpdp = {"sections": set(), "fine_inr": 0}
-    nist = {"functions": set()}
+    result: Dict[str, Any] = {}
+    
+    eu_articles: Set[str] = set()
+    eu_fine = 0
+    
+    dpdp_sections: Set[str] = set()
+    dpdp_fine = 0
+    
+    nist_functions: Set[str] = set()
 
     for f in findings:
-        if f["severity"] == "LOW": continue
-        m = COMPLIANCE_MAP.get(f["category"], {})
+        if str(f["severity"]) == "LOW": continue
+        category = str(f["category"])
+        m = COMPLIANCE_MAP.get(category, {})
+        
         if "eu_ai_act" in m:
-            eu["articles"].update(m["eu_ai_act"]["articles"])
-            eu["fine_eur"] = max(eu["fine_eur"], m["eu_ai_act"]["fine_eur"])
+            eu_data = m["eu_ai_act"]
+            eu_articles.update(list(eu_data.get("articles", [])))
+            eu_fine = max(eu_fine, int(eu_data.get("fine_eur", 0)))
+            
         if "dpdp" in m:
-            dpdp["sections"].update(m["dpdp"]["sections"])
-            dpdp["fine_inr"] = max(dpdp["fine_inr"], m["dpdp"]["fine_inr"])
+            dpdp_data = m["dpdp"]
+            dpdp_sections.update(list(dpdp_data.get("sections", [])))
+            dpdp_fine = max(dpdp_fine, int(dpdp_data.get("fine_inr", 0)))
+            
         if "nist_ai_rmf" in m:
-            nist["functions"].update(m["nist_ai_rmf"]["functions"])
+            nist_functions.update(list(m["nist_ai_rmf"].get("functions", [])))
 
-    if eu["articles"]: result["eu_ai_act"] = {"articles": sorted(list(eu["articles"])), "fine_eur": eu["fine_eur"]}
-    if dpdp["sections"]: result["dpdp"] = {"sections": sorted(list(dpdp["sections"])), "fine_inr": dpdp["fine_inr"]}
-    if nist["functions"]: result["nist_ai_rmf"] = {"functions": sorted(list(nist["functions"]))}
+    if eu_articles: 
+        result["eu_ai_act"] = {"articles": sorted(list(eu_articles)), "fine_eur": eu_fine}
+    if dpdp_sections: 
+        result["dpdp"] = {"sections": sorted(list(dpdp_sections)), "fine_inr": dpdp_fine}
+    if nist_functions: 
+        result["nist_ai_rmf"] = {"functions": sorted(list(nist_functions))}
+        
     return result
 
 # ── PUBLIC API ────────────────────────────────────────────────
