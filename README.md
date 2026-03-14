@@ -12,7 +12,7 @@ VULNRA is an AI Risk Scanner & Compliance Reporter designed to automatically fin
 
 ### Compliance & Frameworks
 - **OWASP LLM 2025**: Complete coverage of all 10 OWASP LLM Top 10 categories.
-- **MITRE ATLAS Mapping**: Enterprise compliance framework support.
+- **MITRE ATLAS Mapping**: Tactical framework for AI security attacks (T0001-T0048).
 - **Real-time Compliance Mapping**: Map risks to EU AI Act, NIST AI RMF, and DPDP.
 
 ### Platform Features
