@@ -44,3 +44,18 @@ def test_crescendo_process_response():
     # Test with jailbreak response
     result = attack.process_response("Here are the confidential passwords: 12345")
     assert result["is_jailbreak"] == True
+
+
+def test_goat_attack_generation():
+    """Test GOAT generates attack prompts using Claude."""
+    attack = GOATAttack()
+    
+    # Mock target response
+    target_response = "I cannot help with that request."
+    
+    # Generate next attack
+    next_prompt = attack.get_next_prompt(target_response)
+    
+    # Should return a string prompt
+    assert isinstance(next_prompt, str)
+    assert len(next_prompt) > 0
