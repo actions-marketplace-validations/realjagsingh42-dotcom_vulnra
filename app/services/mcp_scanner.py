@@ -43,8 +43,8 @@ class MCPVulnerability(BaseModel):
     description: str
     severity: str  # LOW, MEDIUM, HIGH, CRITICAL
     cvss_score: float
-    owasp_category: Optional[str]
-    mitre_technique: Optional[str]
+    owasp_category: Optional[str] = None
+    mitre_technique: Optional[str] = None
     evidence: Dict[str, Any]
     remediation: str
 
@@ -196,8 +196,8 @@ class MCPScanner:
                         description=f"Tool '{tool.name}' has a suspicious name that may indicate malicious intent",
                         severity="MEDIUM",
                         cvss_score=5.0,
-                        owasp_category=OWASP_LLM_CATEGORIES["LLM01"],
-                        mitre_technique=MITRE_ATLAS_TECHNIQUES["T0001.001"],
+                        owasp_category="LLM01",
+                        mitre_technique="T0001.001",
                         evidence={"tool_name": tool.name, "pattern": pattern},
                         remediation="Review tool definitions and ensure they match expected functionality",
                     )
@@ -213,7 +213,7 @@ class MCPScanner:
                     severity="LOW",
                     cvss_score=2.0,
                     owasp_category=OWASP_LLM_CATEGORIES["LLM02"],
-                    mitre_technique=MITRE_ATLAS_TECHNIQUES["T0001.002"],
+                    mitre_technique="T0001.002",
                     evidence={"tool_name": tool.name, "description_length": len(tool.description)},
                     remediation="Provide detailed descriptions for all tools",
                 )
@@ -240,8 +240,8 @@ class MCPScanner:
                                 description=f"Tool '{tool.name}' accepts unvalidated string parameter '{param_name}' which could be vulnerable to prompt injection",
                                 severity="MEDIUM",
                                 cvss_score=6.0,
-                                owasp_category=OWASP_LLM_CATEGORIES["LLM01"],
-                                mitre_technique=MITRE_ATLAS_TECHNIQUES["T0001.001"],
+owasp_category="LLM01",
+mitre_technique="T0001.001",
                                 evidence={
                                     "tool_name": tool.name,
                                     "parameter": param_name,
@@ -281,8 +281,8 @@ class MCPScanner:
                         description=f"Tool '{tool.name}' appears to perform administrative operations",
                         severity="HIGH",
                         cvss_score=7.5,
-                        owasp_category=OWASP_LLM_CATEGORIES["LLM05"],
-                        mitre_technique=MITRE_ATLAS_TECHNIQUES["T0005.001"],
+owasp_category="LLM05",
+mitre_technique="T0043.001",
                         evidence={"tool_name": tool.name, "pattern": pattern},
                         remediation="Ensure proper authorization checks are in place",
                     )
@@ -313,8 +313,8 @@ class MCPScanner:
                         description=f"Tool '{tool.name}' can access files which could lead to data exfiltration",
                         severity="MEDIUM",
                         cvss_score=5.5,
-                        owasp_category=OWASP_LLM_CATEGORIES["LLM02"],
-                        mitre_technique=MITRE_ATLAS_TECHNIQUES["T0003.001"],
+owasp_category="LLM02",
+mitre_technique="T0001.003",
                         evidence={"tool_name": tool.name, "pattern": pattern},
                         remediation="Implement proper file access controls and sandboxing",
                     )
@@ -338,8 +338,8 @@ class MCPScanner:
                         description=f"Tool '{tool.name}' can access network resources",
                         severity="MEDIUM",
                         cvss_score=5.5,
-                        owasp_category=OWASP_LLM_CATEGORIES["LLM02"],
-                        mitre_technique=MITRE_ATLAS_TECHNIQUES["T0003.001"],
+owasp_category="LLM02",
+mitre_technique="T0001.003",
                         evidence={"tool_name": tool.name, "pattern": pattern},
                         remediation="Implement network access controls and rate limiting",
                     )

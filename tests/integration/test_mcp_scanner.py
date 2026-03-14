@@ -60,16 +60,17 @@ class TestMCPScanner:
         mock_session = AsyncMock()
         mock_session.initialize = AsyncMock()
         mock_session.list_tools = AsyncMock()
-        mock_session.list_tools.return_value = MagicMock(
-            tools=[
-                MagicMock(
-                    name=tool.name,
-                    description=tool.description,
-                    inputSchema=tool.input_schema,
-                )
-                for tool in mock_mcp_tools
-            ]
-        )
+        
+        # Create proper mock tools with string attributes
+        mock_tools = []
+        for tool in mock_mcp_tools:
+            mock_tool = MagicMock()
+            mock_tool.name = tool.name
+            mock_tool.description = tool.description
+            mock_tool.inputSchema = tool.input_schema
+            mock_tools.append(mock_tool)
+        
+        mock_session.list_tools.return_value = MagicMock(tools=mock_tools)
 
         with patch("app.services.mcp_scanner.streamablehttp_client") as mock_http_client:
             mock_http_client.return_value.__aenter__.return_value = (AsyncMock(), AsyncMock())
@@ -98,7 +99,7 @@ class TestMCPScanner:
         )
 
         assert len(vulnerabilities) > 0
-        assert any("Administrative Tool" in v.name for v in vulnerabilities)
+        assert any("Suspicious Tool Name" in v.name for v in vulnerabilities)
 
     @pytest.mark.asyncio
     async def test_check_prompt_injection(self, scanner, mock_mcp_tools):
