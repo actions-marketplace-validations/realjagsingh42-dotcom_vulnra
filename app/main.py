@@ -260,56 +260,81 @@ BLOCKED_RANGES = [
     ipaddress.ip_network("172.16.0.0/12"),
     ipaddress.ip_network("192.168.0.0/16"),
     ipaddress.ip_network("127.0.0.0/8"),
-    ipaddress.ip_network("169.254.0.0/16"),  # AWS/GCP/Azure metadata service
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local / Cloud Metadata
     ipaddress.ip_network("100.64.0.0/10"),   # Carrier-grade NAT
-    ipaddress.ip_network("0.0.0.0/8"),
+    ipaddress.ip_network("0.0.0.0/8"),       # Local identification
     ipaddress.ip_network("::1/128"),          # IPv6 loopback
     ipaddress.ip_network("fc00::/7"),         # IPv6 private
+    ipaddress.ip_network("fe80::/10"),        # IPv6 link-local
 ]
 
 def is_safe_url(target_url: str) -> bool:
-    """Validate URL to prevent SSRF against internal networks."""
+    """
+    Validate URL to prevent SSRF against internal networks.
+    Includes DNS resolution to prevent rebinding attacks.
+    """
     try:
         parsed = urlparse(target_url)
         if parsed.scheme not in ("http", "https"):
+            logger.warning(f"SSRF Check: Disallowed scheme '{parsed.scheme}' in {target_url}")
             return False
 
         hostname = parsed.hostname
         if not hostname:
             return False
 
-        # Resolve hostname to catch DNS rebinding attacks
+        # 1. Check if hostname itself is a direct IP
         try:
-            resolved_ip = socket.gethostbyname(hostname)
-        except socket.gaierror:
-            logger.warning(f"Could not resolve hostname: {hostname}")
-            return False
-
-        ip_obj = ipaddress.ip_address(resolved_ip)
-
-        # Check against comprehensive blocked ranges
-        for blocked in BLOCKED_RANGES:
-            if ip_obj in blocked:
-                logger.warning(f"Blocked private IP range: {hostname} -> {resolved_ip}")
+            ip_obj = ipaddress.ip_address(hostname)
+            if _is_internal_ip(ip_obj):
+                logger.warning(f"SSRF Check: Blocking direct internal IP access: {hostname}")
                 return False
+        except ValueError:
+            # Not a direct IP, proceed to resolution
+            pass
 
-        # Additional checks using ipaddress built-in checks
-        if (
-            ip_obj.is_private
-            or ip_obj.is_loopback
-            or ip_obj.is_link_local
-            or ip_obj.is_reserved
-            or ip_obj.is_unspecified
-        ):
+        # 2. Resolve hostname to catch DNS rebinding
+        try:
+            # Note: This doesn't handle multiple A records perfectly, but catches the common case.
+            # Production versions might use a custom resolver or check ALL resolved IPs.
+            resolved_ips = socket.getaddrinfo(hostname, None)
+            for family, _, _, _, sockaddr in resolved_ips:
+                ip_str = sockaddr[0]
+                resolved_ip_obj = ipaddress.ip_address(ip_str)
+                if _is_internal_ip(resolved_ip_obj):
+                    logger.warning(f"SSRF Check: Hostname {hostname} resolved to internal IP {ip_str}")
+                    return False
+        except socket.gaierror:
+            logger.warning(f"SSRF Check: Could not resolve hostname: {hostname}")
             return False
 
-        if hostname.lower() in ("localhost", "0.0.0.0", "127.0.0.1"):
+        # Block literal forbidden names
+        if hostname.lower() in ("localhost", "0.0.0.0", "127.0.0.1", "::1"):
             return False
 
         return True
     except Exception as e:
         logger.error(f"SSRF validation error for {target_url}: {e}")
         return False
+
+def _is_internal_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """Helper to check if an IP address is internal/private."""
+    # Check built-in properties
+    if (
+        ip.is_private 
+        or ip.is_loopback 
+        or ip.is_link_local 
+        or ip.is_reserved 
+        or ip.is_unspecified
+    ):
+        return True
+    
+    # Check manual ranges (some niche cases or explicit ones like 169.254)
+    for blocked in BLOCKED_RANGES:
+        if ip in blocked:
+            return True
+            
+    return False
 
 # ── Redis Utility ─────────────────────────────────────────────────────────────
 _redis_pool = None

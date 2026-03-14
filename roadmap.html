@@ -1572,20 +1572,19 @@
           </div>
         </div>
 
-        <div class="item-card planned-card" data-status="planned">
+        <div class="item-card done-card" data-status="done">
           <div class="item-top">
-            <div class="item-icon planned"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"
+            <div class="item-icon done"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"
                 stroke-linecap="round">
-                <path d="M9 1L17 9 9 17 1 9Z" />
+                <path d="M3 9l4 4 8-8" />
               </svg></div>
             <div class="item-info">
-              <div class="item-status-pill planned">PLANNED</div>
+              <div class="item-status-pill done">SHIPPED</div>
               <div class="item-title">Private IP Blocklist</div>
             </div>
-            <div class="item-effort">0.5 DAYS</div>
+            <div class="item-effort">DONE</div>
           </div>
-          <div class="item-desc">Legal blocker before public launch. Blocks RFC 1918 ranges, AWS/GCP metadata endpoint
-            (169.254.169.254), and localhost from being scanned. Returns HTTP 400 with clear error.</div>
+          <div class="item-desc">A critical security requirement for public launch. Blocks scans against private IPv4/IPv6 ranges (RFC 1918, etc.), local hostnames, and cloud metadata endpoints via DNS resolution checks.</div>
           <div class="item-tags">
             <span class="item-tag">Security</span><span class="item-tag">Legal</span><span
               class="item-tag">Required</span>
@@ -1626,27 +1625,19 @@
       </div>
       <div class="items-grid">
 
-        <div class="item-card active-card" data-status="active">
+        <div class="item-card done-card" data-status="done">
           <div class="item-top">
-            <div class="item-icon active"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"
+            <div class="item-icon done"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8"
                 stroke-linecap="round">
-                <circle cx="9" cy="9" r="6" />
-                <path d="M9 6v3l2 2" />
+                <path d="M3 9l4 4 8-8" />
               </svg></div>
             <div class="item-info">
-              <div class="item-status-pill active">IN PROGRESS</div>
+              <div class="item-status-pill done">SHIPPED</div>
               <div class="item-title">DeepTeam Integration (40+ new probes)</div>
             </div>
-            <div class="item-effort">3 DAYS</div>
+            <div class="item-effort">DONE</div>
           </div>
-          <div class="item-desc">pip install deepteam adds bias detection, hallucination scoring, toxicity generation,
-            PII leakage, robustness, and misinformation probes. Triples total probe count instantly.</div>
-          <div class="item-progress">
-            <div class="item-progress-track">
-              <div class="item-progress-fill" style="--p:20%"></div>
-            </div>
-            <div class="item-progress-label">20% — Package evaluation complete, integration starting</div>
-          </div>
+          <div class="item-desc">Integrated the DeepTeam library with 40+ probes for bias, toxicity, and PII leakage. Implemented a dual-engine orchestration wrapper with subprocess isolation in garak_env.</div>
           <div class="item-tags">
             <span class="item-tag">DeepTeam</span><span class="item-tag">40+ Probes</span><span
               class="item-tag">Hallucination</span><span class="item-tag">Bias</span>
