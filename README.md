@@ -7,6 +7,8 @@ VULNRA is an AI Risk Scanner & Compliance Reporter designed to automatically fin
 - **Jailbreak Detection**: Recognize DAN, AutoDAN, and HijackKill styles.
 - **Encoding Bypasses**: Catch Base64, ROT13, and Unicode obfuscated inputs.
 - **Real-time Compliance Mapping**: Map risks to EU AI Act, NIST AI RMF, and DPDP.
+- **Multi-Turn Attack Chains**: Crescendo (5-turn escalating) and GOAT (autonomous) attacks.
+- **MITRE ATLAS Mapping**: Enterprise compliance framework support.
 
 ## Getting Started
 
