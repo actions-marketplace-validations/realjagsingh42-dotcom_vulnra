@@ -16,6 +16,7 @@ import shlex
 import random
 from typing import Optional, List, Dict, Any, Set, cast
 from app.judge import get_judge
+from app.core.compliance import get_owasp_category, get_compliance_mapping, OWASP_LLM_CATEGORIES
 
 # ── Logging Setup ─────────────────────────────────────────────────────────────
 logger = logging.getLogger("vulnra.garak")
@@ -50,6 +51,9 @@ PROBE_TO_CATEGORY = {
     "knownbadsignatures": "POLICY_BYPASS",
     "malwaregen":         "POLICY_BYPASS",
     "leakage":            "PII_LEAK",
+    "prompt_leakage":     "SYSTEM_PROMPT_LEAKAGE",  # LLM07
+    "rag":                "VECTOR_WEAKNESS",        # LLM08
+    "resource":           "UNBOUNDED_CONSUMPTION",  # LLM10
 }
 
 SEVERITY_THRESHOLDS = {
@@ -68,32 +72,17 @@ CATEGORY_WEIGHT = {
     "DATA_EXFIL":       1.6,
 }
 
-COMPLIANCE_MAP = {
-    "JAILBREAK": {
-        "eu_ai_act":   {"articles": ["Art. 9", "Art. 15"], "fine_eur": 15_000_000},
-        "dpdp":        {"sections": ["Sec. 8"],             "fine_inr": 100_000_000},
-        "nist_ai_rmf": {"functions": ["GOVERN 1.1", "MANAGE 2.2"]},
-    },
-    "PROMPT_INJECTION": {
-        "eu_ai_act":   {"articles": ["Art. 9", "Art. 13"], "fine_eur": 15_000_000},
-        "dpdp":        {"sections": ["Sec. 8", "Sec. 11"], "fine_inr": 250_000_000},
-        "nist_ai_rmf": {"functions": ["GOVERN 1.1", "MAP 2.1", "MEASURE 2.5"]},
-    },
-    "PII_LEAK": {
-        "eu_ai_act":   {"articles": ["Art. 13", "Art. 17"], "fine_eur": 20_000_000},
-        "dpdp":        {"sections": ["Sec. 8", "Sec. 11", "Sec. 16"], "fine_inr": 250_000_000},
-        "nist_ai_rmf": {"functions": ["GOVERN 1.1", "MAP 2.1"]},
-    },
-    "POLICY_BYPASS": {
-        "eu_ai_act":   {"articles": ["Art. 9"], "fine_eur": 10_000_000},
-        "nist_ai_rmf": {"functions": ["GOVERN 1.1", "MANAGE 2.2"]},
-    },
-    "DATA_EXFIL": {
-        "eu_ai_act":   {"articles": ["Art. 13", "Art. 17"], "fine_eur": 20_000_000},
-        "dpdp":        {"sections": ["Sec. 8"], "fine_inr": 150_000_000},
-        "nist_ai_rmf": {"functions": ["GOVERN 1.1", "MEASURE 2.5"]},
-    },
-}
+# Use centralized compliance mapping
+def get_compliance(category: str) -> Dict[str, Any]:
+    """Get compliance mapping for category using centralized module."""
+    owasp_cat = get_owasp_category(category)
+    return {
+        "eu_ai_act": get_compliance_mapping(owasp_cat, "eu_ai_act"),
+        "dpdp": get_compliance_mapping(owasp_cat, "dpdp"),
+        "nist_ai_rmf": get_compliance_mapping(owasp_cat, "nist_ai_rmf"),
+        "owasp_category": owasp_cat,
+        "owasp_name": OWASP_LLM_CATEGORIES.get(owasp_cat, {}).get("name", "Unknown"),
+    }
 
 # ── INTERNAL UTILS ────────────────────────────────────────────
 
@@ -280,7 +269,7 @@ def _build_compliance(findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     for f in findings:
         if str(f["severity"]) == "LOW": continue
         category = str(f["category"])
-        m = COMPLIANCE_MAP.get(category, {})
+        m = get_compliance(category)
         
         if "eu_ai_act" in m:
             eu_data = cast(Dict[str, Any], m["eu_ai_act"])
