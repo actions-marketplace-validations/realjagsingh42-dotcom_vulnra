@@ -28,8 +28,6 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import httpx
-from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
 from pydantic import BaseModel, Field
 
 from app.core.compliance import (
@@ -308,6 +306,8 @@ class MCPScanner:
 
     async def _enumerate_tools(self, server_url: str) -> List[MCPTool]:
         """Connect to MCP server and list all exposed tools."""
+        from mcp import ClientSession  # lazy import — mcp is optional
+        from mcp.client.streamable_http import streamablehttp_client
         tools: List[MCPTool] = []
         try:
             async with streamablehttp_client(url=server_url) as (read_stream, write_stream):
@@ -337,6 +337,8 @@ class MCPScanner:
         params: Dict[str, Any],
     ) -> Tuple[bool, Any]:
         """Call a specific tool; return (success, response_data)."""
+        from mcp import ClientSession  # lazy import — mcp is optional
+        from mcp.client.streamable_http import streamablehttp_client
         self._tool_call_counter += 1
         try:
             async with streamablehttp_client(url=server_url) as (read_stream, write_stream):
