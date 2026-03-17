@@ -2,7 +2,13 @@ import Link from "next/link";
 import { Shield } from "lucide-react";
 import SignupForm from "@/components/auth/SignupForm";
 
-export default function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <main className="min-h-screen flex flex-col relative overflow-hidden">
       <div className="absolute top-[-15%] left-[-15%] w-[500px] h-[500px] bg-acid/10 rounded-full blur-[80px] animate-[orb1_12s_ease-in-out_infinite] pointer-events-none" />
@@ -26,7 +32,7 @@ export default function SignupPage() {
 
       {/* Centered form */}
       <div className="flex-1 flex items-center justify-center p-6 relative z-10">
-        <SignupForm />
+        <SignupForm error={error} />
       </div>
     </main>
   );
