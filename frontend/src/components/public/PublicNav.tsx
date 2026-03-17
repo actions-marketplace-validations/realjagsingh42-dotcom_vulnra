@@ -47,6 +47,12 @@ export default function PublicNav() {
           PRICING
         </Link>
         <Link
+          href="/docs"
+          className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+        >
+          DOCS
+        </Link>
+        <Link
           href="/login"
           className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
         >
@@ -85,6 +91,13 @@ export default function PublicNav() {
             onClick={() => setMenuOpen(false)}
           >
             PRICING
+          </Link>
+          <Link
+            href="/docs"
+            className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+            onClick={() => setMenuOpen(false)}
+          >
+            DOCS
           </Link>
           <Link
             href="/login"

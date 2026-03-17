@@ -424,6 +424,39 @@ def update_sentinel_after_scan(watch_id: str, risk_score: float) -> None:
         logger.error(f"Failed to update sentinel watch {watch_id} after scan: {e}")
 
 
+# ── Webhooks ──────────────────────────────────────────────────────────────────
+
+def list_webhooks_for_user(user_id: str, event: Optional[str] = None) -> list:
+    """Return active webhooks for a user, optionally filtered by event type."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return []
+        q = sb.table("webhooks").select("*").eq("user_id", user_id).eq("active", True)
+        rows = q.execute().data or []
+        if event:
+            rows = [r for r in rows if event in (r.get("events") or [])]
+        return rows
+    except Exception as e:
+        logger.error(f"list_webhooks_for_user error: {e}")
+        return []
+
+
+def update_webhook_status(webhook_id: str, success: bool, status_code: int) -> None:
+    """Update last_triggered_at, last_status, last_status_code after delivery."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return
+        sb.table("webhooks").update({
+            "last_triggered_at": "now()",
+            "last_status":       "success" if success else "failed",
+            "last_status_code":  status_code,
+        }).eq("id", webhook_id).execute()
+    except Exception as e:
+        logger.error(f"update_webhook_status error: {e}")
+
+
 def update_user_subscription(email: str, tier: str, subscription_id: Optional[str] = None):
     """Update user subscription tier in Supabase."""
     try:

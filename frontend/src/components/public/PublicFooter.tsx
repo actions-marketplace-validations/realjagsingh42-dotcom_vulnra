@@ -18,6 +18,7 @@ export default function PublicFooter() {
           {[
             ["Features", "/#features"],
             ["Pricing", "/pricing"],
+            ["Docs", "/docs"],
             ["Investors", "/investors"],
             ["Sign In", "/login"],
             ["Sign Up", "/signup"],

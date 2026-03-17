@@ -245,6 +245,26 @@ def sentinel_check(
         if should_alert:
             _send_sentinel_alert(notification_email, url, new_risk, findings, reason)
 
+            # Deliver sentinel.alert webhooks (best-effort)
+            try:
+                from app.services.webhook_delivery import deliver_sentinel_alert
+                from app.services.supabase_service import get_supabase
+                sb = get_supabase()
+                if sb:
+                    watch_row = sb.table("sentinel_watches").select("user_id").eq("id", watch_id).execute()
+                    if watch_row.data:
+                        uid = watch_row.data[0]["user_id"]
+                        deliver_sentinel_alert(uid, {
+                            "watch_id": watch_id,
+                            "url": url,
+                            "risk_score": new_risk,
+                            "prev_risk_score": prev_risk_score,
+                            "reason": reason,
+                            "findings_count": len(findings),
+                        })
+            except Exception:
+                pass
+
     logger.info(f"Sentinel scan complete for {url}: risk={new_risk:.2f}")
 
 

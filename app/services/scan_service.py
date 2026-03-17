@@ -109,4 +109,11 @@ async def run_scan_internal(scan_id: str, url: str, tier: str, user_id: str) -> 
     # Save to Supabase
     save_scan_result(scan_id, url, tier, data)
 
+    # Deliver webhooks (best-effort, never block scan result)
+    try:
+        from app.services.webhook_delivery import deliver_scan_complete
+        deliver_scan_complete(user_id, {**data, "scan_id": scan_id, "url": url, "tier": tier})
+    except Exception:
+        pass
+
     return data
