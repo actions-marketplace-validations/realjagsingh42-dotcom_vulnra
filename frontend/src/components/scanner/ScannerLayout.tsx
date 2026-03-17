@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { Shield, LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Link2, CheckCheck, Key, Radio, Database, Building2 } from "lucide-react";
+import { Shield, LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Link2, CheckCheck, Key, Radio, Database, Building2, TrendingUp } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
@@ -435,6 +435,14 @@ export default function ScannerLayout({ user }: { user: User }) {
           >
             <History className="w-3.5 h-3.5" />
             HISTORY
+          </a>
+          <div className="h-5 w-[1px] bg-v-border mx-2" />
+          <a
+            href="/analytics"
+            className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors"
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            ANALYTICS
           </a>
           <div className="h-5 w-[1px] bg-v-border mx-2" />
           <a

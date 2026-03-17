@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings, validate_config, logger
-from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks
+from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics
 from app.core.rate_limiter import TIER_LIMITS, set_limiter
 from app.core.security import get_current_user
 
@@ -168,6 +168,7 @@ app.include_router(rag_scans.router, prefix="/api", tags=["rag-scans"])
 app.include_router(org.router, prefix="/api", tags=["org"])
 app.include_router(user.router, tags=["user"])
 app.include_router(webhooks.router, tags=["webhooks"])
+app.include_router(analytics.router, tags=["analytics"])
 
 @app.get("/health")
 def health():
