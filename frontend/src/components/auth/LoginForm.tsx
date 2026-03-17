@@ -1,36 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, Github, Chrome, ArrowRight, Loader2, AlertTriangle, Info } from "lucide-react";
+import {
+  Mail, Lock, Eye, EyeOff, Github, Chrome, ArrowRight,
+  Loader2, AlertTriangle, Info,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-import { login } from "@/app/auth/actions";
 import { createClient } from "@/utils/supabase/client";
-
-/* ── Submit button — reads pending state from parent <form> ── */
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={cn(
-        "mt-2 w-full bg-acid text-black font-mono text-[10.5px] font-bold tracking-widest py-3 rounded-sm transition-all flex items-center justify-center gap-1.5",
-        pending
-          ? "opacity-70 cursor-not-allowed"
-          : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(184,255,87,0.3)]"
-      )}
-    >
-      {pending ? (
-        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> AUTHENTICATING...</>
-      ) : (
-        <>AUTHENTICATE <ArrowRight className="w-3.5 h-3.5" /></>
-      )}
-    </button>
-  );
-}
 
 /* ── OAuth button with its own loading state ── */
 function OAuthButton({
@@ -71,14 +49,35 @@ function OAuthButton({
 }
 
 /* ── Main form ── */
-export default function LoginForm({
-  error,
-  message,
-}: {
-  error?: string;
-  message?: string;
-}) {
-  const [showPw, setShowPw] = useState(false);
+export default function LoginForm({ message }: { message?: string }) {
+  const router = useRouter();
+  const [showPw, setShowPw]   = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+
+    const form     = e.currentTarget;
+    const email    = (form.elements.namedItem("email")    as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (authError) {
+      setError(authError.message);
+      setPending(false);
+      return;
+    }
+
+    // Session cookies are now written to document.cookie by @supabase/ssr.
+    // router.push sends them with the next request so the server can read them.
+    router.push("/scanner");
+    router.refresh();
+  };
 
   return (
     <div className="card w-full max-w-[460px] bg-v-bg1 border border-v-border rounded-lg relative overflow-hidden z-10 opacity-0 animate-[fadeUp_0.6s_ease_forwards_0.1s]">
@@ -99,20 +98,18 @@ export default function LoginForm({
         </p>
       </div>
 
-      <form action={login} className="p-8 flex flex-col gap-4.5">
+      <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-4.5">
 
         {/* Error banner */}
         {error && (
           <div className="flex items-start gap-2.5 px-3 py-2.5 bg-v-red/10 border border-v-red/30 rounded-sm">
             <AlertTriangle className="w-3.5 h-3.5 text-v-red shrink-0 mt-0.5" />
-            <p className="font-mono text-[10.5px] text-v-red leading-relaxed">
-              {decodeURIComponent(error)}
-            </p>
+            <p className="font-mono text-[10.5px] text-v-red leading-relaxed">{error}</p>
           </div>
         )}
 
-        {/* Info/success banner (e.g. "Check your email") */}
-        {message && (
+        {/* Info banner (e.g. "Check your email") */}
+        {message && !error && (
           <div className="flex items-start gap-2.5 px-3 py-2.5 bg-acid/10 border border-acid/30 rounded-sm">
             <Info className="w-3.5 h-3.5 text-acid shrink-0 mt-0.5" />
             <p className="font-mono text-[10.5px] text-acid leading-relaxed">
@@ -159,7 +156,22 @@ export default function LoginForm({
           </div>
         </div>
 
-        <SubmitButton />
+        <button
+          type="submit"
+          disabled={pending}
+          className={cn(
+            "mt-2 w-full bg-acid text-black font-mono text-[10.5px] font-bold tracking-widest py-3 rounded-sm transition-all flex items-center justify-center gap-1.5",
+            pending
+              ? "opacity-70 cursor-not-allowed"
+              : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(184,255,87,0.3)]"
+          )}
+        >
+          {pending ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> AUTHENTICATING...</>
+          ) : (
+            <>AUTHENTICATE <ArrowRight className="w-3.5 h-3.5" /></>
+          )}
+        </button>
 
         <div className="flex items-center gap-3 my-2">
           <div className="flex-1 h-[1px] bg-v-border" />

@@ -5,9 +5,9 @@ import LoginForm from "@/components/auth/LoginForm";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{ message?: string }>;
 }) {
-  const { error, message } = await searchParams;
+  const { message } = await searchParams;
 
   return (
     <main className="min-h-screen flex flex-col relative overflow-hidden">
@@ -33,7 +33,7 @@ export default async function LoginPage({
 
       {/* Centered form */}
       <div className="flex-1 flex items-center justify-center p-6 relative z-10">
-        <LoginForm error={error} message={message} />
+        <LoginForm message={message} />
       </div>
     </main>
   );

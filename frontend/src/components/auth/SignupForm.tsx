@@ -1,35 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Github, Chrome, Loader2, AlertTriangle } from "lucide-react";
-import { signup } from "@/app/auth/actions";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Github, Chrome, Loader2, AlertTriangle, Info } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
-
-/* ── Submit button — reads pending state from parent <form> ── */
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className={cn(
-        "mt-2 w-full bg-acid text-black font-mono text-[10.5px] font-bold tracking-widest py-3 rounded-sm transition-all flex items-center justify-center gap-1.5",
-        pending
-          ? "opacity-70 cursor-not-allowed"
-          : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(184,255,87,0.3)]"
-      )}
-    >
-      {pending ? (
-        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> CREATING ACCOUNT...</>
-      ) : (
-        <>GENERATE_PROFILE <ArrowRight className="w-3.5 h-3.5" /></>
-      )}
-    </button>
-  );
-}
 
 /* ── OAuth button with its own loading state ── */
 function OAuthButton({
@@ -69,8 +45,44 @@ function OAuthButton({
 }
 
 /* ── Main form ── */
-export default function SignupForm({ error }: { error?: string }) {
-  const [showPw, setShowPw] = useState(false);
+export default function SignupForm() {
+  const router = useRouter();
+  const [showPw, setShowPw]   = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+  const [info, setInfo]       = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
+    setInfo(null);
+
+    const form     = e.currentTarget;
+    const email    = (form.elements.namedItem("email")    as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    const supabase = createClient();
+    const { data, error: authError } = await supabase.auth.signUp({ email, password });
+
+    if (authError) {
+      setError(authError.message);
+      setPending(false);
+      return;
+    }
+
+    // If a session was immediately returned, email confirmation is disabled —
+    // navigate straight to the dashboard.
+    if (data.session) {
+      router.push("/scanner");
+      router.refresh();
+      return;
+    }
+
+    // Otherwise email confirmation is required.
+    setInfo("Check your email to confirm your account before signing in.");
+    setPending(false);
+  };
 
   return (
     <div className="card w-full max-w-[460px] bg-v-bg1 border border-v-border rounded-lg relative overflow-hidden z-10 animate-[fadeUp_0.6s_ease_forwards_0.1s]">
@@ -87,15 +99,21 @@ export default function SignupForm({ error }: { error?: string }) {
         </p>
       </div>
 
-      <form action={signup} className="p-8 flex flex-col gap-4.5">
+      <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-4.5">
 
         {/* Error banner */}
         {error && (
           <div className="flex items-start gap-2.5 px-3 py-2.5 bg-v-red/10 border border-v-red/30 rounded-sm">
             <AlertTriangle className="w-3.5 h-3.5 text-v-red shrink-0 mt-0.5" />
-            <p className="font-mono text-[10.5px] text-v-red leading-relaxed">
-              {decodeURIComponent(error)}
-            </p>
+            <p className="font-mono text-[10.5px] text-v-red leading-relaxed">{error}</p>
+          </div>
+        )}
+
+        {/* Info banner */}
+        {info && (
+          <div className="flex items-start gap-2.5 px-3 py-2.5 bg-acid/10 border border-acid/30 rounded-sm">
+            <Info className="w-3.5 h-3.5 text-acid shrink-0 mt-0.5" />
+            <p className="font-mono text-[10.5px] text-acid leading-relaxed">{info}</p>
           </div>
         )}
 
@@ -134,7 +152,22 @@ export default function SignupForm({ error }: { error?: string }) {
           </div>
         </div>
 
-        <SubmitButton />
+        <button
+          type="submit"
+          disabled={pending}
+          className={cn(
+            "mt-2 w-full bg-acid text-black font-mono text-[10.5px] font-bold tracking-widest py-3 rounded-sm transition-all flex items-center justify-center gap-1.5",
+            pending
+              ? "opacity-70 cursor-not-allowed"
+              : "hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(184,255,87,0.3)]"
+          )}
+        >
+          {pending ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> CREATING ACCOUNT...</>
+          ) : (
+            <>GENERATE_PROFILE <ArrowRight className="w-3.5 h-3.5" /></>
+          )}
+        </button>
 
         <div className="flex items-center gap-3 my-2">
           <div className="flex-1 h-[1px] bg-v-border" />
