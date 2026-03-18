@@ -28,7 +28,6 @@ export default function PublicFooter() {
             ["Open Source", "/open-source"],
             ["Affiliates", "/affiliates"],
             ["About", "/about"],
-            ["Investors", "/investors"],
             ["Sign In", "/login"],
             ["Sign Up", "/signup"],
             ["Terms", "/terms"],
