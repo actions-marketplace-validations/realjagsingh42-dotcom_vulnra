@@ -2,7 +2,6 @@ import logging
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -175,14 +174,6 @@ def health():
     logger.info("Health check endpoint called")
     return {"status": "healthy", "version": settings.version}
 
-# ── Static Files (Must be last) ───────────────────────────────────────────────
-# Serve static HTML files from the project root (works on Windows + Docker)
-from pathlib import Path
-_project_root = Path(__file__).resolve().parent.parent
-try:
-    app.mount("/", StaticFiles(directory=str(_project_root), html=True), name="static")
-except Exception as e:
-    logger.warning(f"Static mount failed: {e}")
 
 # ── Server Entry Point ────────────────────────────────────────────────────────
 if __name__ == "__main__":
