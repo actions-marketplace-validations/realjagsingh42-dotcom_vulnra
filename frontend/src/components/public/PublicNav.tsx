@@ -16,14 +16,14 @@ export default function PublicNav() {
 
   return (
     <nav
-      className={`fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-6 md:px-10 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4 sm:px-6 md:px-10 transition-colors duration-200 ${
         scrolled
-          ? "bg-[#060608]/90 backdrop-blur-sm border-b border-white/[0.06]"
+          ? "bg-[#060608] border-b border-white/[0.06] md:bg-[#060608]/90 md:backdrop-blur-sm"
           : "bg-transparent"
       }`}
     >
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 group">
+      <Link href="/" className="flex items-center gap-2 group shrink-0">
         <div className="w-6 h-6 rounded bg-acid flex items-center justify-center group-hover:shadow-[0_0_12px_rgba(184,255,87,0.5)] transition-all">
           <Shield className="w-3 h-3 text-black" />
         </div>
@@ -66,53 +66,63 @@ export default function PublicNav() {
         </Link>
       </div>
 
-      {/* Mobile Toggle */}
-      <button
-        className="md:hidden text-v-muted hover:text-acid transition-colors"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-      >
-        {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </button>
+      {/* Mobile right side: Sign In + Hamburger */}
+      <div className="flex md:hidden items-center gap-3">
+        <Link
+          href="/signup"
+          className="font-mono text-[10px] font-semibold tracking-widest bg-acid text-black px-3 py-1.5 rounded-sm"
+        >
+          START FREE
+        </Link>
+        <button
+          className="p-1 text-v-muted hover:text-acid transition-colors"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — solid bg, no backdrop-blur */}
       {menuOpen && (
-        <div className="absolute top-14 inset-x-0 bg-[#0a0b0f]/95 backdrop-blur-sm border-b border-v-border2 flex flex-col p-6 gap-5 md:hidden">
+        <div className="absolute top-14 inset-x-0 bg-[#0a0b0f] border-b border-v-border2 flex flex-col p-5 gap-4 md:hidden">
           <Link
             href="/#features"
-            className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             FEATURES
           </Link>
           <Link
             href="/pricing"
-            className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             PRICING
           </Link>
           <Link
             href="/docs"
-            className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             DOCS
           </Link>
           <Link
             href="/login"
-            className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
+            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
             onClick={() => setMenuOpen(false)}
           >
             SIGN IN
           </Link>
-          <Link
-            href="/signup"
-            className="font-mono text-[10.5px] font-semibold tracking-widest bg-acid text-black px-4 py-2.5 rounded-sm text-center"
-            onClick={() => setMenuOpen(false)}
-          >
-            START FREE
-          </Link>
+          <div className="border-t border-v-border2 pt-3">
+            <Link
+              href="/signup"
+              className="block font-mono text-[11px] font-semibold tracking-widest bg-acid text-black px-4 py-3 rounded-sm text-center"
+              onClick={() => setMenuOpen(false)}
+            >
+              START FREE — NO CREDIT CARD
+            </Link>
+          </div>
         </div>
       )}
     </nav>

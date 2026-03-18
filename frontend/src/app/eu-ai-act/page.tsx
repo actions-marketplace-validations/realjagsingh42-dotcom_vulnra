@@ -80,7 +80,7 @@ export default function EUAIActPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <Shield className="w-3 h-3 text-acid" />
@@ -96,7 +96,7 @@ export default function EUAIActPage() {
       </section>
 
       {/* Stats */}
-      <section className="px-6 md:px-12 pb-12">
+      <section className="px-4 sm:px-6 md:px-12 pb-12">
         <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { num: "€30M",   label: "Max fine per violation" },
@@ -113,34 +113,35 @@ export default function EUAIActPage() {
       </section>
 
       {/* Timeline */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">IMPLEMENTATION TIMELINE</h2>
-          <div className="border border-v-border2 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <div className="border border-v-border2 rounded-xl overflow-hidden min-w-[520px]">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-v-border2 bg-white/3">
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">DATE</th>
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">MILESTONE</th>
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">ARTICLE</th>
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">RISK LEVEL</th>
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">STATUS</th>
+                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">DATE</th>
+                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">MILESTONE</th>
+                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">ARTICLE</th>
+                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">RISK</th>
+                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">STATUS</th>
                 </tr>
               </thead>
               <tbody>
                 {DEADLINES.map((d, i) => (
                   <tr key={d.date} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
-                    <td className="font-mono text-xs text-acid px-5 py-3 whitespace-nowrap">{d.date}</td>
-                    <td className="font-mono text-xs px-5 py-3">{d.milestone}</td>
-                    <td className="font-mono text-[10px] text-v-muted px-5 py-3">{d.article}</td>
-                    <td className="px-5 py-3">
+                    <td className="font-mono text-xs text-acid px-3 py-2.5 md:px-5 md:py-3 whitespace-nowrap">{d.date}</td>
+                    <td className="font-mono text-xs px-3 py-2.5 md:px-5 md:py-3">{d.milestone}</td>
+                    <td className="font-mono text-[10px] text-v-muted px-3 py-2.5 md:px-5 md:py-3 whitespace-nowrap">{d.article}</td>
+                    <td className="px-3 py-2.5 md:px-5 md:py-3">
                       <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border ${
                         d.risk === "Critical" ? "text-v-red border-v-red/30 bg-v-red/10" :
                         d.risk === "High" ? "text-orange-400 border-orange-400/30 bg-orange-400/10" :
                         "text-yellow-400 border-yellow-400/30 bg-yellow-400/10"
                       }`}>{d.risk}</span>
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-3 py-2.5 md:px-5 md:py-3">
                       <span className={`font-mono text-[10px] px-2 py-0.5 rounded-full border ${STATUS_CFG[d.status]}`}>
                         {d.status.toUpperCase()}
                       </span>
@@ -149,12 +150,13 @@ export default function EUAIActPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Article mappings */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">HOW VULNRA COVERS EACH ARTICLE</h2>
           <div className="space-y-4">
@@ -189,7 +191,7 @@ export default function EUAIActPage() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[700px] mx-auto text-center border border-acid/20 rounded-xl p-8 bg-acid/3">
           <AlertTriangle className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
           <h2 className="font-mono text-2xl font-bold mb-3">Don&apos;t wait for August 2026</h2>

@@ -63,7 +63,7 @@ export default function StatusPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12 text-center">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12 text-center">
         <div className="max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <span className="w-2 h-2 rounded-full bg-acid animate-pulse" />
@@ -90,7 +90,7 @@ export default function StatusPage() {
       </section>
 
       {/* Uptime summary cards */}
-      <section className="px-6 md:px-12 pb-12">
+      <section className="px-4 sm:px-6 md:px-12 pb-12">
         <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "30-day uptime", value: "99.95%" },
@@ -107,52 +107,54 @@ export default function StatusPage() {
       </section>
 
       {/* Component status table */}
-      <section className="px-6 md:px-12 pb-16">
+      <section className="px-4 sm:px-6 md:px-12 pb-16">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">COMPONENT STATUS</h2>
-          <div className="border border-v-border2 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-v-border2 bg-white/3">
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">COMPONENT</th>
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">STATUS</th>
-                  <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">LATENCY</th>
-                  <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">30-DAY UPTIME</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPONENTS.map((c, i) => {
-                  const cfg = STATUS_CONFIG[c.status];
-                  return (
-                    <tr key={c.name} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
-                      <td className="font-mono text-sm px-5 py-3">{c.name}</td>
-                      <td className="px-5 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                          <span className={`font-mono text-xs ${cfg.color}`}>{cfg.label}</span>
-                        </div>
-                      </td>
-                      <td className="font-mono text-xs text-v-muted text-right px-5 py-3">{c.latency}</td>
-                      <td className="font-mono text-xs text-acid text-right px-5 py-3">{c.uptime}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="overflow-x-auto">
+            <div className="border border-v-border2 rounded-xl overflow-hidden min-w-[480px]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-v-border2 bg-white/3">
+                    <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">COMPONENT</th>
+                    <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">STATUS</th>
+                    <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">LATENCY</th>
+                    <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">UPTIME</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {COMPONENTS.map((c, i) => {
+                    const cfg = STATUS_CONFIG[c.status];
+                    return (
+                      <tr key={c.name} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
+                        <td className="font-mono text-xs px-3 py-2.5 md:px-5 md:py-3">{c.name}</td>
+                        <td className="px-3 py-2.5 md:px-5 md:py-3">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
+                            <span className={`font-mono text-[10px] md:text-xs ${cfg.color}`}>{cfg.label}</span>
+                          </div>
+                        </td>
+                        <td className="font-mono text-xs text-v-muted text-right px-3 py-2.5 md:px-5 md:py-3">{c.latency}</td>
+                        <td className="font-mono text-xs text-acid text-right px-3 py-2.5 md:px-5 md:py-3">{c.uptime}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Incident history */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">INCIDENT HISTORY (LAST 90 DAYS)</h2>
           <div className="space-y-3">
             {INCIDENTS.map((inc) => (
-              <div key={inc.date} className="border border-v-border2 rounded-xl p-5">
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-acid/10 border border-acid/20 font-mono text-[10px] text-acid tracking-wider">
+              <div key={inc.date} className="border border-v-border2 rounded-xl p-4 md:p-5">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-acid/10 border border-acid/20 font-mono text-[10px] text-acid tracking-wider shrink-0">
                       <CheckCircle2 className="w-3 h-3" /> RESOLVED
                     </span>
                     <span className="font-mono text-sm font-semibold">{inc.title}</span>
@@ -174,7 +176,7 @@ export default function StatusPage() {
       </section>
 
       {/* Subscribe */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[600px] mx-auto text-center border border-v-border2 rounded-xl p-8">
           <Shield className="w-8 h-8 text-acid mx-auto mb-3" />
           <h2 className="font-mono text-xl font-bold mb-2">Get notified about incidents</h2>

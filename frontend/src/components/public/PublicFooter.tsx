@@ -1,10 +1,28 @@
 import Link from "next/link";
 import { Shield } from "lucide-react";
 
+const FOOTER_LINKS = [
+  ["Features", "/#features"],
+  ["Pricing", "/pricing"],
+  ["Docs", "/docs"],
+  ["Compliance", "/compliance"],
+  ["Status", "/status"],
+  ["Compare", "/compare"],
+  ["EU AI Act", "/eu-ai-act"],
+  ["DPDP", "/dpdp"],
+  ["Vuln DB", "/vuln-db"],
+  ["Open Source", "/open-source"],
+  ["Affiliates", "/affiliates"],
+  ["About", "/about"],
+  ["Sign In", "/login"],
+  ["Sign Up", "/signup"],
+  ["Terms", "/terms"],
+];
+
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-v-border2 px-6 md:px-12 py-10">
-      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="border-t border-v-border2 px-4 sm:px-6 md:px-12 py-10">
+      <div className="max-w-[1200px] mx-auto flex flex-col items-center gap-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-5 h-5 rounded bg-acid flex items-center justify-center">
@@ -13,29 +31,13 @@ export default function PublicFooter() {
           <span className="font-mono text-sm font-bold tracking-wider">VULNRA</span>
         </Link>
 
-        {/* Links */}
-        <div className="flex flex-wrap items-center justify-center gap-6">
-          {[
-            ["Features", "/#features"],
-            ["Pricing", "/pricing"],
-            ["Docs", "/docs"],
-            ["Compliance", "/compliance"],
-            ["Status", "/status"],
-            ["Compare", "/compare"],
-            ["EU AI Act", "/eu-ai-act"],
-            ["DPDP", "/dpdp"],
-            ["Vuln DB", "/vuln-db"],
-            ["Open Source", "/open-source"],
-            ["Affiliates", "/affiliates"],
-            ["About", "/about"],
-            ["Sign In", "/login"],
-            ["Sign Up", "/signup"],
-            ["Terms", "/terms"],
-          ].map(([label, href]) => (
+        {/* Links — 3-col grid on mobile, flex-wrap on desktop */}
+        <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-4 w-full max-w-2xl">
+          {FOOTER_LINKS.map(([label, href]) => (
             <Link
               key={label}
               href={href}
-              className="font-mono text-[10px] tracking-widest text-v-muted2 hover:text-acid transition-colors"
+              className="font-mono text-[10px] tracking-widest text-v-muted2 hover:text-acid transition-colors text-center"
             >
               {label.toUpperCase()}
             </Link>

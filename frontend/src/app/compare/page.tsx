@@ -73,7 +73,7 @@ export default function ComparePage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12 text-center">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12 text-center">
         <div className="max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <span className="font-mono text-[11px] tracking-widest text-acid">COMPARISON</span>
@@ -88,7 +88,7 @@ export default function ComparePage() {
       </section>
 
       {/* Legend */}
-      <section className="px-6 md:px-12 pb-6">
+      <section className="px-4 sm:px-6 md:px-12 pb-6">
         <div className="max-w-[1100px] mx-auto flex items-center gap-6 justify-center flex-wrap">
           <div className="flex items-center gap-2"><Check className="w-4 h-4 text-acid" /><span className="font-mono text-xs text-v-muted">Full support</span></div>
           <div className="flex items-center gap-2"><Minus className="w-4 h-4 text-yellow-400" /><span className="font-mono text-xs text-v-muted">Partial / limited</span></div>
@@ -97,37 +97,38 @@ export default function ComparePage() {
       </section>
 
       {/* Comparison table */}
-      <section className="px-6 md:px-12 pb-20 overflow-x-auto">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[1100px] mx-auto">
           {categories.map((cat) => (
             <div key={cat} className="mb-8">
               <h2 className="font-mono text-[10px] tracking-widest text-v-muted mb-3">{cat.toUpperCase()}</h2>
-              <div className="border border-v-border2 rounded-xl overflow-hidden">
-                <table className="w-full min-w-[700px]">
-                  <thead>
-                    <tr className="border-b border-v-border2 bg-white/3">
-                      <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3 w-[35%]">FEATURE</th>
-                      {COMPETITORS.map((c) => (
-                        <th key={c} className={`font-mono text-[10px] tracking-widest px-4 py-3 text-center ${c === "vulnra" ? "text-acid" : "text-v-muted"}`}>
-                          {LABELS[c].toUpperCase()}
-                          {c === "vulnra" && <span className="ml-1 text-[8px] align-top">★</span>}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {FEATURES.filter((f) => f.category === cat).map((f, i) => (
-                      <tr key={f.name} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
-                        <td className="font-mono text-xs px-5 py-3">{f.name}</td>
+              <div className="overflow-x-auto">
+                <div className="border border-v-border2 rounded-xl overflow-hidden min-w-[560px]">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-v-border2 bg-white/3">
+                        <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3 w-[35%]">FEATURE</th>
                         {COMPETITORS.map((c) => (
-                          <td key={c} className={`px-4 py-3 text-center ${c === "vulnra" ? "bg-acid/3" : ""}`}>
-                            <Cell val={f[c]} />
-                          </td>
+                          <th key={c} className={`font-mono text-[10px] tracking-widest px-2 py-2 md:px-4 md:py-3 text-center ${c === "vulnra" ? "text-acid" : "text-v-muted"}`}>
+                            {c === "vulnra" ? "VULNRA ★" : LABELS[c].toUpperCase()}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {FEATURES.filter((f) => f.category === cat).map((f, i) => (
+                        <tr key={f.name} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
+                          <td className="font-mono text-xs px-3 py-2.5 md:px-5 md:py-3">{f.name}</td>
+                          {COMPETITORS.map((c) => (
+                            <td key={c} className={`px-2 py-2.5 md:px-4 md:py-3 text-center ${c === "vulnra" ? "bg-acid/3" : ""}`}>
+                              <Cell val={f[c]} />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           ))}
@@ -135,7 +136,7 @@ export default function ComparePage() {
       </section>
 
       {/* Score summary */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[1100px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4 text-center">TOTAL FEATURE COVERAGE</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -157,7 +158,7 @@ export default function ComparePage() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[600px] mx-auto text-center border border-acid/20 rounded-xl p-8 bg-acid/3">
           <h2 className="font-mono text-2xl font-bold mb-3">Start scanning free</h2>
           <p className="text-v-muted text-sm mb-6">

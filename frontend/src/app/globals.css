@@ -3,17 +3,17 @@
 @theme inline {
   --color-background: #060608;
   --color-foreground: #e8edf4;
-  
+
   --color-acid: #b8ff57;
   --color-acid-dim: rgba(184, 255, 87, 0.07);
   --color-acid-border: rgba(184, 255, 87, 0.18);
-  
+
   --color-v-red: #ff3c5a;
   --color-v-amber: #ffb340;
-  
+
   --color-v-bg1: #0a0b0f;
   --color-v-bg2: #0f1117;
-  
+
   --color-v-muted: rgba(232, 237, 244, 0.42);
   --color-v-muted2: rgba(232, 237, 244, 0.2);
   --color-v-border: rgba(255, 255, 255, 0.07);
@@ -89,7 +89,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Grain Effect */
+/* Grain Effect — desktop only, disabled on mobile for performance */
 body::before {
   content: '';
   position: fixed;
@@ -102,7 +102,7 @@ body::before {
   animation: grain .4s steps(1) infinite;
 }
 
-/* Scanlines Effect */
+/* Scanlines Effect — desktop only */
 body::after {
   content: '';
   position: fixed;
@@ -112,10 +112,42 @@ body::after {
   z-index: 9998;
 }
 
-/* Base Utility Classes */
+/* ─── Mobile Performance Optimizations ─────────────────────────────────────── */
+
+/* Disable heavy grain animation on mobile — biggest perf win */
+@media (max-width: 767px) {
+  body::before {
+    display: none;
+  }
+  body::after {
+    display: none;
+  }
+}
+
+/* Respect user's reduced-motion preference globally */
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Base Utility Classes ──────────────────────────────────────────────────── */
 @layer utilities {
   .text-mono { font-family: var(--font-mono); }
   .text-acid { color: var(--color-acid); }
   .bg-v-bg1 { background-color: var(--color-v-bg1); }
   .border-v-border { border-color: var(--color-v-border); }
+
+  /* Responsive table scroll wrapper */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }

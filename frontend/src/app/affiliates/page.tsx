@@ -93,7 +93,7 @@ export default function AffiliatesPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <DollarSign className="w-3 h-3 text-acid" />
@@ -118,7 +118,7 @@ export default function AffiliatesPage() {
       </section>
 
       {/* Stats */}
-      <section className="px-6 md:px-12 pb-12">
+      <section className="px-4 sm:px-6 md:px-12 pb-12">
         <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { num: "20%",   label: "Recurring commission" },
@@ -135,7 +135,7 @@ export default function AffiliatesPage() {
       </section>
 
       {/* Partner tracks */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">PARTNER TRACKS</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -168,36 +168,38 @@ export default function AffiliatesPage() {
       </section>
 
       {/* Commission table */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[800px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">COMMISSION EXAMPLES</h2>
-          <div className="border border-v-border2 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-v-border2 bg-white/3">
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">REFERRAL</th>
-                  <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">PLAN PRICE</th>
-                  <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">YOUR CUT</th>
-                  <th className="text-right font-mono text-[10px] tracking-widest text-acid px-5 py-3">ANNUAL EARNINGS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMMISSION_TABLE.map((row, i) => (
-                  <tr key={row.plan} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
-                    <td className="font-mono text-xs px-5 py-3">{row.plan}</td>
-                    <td className="font-mono text-xs text-v-muted text-right px-5 py-3">{row.price}</td>
-                    <td className="font-mono text-xs text-right px-5 py-3">{row.commission}</td>
-                    <td className="font-mono text-sm text-acid font-bold text-right px-5 py-3">{row.annual}</td>
+          <div className="overflow-x-auto">
+            <div className="border border-v-border2 rounded-xl overflow-hidden min-w-[420px]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-v-border2 bg-white/3">
+                    <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">REFERRAL</th>
+                    <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">PRICE</th>
+                    <th className="text-right font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">YOUR CUT</th>
+                    <th className="text-right font-mono text-[10px] tracking-widest text-acid px-3 py-2 md:px-5 md:py-3">ANNUAL</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {COMMISSION_TABLE.map((row, i) => (
+                    <tr key={row.plan} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
+                      <td className="font-mono text-xs px-3 py-2.5 md:px-5 md:py-3">{row.plan}</td>
+                      <td className="font-mono text-xs text-v-muted text-right px-3 py-2.5 md:px-5 md:py-3">{row.price}</td>
+                      <td className="font-mono text-xs text-right px-3 py-2.5 md:px-5 md:py-3">{row.commission}</td>
+                      <td className="font-mono text-sm text-acid font-bold text-right px-3 py-2.5 md:px-5 md:py-3">{row.annual}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       {/* How it works */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[700px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4 text-center">HOW IT WORKS</h2>
           <div className="relative">
@@ -220,7 +222,7 @@ export default function AffiliatesPage() {
       </section>
 
       {/* Perks */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[700px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4 text-center">WHAT YOU GET</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -244,7 +246,7 @@ export default function AffiliatesPage() {
       </section>
 
       {/* FAQ */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[700px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">FAQ</h2>
           <div className="space-y-3">
@@ -262,7 +264,7 @@ export default function AffiliatesPage() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[600px] mx-auto text-center border border-acid/20 rounded-xl p-8 bg-acid/3">
           <DollarSign className="w-10 h-10 text-acid mx-auto mb-3" />
           <h2 className="font-mono text-2xl font-bold mb-3">Start earning today</h2>

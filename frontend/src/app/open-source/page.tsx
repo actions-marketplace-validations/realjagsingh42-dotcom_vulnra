@@ -109,7 +109,7 @@ export default function OpenSourcePage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <Github className="w-3 h-3 text-acid" />
@@ -125,7 +125,7 @@ export default function OpenSourcePage() {
       </section>
 
       {/* OSS Engine cards */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">INTEGRATED OPEN-SOURCE ENGINES</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -161,41 +161,43 @@ export default function OpenSourcePage() {
       </section>
 
       {/* OSS vs VULNRA */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[700px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">OSS TOOLS vs VULNRA PLATFORM</h2>
-          <div className="border border-v-border2 rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-v-border2 bg-white/3">
-                  <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-5 py-3">FEATURE</th>
-                  <th className="font-mono text-[10px] tracking-widest text-v-muted px-4 py-3 text-center">OSS TOOLS</th>
-                  <th className="font-mono text-[10px] tracking-widest text-acid px-4 py-3 text-center">VULNRA ★</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map((row, i) => (
-                  <tr key={row.feature} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
-                    <td className="font-mono text-xs px-5 py-3">{row.feature}</td>
-                    <td className="px-4 py-3 text-center">
-                      {row.oss === true ? <Check className="w-4 h-4 text-acid mx-auto" /> :
-                       row.oss === "partial" ? <span className="font-mono text-[10px] text-yellow-400">PARTIAL</span> :
-                       <X className="w-4 h-4 text-v-red/50 mx-auto" />}
-                    </td>
-                    <td className="px-4 py-3 text-center bg-acid/3">
-                      {row.vulnra === true ? <Check className="w-4 h-4 text-acid mx-auto" /> :
-                       <X className="w-4 h-4 text-v-red/50 mx-auto" />}
-                    </td>
+          <div className="overflow-x-auto">
+            <div className="border border-v-border2 rounded-xl overflow-hidden min-w-[380px]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-v-border2 bg-white/3">
+                    <th className="text-left font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-5 md:py-3">FEATURE</th>
+                    <th className="font-mono text-[10px] tracking-widest text-v-muted px-3 py-2 md:px-4 md:py-3 text-center">OSS TOOLS</th>
+                    <th className="font-mono text-[10px] tracking-widest text-acid px-3 py-2 md:px-4 md:py-3 text-center">VULNRA ★</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {COMPARISON.map((row, i) => (
+                    <tr key={row.feature} className={`border-b border-v-border2 last:border-0 ${i % 2 === 0 ? "" : "bg-white/1"}`}>
+                      <td className="font-mono text-xs px-3 py-2.5 md:px-5 md:py-3">{row.feature}</td>
+                      <td className="px-3 py-2.5 md:px-4 md:py-3 text-center">
+                        {row.oss === true ? <Check className="w-4 h-4 text-acid mx-auto" /> :
+                         row.oss === "partial" ? <span className="font-mono text-[10px] text-yellow-400">PARTIAL</span> :
+                         <X className="w-4 h-4 text-v-red/50 mx-auto" />}
+                      </td>
+                      <td className="px-3 py-2.5 md:px-4 md:py-3 text-center bg-acid/3">
+                        {row.vulnra === true ? <Check className="w-4 h-4 text-acid mx-auto" /> :
+                         <X className="w-4 h-4 text-v-red/50 mx-auto" />}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[700px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">FAQ</h2>
           <div className="space-y-3">
@@ -213,7 +215,7 @@ export default function OpenSourcePage() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[600px] mx-auto text-center border border-acid/20 rounded-xl p-8 bg-acid/3">
           <Shield className="w-8 h-8 text-acid mx-auto mb-3" />
           <h2 className="font-mono text-2xl font-bold mb-3">All engines. Zero setup.</h2>

@@ -71,7 +71,7 @@ export default function DPDPPage() {
       <PublicNav />
 
       {/* Hero */}
-      <section className="pt-20 pb-12 px-6 md:px-12">
+      <section className="pt-20 pb-12 px-4 sm:px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-acid/30 bg-acid/5 mb-6">
             <Shield className="w-3 h-3 text-acid" />
@@ -87,7 +87,7 @@ export default function DPDPPage() {
       </section>
 
       {/* Stats */}
-      <section className="px-6 md:px-12 pb-12">
+      <section className="px-4 sm:px-6 md:px-12 pb-12">
         <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { num: "₹250Cr", label: "Max fine per violation" },
@@ -104,7 +104,7 @@ export default function DPDPPage() {
       </section>
 
       {/* DPDP Sections table */}
-      <section className="px-6 md:px-12 pb-14">
+      <section className="px-4 sm:px-6 md:px-12 pb-14">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">DPDP OBLIGATIONS & VULNRA COVERAGE</h2>
           <div className="space-y-4">
@@ -139,7 +139,7 @@ export default function DPDPPage() {
       </section>
 
       {/* Compliance checklist */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[1000px] mx-auto">
           <h2 className="font-mono text-xs tracking-widest text-v-muted mb-4">AI OPERATOR DPDP CHECKLIST</h2>
           <div className="border border-v-border2 rounded-xl overflow-hidden">
@@ -159,7 +159,7 @@ export default function DPDPPage() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 md:px-12 pb-20">
+      <section className="px-4 sm:px-6 md:px-12 pb-20">
         <div className="max-w-[700px] mx-auto text-center border border-acid/20 rounded-xl p-8 bg-acid/3">
           <AlertTriangle className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
           <h2 className="font-mono text-2xl font-bold mb-3">Penalties up to ₹250 Crore per violation</h2>
