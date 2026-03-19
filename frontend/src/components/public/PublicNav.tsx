@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Shield, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 export default function PublicNav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,12 +23,25 @@ export default function PublicNav() {
       }`}
     >
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 group shrink-0">
-        <div className="w-6 h-6 rounded bg-acid flex items-center justify-center group-hover:shadow-[0_0_12px_rgba(184,255,87,0.5)] transition-all">
-          <Shield className="w-3 h-3 text-black" />
+      <Link href="/" className="flex items-center gap-2 shrink-0">
+        <div className="vulnra-logo-mark" style={{
+          width: 28, height: 28, borderRadius: 5,
+          background: "#060608", border: "1.5px solid #b8ff57",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexShrink: 0, position: "relative",
+          animation: "neonBoxPulse 2s ease-in-out infinite",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+            <rect x="1" y="1" width="7.5" height="7.5" rx=".8" fill="#b8ff57" style={{animation:"neonSqSeq 2.4s ease-in-out infinite 0s"}} />
+            <rect x="11.5" y="1" width="7.5" height="7.5" rx=".8" fill="#b8ff57" style={{animation:"neonSqSeq 2.4s ease-in-out infinite 0.3s"}} />
+            <rect x="1" y="11.5" width="7.5" height="7.5" rx=".8" fill="#b8ff57" style={{animation:"neonSqSeq 2.4s ease-in-out infinite 0.6s"}} />
+            <rect x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" fill="#b8ff57" style={{animation:"neonSqSeq 2.4s ease-in-out infinite 0.9s"}} />
+            <circle cx="14.25" cy="16.75" r="1.1" fill="#b8ff57" style={{animation:"neonDotPulse 1.2s ease-in-out infinite 0s"}} />
+            <circle cx="17.25" cy="16.75" r="1.1" fill="#b8ff57" style={{animation:"neonDotPulse 1.2s ease-in-out infinite 0.5s"}} />
+          </svg>
         </div>
         <span className="font-mono text-sm font-bold tracking-wider">
-          VULNRA
+          VULN<span style={{color:"#b8ff57"}}>RA</span>
         </span>
       </Link>
 

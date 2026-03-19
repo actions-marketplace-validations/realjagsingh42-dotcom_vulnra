@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Shield } from "lucide-react";
 
 const FOOTER_LINKS = [
   ["Features", "/#features"],
@@ -21,11 +20,23 @@ export default function PublicFooter() {
     <footer className="border-t border-v-border2 px-4 sm:px-6 md:px-12 py-10">
       <div className="max-w-[1200px] mx-auto flex flex-col items-center gap-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-5 h-5 rounded bg-acid flex items-center justify-center">
-            <Shield className="w-2.5 h-2.5 text-black" />
+        <Link href="/" className="flex items-center gap-2">
+          <div style={{
+            width: 24, height: 24, borderRadius: 4,
+            background: "#060608", border: "1.5px solid #b8ff57",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, animation: "neonBoxPulse 2s ease-in-out infinite",
+          }}>
+            <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+              <rect x="1" y="1" width="7.5" height="7.5" rx=".8" fill="#b8ff57" />
+              <rect x="11.5" y="1" width="7.5" height="7.5" rx=".8" fill="#b8ff57" />
+              <rect x="1" y="11.5" width="7.5" height="7.5" rx=".8" fill="#b8ff57" />
+              <rect x="11.5" y="11.5" width="7.5" height="7.5" rx=".8" fill="#b8ff57" />
+            </svg>
           </div>
-          <span className="font-mono text-sm font-bold tracking-wider">VULNRA</span>
+          <span className="font-mono text-sm font-bold tracking-wider">
+            VULN<span style={{color:"#b8ff57"}}>RA</span>
+          </span>
         </Link>
 
         {/* Links — 3-col grid on mobile, flex-wrap on desktop */}

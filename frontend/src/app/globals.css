@@ -73,6 +73,28 @@
     0% { left: -100%; }
     100% { left: 200%; }
   }
+
+  @keyframes neonSqSeq {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 3px rgba(184, 255, 87, .9)) drop-shadow(0 0 7px rgba(184, 255, 87, .5));
+    }
+    40%, 60% {
+      opacity: .08;
+      filter: none;
+    }
+  }
+
+  @keyframes neonDotPulse {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 4px #b8ff57) drop-shadow(0 0 8px rgba(184, 255, 87, .6));
+    }
+    50% {
+      opacity: .1;
+      filter: none;
+    }
+  }
 }
 
 :root {
