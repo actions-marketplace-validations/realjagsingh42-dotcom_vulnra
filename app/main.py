@@ -174,6 +174,10 @@ def health():
     logger.info("Health check endpoint called")
     return {"status": "healthy", "version": settings.version}
 
+@app.get("/")
+def root():
+    return {"service": "VULNRA API", "status": "ok", "docs": "/docs"}
+
 
 # ── Server Entry Point ────────────────────────────────────────────────────────
 if __name__ == "__main__":
