@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { User } from "@supabase/supabase-js";
 import {
-  Shield, LogOut, Server, Key, Radio, History, Database,
+  LogOut, Server, Key, Radio, History, Database,
   Users, Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle,
   CheckCircle2, Building2, Crown, UserCircle, Clock, Filter,
   RefreshCw, Loader2, Mail
@@ -11,6 +11,7 @@ import {
 import { signOut } from "@/app/auth/actions";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
+import VulnraLogo from "@/components/VulnraLogo";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://vulnra-production.up.railway.app";
 
@@ -248,12 +249,7 @@ export default function OrgDashboard({ user }: { user: User }) {
       {/* Top Nav */}
       <nav className="h-13 bg-v-bg1 border-b border-v-border2 flex items-center justify-between px-5 z-50 shrink-0">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 font-mono text-sm font-bold tracking-wider">
-            <div className="w-6 h-6 rounded bg-acid flex items-center justify-center">
-              <Shield className="w-3 h-3 text-black" />
-            </div>
-            VULNRA <em className="text-acid not-italic tracking-tighter ml-1">PLATFORM</em>
-          </div>
+          <VulnraLogo suffix="PLATFORM" />
           <div className="h-5 w-[1px] bg-v-border mx-2" />
           <a href="/scanner" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors"><Shield className="w-3.5 h-3.5" />SCANNER</a>
           <div className="h-5 w-[1px] bg-v-border mx-2" />

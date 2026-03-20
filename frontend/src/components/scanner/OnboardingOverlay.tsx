@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Shield, ChevronRight, ChevronLeft, X, Zap, Target, Layers } from "lucide-react";
+import { ChevronRight, ChevronLeft, X, Zap, Target, Layers } from "lucide-react";
+import VulnraLogo from "@/components/VulnraLogo";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/client";
 
@@ -158,11 +159,9 @@ export default function OnboardingOverlay({
         {/* Header */}
         <div className="px-8 pt-7 pb-0">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-5 h-5 rounded bg-acid flex items-center justify-center">
-              <Shield className="w-3 h-3 text-black" />
-            </div>
+            <VulnraLogo size="sm" />
             <span className="text-[9px] font-mono text-acid tracking-widest uppercase">
-              VULNRA — Security Orientation
+              — Security Orientation
             </span>
           </div>
           <div className="h-px bg-v-border2 mt-4 mb-5" />

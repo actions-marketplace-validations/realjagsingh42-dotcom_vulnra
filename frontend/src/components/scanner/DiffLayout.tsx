@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
+import VulnraLogo from "@/components/VulnraLogo";
 import {
-  ArrowLeft, Shield, TrendingDown, TrendingUp, Minus,
+  ArrowLeft, TrendingDown, TrendingUp, Minus,
   AlertTriangle, CheckCircle2, Loader2, ExternalLink,
 } from "lucide-react";
 
@@ -250,12 +251,7 @@ export default function DiffLayout() {
                 <ExternalLink className="w-3 h-3" /> View scan
               </a>
             )}
-            <div className="flex items-center gap-2 text-sm font-mono font-bold tracking-wider">
-              <div className="w-6 h-6 rounded bg-acid flex items-center justify-center">
-                <Shield className="w-3 h-3 text-black" />
-              </div>
-              VULNRA
-            </div>
+            <VulnraLogo />
           </div>
         </div>
 
