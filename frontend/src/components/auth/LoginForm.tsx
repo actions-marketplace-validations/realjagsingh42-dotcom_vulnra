@@ -158,7 +158,7 @@ export default function LoginForm({ message }: { message?: string }) {
         <div className="flex flex-col gap-1.75">
           <div className="flex justify-between items-center">
             <label className="text-[9px] font-mono tracking-widest uppercase text-v-muted2">Authorization Key</label>
-            <Link href="#" className="text-[9.5px] font-mono text-v-muted2 hover:text-acid transition-colors">Forgot Key?</Link>
+            <Link href="/forgot-password" className="text-[9.5px] font-mono text-v-muted2 hover:text-acid transition-colors">Forgot Key?</Link>
           </div>
           <div className="relative flex items-center group">
             <Lock className="absolute left-3.25 w-4 h-4 text-v-muted2 group-focus-within:text-acid transition-colors" />

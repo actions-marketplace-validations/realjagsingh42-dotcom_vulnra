@@ -3,15 +3,19 @@ import Link from "next/link";
 const FOOTER_LINKS = [
   ["Features", "/#features"],
   ["Pricing", "/pricing"],
+  ["Blog", "/blog"],
   ["Docs", "/docs"],
+  ["Integrations", "/integrations"],
   ["Compliance", "/compliance"],
   ["Status", "/status"],
+  ["Changelog", "/changelog"],
   ["Compare", "/compare"],
   ["EU AI Act", "/eu-ai-act"],
   ["DPDP", "/dpdp"],
   ["About", "/about"],
   ["Sign In", "/login"],
   ["Sign Up", "/signup"],
+  ["Privacy", "/privacy"],
   ["Terms", "/terms"],
 ];
 
