@@ -1,14 +1,15 @@
 import logging
+import re
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings, validate_config, logger
-from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics
+from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics, quick_scan
 from app.core.rate_limiter import TIER_LIMITS, set_limiter
 from app.core.security import get_current_user
 
@@ -48,14 +49,47 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["X-VULNRA-Signature-256"],
-)
+# Patterns that are always allowed regardless of ALLOWED_ORIGINS env var
+_CORS_ALLOWED_PATTERNS = [
+    re.compile(r"^https?://localhost(:\d+)?$"),
+    re.compile(r"^https?://127\.0\.0\.1(:\d+)?$"),
+    re.compile(r"^https://[a-z0-9\-]+\.up\.railway\.app$"),   # any Railway service
+    re.compile(r"^https://[a-z0-9\-]+\.railway\.app$"),
+]
+
+def _is_origin_allowed(origin: str) -> bool:
+    if not origin:
+        return False
+    if origin in settings.allowed_origins:
+        return True
+    return any(p.match(origin) for p in _CORS_ALLOWED_PATTERNS)
+
+_CORS_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+_CORS_HEADERS = "Authorization, Content-Type, X-Requested-With, Accept, Origin"
+
+@app.middleware("http")
+async def cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin", "")
+    allowed = _is_origin_allowed(origin)
+
+    if request.method == "OPTIONS":
+        # Handle preflight immediately — never reach route handlers
+        resp = Response(status_code=204)
+        if allowed and origin:
+            resp.headers["Access-Control-Allow-Origin"] = origin
+            resp.headers["Access-Control-Allow-Credentials"] = "true"
+            resp.headers["Access-Control-Allow-Methods"] = _CORS_METHODS
+            resp.headers["Access-Control-Allow-Headers"] = _CORS_HEADERS
+            resp.headers["Access-Control-Max-Age"] = "86400"
+        return resp
+
+    response = await call_next(request)
+    if allowed and origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Expose-Headers"] = "X-VULNRA-Signature-256"
+    return response
 
 # ── Security Middleware ───────────────────────────────────────────────────────
 @app.middleware("http")
@@ -160,6 +194,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 app.include_router(scans.router, tags=["scans"])
+app.include_router(quick_scan.router, tags=["quick-scan"])   # public, no auth
 app.include_router(billing.router, prefix="/billing", tags=["billing"])
 app.include_router(api_keys.router, tags=["api-keys"])
 app.include_router(monitor.router, tags=["monitor"])

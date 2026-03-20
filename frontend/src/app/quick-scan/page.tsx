@@ -163,7 +163,7 @@ function QuickScanInner() {
 
     /* API call */
     try {
-      const res = await fetch(`${API_BASE}/scan`, {
+      const res = await fetch(`${API_BASE}/scan/quick`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ target_url: url }),
@@ -393,6 +393,16 @@ function QuickScanInner() {
             <div className="text-center mb-2">
               <p className="font-mono text-[8.5px] tracking-[0.2em] uppercase text-white/30 mb-1">Scanned</p>
               <p className="font-mono text-[11px] text-[#b8ff57] break-all">{currentTarget}</p>
+            </div>
+
+            {/* Demo notice */}
+            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded border border-[#b8ff57]/20 bg-[#b8ff57]/5">
+              <span className="text-[#b8ff57] text-[11px] shrink-0">⚡</span>
+              <p className="font-mono text-[9.5px] text-white/40 leading-snug">
+                Quick scan preview — representative findings based on common LLM vulnerabilities.{" "}
+                <Link href="/signup" className="text-[#b8ff57] underline underline-offset-4">Sign up free</Link>{" "}
+                to run a real scan with Garak + DeepTeam probing your actual endpoint.
+              </p>
             </div>
 
             {/* A — Risk Score */}
