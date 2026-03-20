@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings, logger
 from app.core.security import get_current_user
 from app.core.utils import is_safe_url
-from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_tier, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url
+from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_tier, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url, create_scan_record, save_scan_result
 from app.services.scan_service import run_scan_internal
 from app.services.mcp_scanner import scan_mcp_server, MCPScanResult
 
@@ -397,7 +397,10 @@ async def start_scan(
         raise HTTPException(status_code=400, detail="Invalid target URL (private IPs or local hostnames blocked).")
 
     scan_id = str(uuid.uuid4())
-    
+
+    # Create initial DB row NOW so polling works immediately
+    create_scan_record(scan_id, url, tier, user_id, scan_type="standard")
+
     # Start scan in background
     background_tasks.add_task(
         run_scan_internal, scan_id, url, tier, user_id,
@@ -451,16 +454,19 @@ async def start_multi_turn_scan(
         }
     
     scan_id = str(uuid.uuid4())
-    
-    # Start multi-turn scan in background
-    background_tasks.add_task(
-        run_multi_turn_scan,
-        scan_id,
-        str(scan_data.url),
-        scan_data.attack_type,
-        scan_data.tier
-    )
-    
+    url_str = str(scan_data.url)
+
+    # Create initial DB row NOW so polling works immediately
+    create_scan_record(scan_id, url_str, scan_data.tier, user_id,
+                       scan_type=f"{scan_data.attack_type}_multi_turn")
+
+    def _run_and_save():
+        result = run_multi_turn_scan(scan_id, url_str, scan_data.attack_type, scan_data.tier)
+        result["user_id"] = user_id
+        save_scan_result(scan_id, url_str, scan_data.tier, result)
+
+    background_tasks.add_task(_run_and_save)
+
     return {
         "scan_id": scan_id,
         "status": "queued",

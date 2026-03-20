@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime, timezone
 from typing import Optional
 from supabase import create_client, Client
 from app.core.config import settings
@@ -32,26 +33,44 @@ def get_user_tier(user_id: str) -> str:
         logger.error(f"Tier lookup failed for {user_id}: {e}")
         return "free"
 
+def create_scan_record(scan_id: str, url: str, tier: str, user_id: str, scan_type: str = "standard"):
+    """Insert an initial 'scanning' row so the frontend can poll immediately."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return
+        sb.table("scans").insert({
+            "id":         scan_id,
+            "user_id":    user_id,
+            "target_url": url,
+            "tier":       tier,
+            "status":     "scanning",
+            "scan_engine": scan_type,
+        }).execute()
+    except Exception as e:
+        logger.error(f"Failed to create scan record {scan_id}: {e}")
+
 def save_scan_result(scan_id: str, url: str, tier: str, data: dict):
     """Persist scan metadata to Supabase."""
     try:
         sb = get_supabase()
         if not sb:
             return
-            
+
         scan_engines = data.get("scan_engines", [])
-        
+        now_iso = datetime.now(timezone.utc).isoformat()
+
         sb.table("scans").upsert({
             "id":           scan_id,
             "user_id":      data.get("user_id", "00000000-0000-0000-0000-000000000000"),
             "target_url":   url,
             "tier":         tier,
             "status":       data.get("status"),
-            "scan_engine":  ",".join(scan_engines) if scan_engines else "none",
+            "scan_engine":  ",".join(scan_engines) if scan_engines else data.get("scan_engine", "none"),
             "risk_score":   data.get("risk_score"),
             "findings":     data.get("findings"),
             "compliance":   data.get("compliance"),
-            "completed_at": "now()",
+            "completed_at": now_iso,
         }).execute()
     except Exception as e:
         logger.error(f"Failed to save scan {scan_id} to Supabase: {e}")
