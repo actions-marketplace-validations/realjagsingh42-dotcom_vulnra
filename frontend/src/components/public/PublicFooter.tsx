@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const FOOTER_LINKS = [
+  ["Quick Scan", "/quick-scan"],
   ["Features", "/#features"],
   ["Pricing", "/pricing"],
   ["Enterprise", "/enterprise"],

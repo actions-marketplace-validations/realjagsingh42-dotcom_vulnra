@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Shield,
@@ -112,9 +113,24 @@ const TIERS_PREVIEW = [
 /* ─── Main Component ───────────────────────────────────────── */
 
 export default function LandingPage() {
+  const router = useRouter();
   const [shownLines, setShownLines] = useState(0);
   const terminalRef = useRef<HTMLDivElement>(null);
   const animatedRef = useRef(false);
+  const [scanUrl, setScanUrl] = useState("");
+  const [scanUrlError, setScanUrlError] = useState(false);
+
+  function handleFreeScan(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = scanUrl.trim();
+    if (!trimmed) { setScanUrlError(true); return; }
+    try {
+      const parsed = new URL(trimmed);
+      if (!["http:", "https:"].includes(parsed.protocol)) { setScanUrlError(true); return; }
+    } catch { setScanUrlError(true); return; }
+    setScanUrlError(false);
+    router.push(`/quick-scan?url=${encodeURIComponent(trimmed)}`);
+  }
 
   useEffect(() => {
     const el = terminalRef.current;
@@ -172,28 +188,71 @@ export default function LandingPage() {
             Every vulnerability mapped to OWASP, MITRE ATLAS, and EU AI Act.
           </p>
 
-          {/* CTA buttons */}
-          <div className="flex items-center justify-center gap-4 flex-wrap opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.38s]">
-            <Link
-              href="/signup"
-              className="font-mono text-[11px] font-bold tracking-widest bg-acid text-black px-8 py-3.5 rounded-sm hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(184,255,87,0.35)] transition-all inline-flex items-center gap-2"
-              style={{
-                border: "1px solid rgba(184,255,87,0.9)",
-                animation: "neonBoxPulse 3s ease-in-out infinite",
-              }}
+          {/* ── Free scan widget ────────────────────────── */}
+          <form
+            onSubmit={handleFreeScan}
+            className="opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.38s] w-full max-w-[600px] mx-auto"
+          >
+            <div
+              className={`flex items-center gap-0 rounded-sm overflow-hidden border transition-colors ${
+                scanUrlError
+                  ? "border-v-red/70 shadow-[0_0_14px_rgba(255,80,80,0.18)]"
+                  : "border-acid/50 shadow-[0_0_18px_rgba(184,255,87,0.12)] focus-within:border-acid focus-within:shadow-[0_0_22px_rgba(184,255,87,0.22)]"
+              }`}
+              style={{ background: "rgba(6,6,8,0.92)" }}
             >
-              START FOR FREE <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+              <span className="font-mono text-[10px] text-acid/60 pl-4 pr-2 shrink-0 hidden sm:block">$</span>
+              <input
+                type="text"
+                value={scanUrl}
+                onChange={(e) => { setScanUrl(e.target.value); setScanUrlError(false); }}
+                placeholder="https://your-llm-api.example.com/v1/chat/completions"
+                className="flex-1 bg-transparent font-mono text-[11px] text-foreground placeholder:text-v-muted2 py-3.5 px-3 sm:px-0 outline-none min-w-0"
+                spellCheck={false}
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                className="shrink-0 font-mono text-[10px] font-bold tracking-widest bg-acid text-black px-5 py-3.5 hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                SCAN FREE →
+              </button>
+            </div>
+            {scanUrlError && (
+              <p className="font-mono text-[9.5px] text-v-red mt-1.5 text-left pl-1">
+                Enter a valid HTTPS URL to your LLM API endpoint
+              </p>
+            )}
+            <div className="flex items-center justify-center gap-6 mt-3">
+              {["No account required", "Results in ~60 seconds", "Free forever"].map((t) => (
+                <span key={t} className="flex items-center gap-1.5 font-mono text-[9.5px] text-v-muted2">
+                  <span className="text-acid text-[10px]">✓</span>{t}
+                </span>
+              ))}
+            </div>
+            <p className="font-mono text-[10px] text-v-muted2 mt-2 text-center leading-relaxed">
+              Free scan shows risk score + 1 finding preview.{" "}
+              <Link href="/signup" className="text-acid underline underline-offset-4">Sign up free</Link>{" "}
+              to unlock all findings.
+            </p>
+          </form>
+
+          {/* Secondary CTA */}
+          <div className="mt-4 opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.44s] flex items-center justify-center gap-5">
             <a
               href="#features"
-              className="font-mono text-[11px] tracking-widest text-v-muted border border-v-border px-8 py-3.5 rounded-sm hover:border-white/20 hover:text-foreground hover:-translate-y-0.5 transition-all"
+              className="font-mono text-[10.5px] tracking-widest text-v-muted2 hover:text-acid transition-colors flex items-center gap-1.5"
             >
               SEE HOW IT WORKS ↓
             </a>
+            <span className="w-px h-3 bg-v-border2" />
+            <Link href="/pricing" className="font-mono text-[10.5px] tracking-widest text-v-muted2 hover:text-acid transition-colors">
+              VIEW PLANS
+            </Link>
           </div>
 
           {/* Compliance badge strip */}
-          <div className="mt-14 flex flex-wrap items-center justify-center gap-2 opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.48s]">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-2 opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.58s]">
             {COMPLIANCE_BADGES.map((b) => (
               <span
                 key={b}
@@ -205,7 +264,7 @@ export default function LandingPage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-12 grid grid-cols-3 gap-8 max-w-[480px] mx-auto opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.56s]">
+          <div className="mt-10 grid grid-cols-3 gap-8 max-w-[480px] mx-auto opacity-0 animate-[fadeUp_0.5s_ease_forwards_0.66s]">
             {[
               { num: "50+", label: "Probe types" },
               { num: "60s", label: "First scan" },

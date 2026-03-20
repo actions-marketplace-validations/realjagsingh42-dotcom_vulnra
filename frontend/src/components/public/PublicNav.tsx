@@ -72,7 +72,7 @@ export default function PublicNav() {
           SIGN IN
         </Link>
         <Link
-          href="/signup"
+          href="/quick-scan"
           className="font-mono text-[10.5px] font-semibold tracking-widest bg-acid text-black px-4 py-2 rounded-sm hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(184,255,87,0.28)] transition-all"
         >
           START FREE
@@ -82,10 +82,10 @@ export default function PublicNav() {
       {/* Mobile right side: Sign In + Hamburger */}
       <div className="flex md:hidden items-center gap-3">
         <Link
-          href="/signup"
+          href="/quick-scan"
           className="font-mono text-[10px] font-semibold tracking-widest bg-acid text-black px-3 py-1.5 rounded-sm"
         >
-          START FREE
+          SCAN FREE
         </Link>
         <button
           className="p-1 text-v-muted hover:text-acid transition-colors"
@@ -129,11 +129,11 @@ export default function PublicNav() {
           </Link>
           <div className="border-t border-v-border2 pt-3">
             <Link
-              href="/signup"
+              href="/quick-scan"
               className="block font-mono text-[11px] font-semibold tracking-widest bg-acid text-black px-4 py-3 rounded-sm text-center"
               onClick={() => setMenuOpen(false)}
             >
-              START FREE — NO CREDIT CARD
+              SCAN FREE — NO ACCOUNT NEEDED
             </Link>
           </div>
         </div>
