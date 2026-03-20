@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List
+from typing import List, Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -19,14 +19,33 @@ class Settings(BaseSettings):
 
     # Security
     secret_key: str = Field(default="dev-secret-change-me", env="SECRET_KEY")
-    allowed_origins: List[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "https://vulnra.ai",
-        "https://vulnra-production.up.railway.app",
-    ]
+
+    # CORS — comma-separated string in env, e.g.:
+    #   ALLOWED_ORIGINS=https://vulnra.ai,https://daring-art.up.railway.app
+    # Falls back to safe defaults + whatever FRONTEND_URL is set to.
+    allowed_origins_env: Optional[str] = Field(default=None, env="ALLOWED_ORIGINS")
+
+    @property
+    def allowed_origins(self) -> List[str]:
+        base = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+            "https://vulnra.ai",
+            "https://www.vulnra.ai",
+            "https://vulnra-production.up.railway.app",
+        ]
+        # Always include whatever FRONTEND_URL is set to
+        if self.frontend_url and self.frontend_url not in base:
+            base.append(self.frontend_url)
+        # Append any extra origins from the ALLOWED_ORIGINS env var
+        if self.allowed_origins_env:
+            extras = [o.strip() for o in self.allowed_origins_env.split(",") if o.strip()]
+            for origin in extras:
+                if origin not in base:
+                    base.append(origin)
+        return base
 
     # Redis
     redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
