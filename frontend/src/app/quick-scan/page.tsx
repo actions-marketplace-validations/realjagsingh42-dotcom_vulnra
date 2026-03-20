@@ -415,7 +415,7 @@ function QuickScanInner() {
               >
                 {riskLabel(Number(scanResult.risk_score ?? 0))}
               </span>
-              {scanResult.findings && Array.isArray(scanResult.findings) && (
+              {Array.isArray(scanResult.findings) && (
                 <p className="font-mono text-[10px] text-white/30 mt-4">
                   {(scanResult.findings as unknown[]).length} findings detected
                 </p>
@@ -481,7 +481,7 @@ function QuickScanInner() {
                 href="/signup"
                 className="block text-center font-mono text-[9.5px] tracking-widest text-white/30 hover:text-[#b8ff57] transition-colors py-1"
               >
-                Sign up free to unlock all {scanResult.findings && Array.isArray(scanResult.findings)
+                Sign up free to unlock all {Array.isArray(scanResult.findings)
                   ? (scanResult.findings as unknown[]).length
                   : "all"} findings →
               </Link>
