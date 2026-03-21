@@ -31,6 +31,21 @@ function mkEvt(kind: TerminalEvent["kind"], text: string, extra?: Partial<Termin
   return { id: Math.random().toString(36).slice(2), ts: Date.now(), kind, text, ...extra };
 }
 
+const VALID_SEVERITIES = new Set(["CRITICAL", "HIGH", "MEDIUM", "LOW"]);
+
+/** Returns true only for findings that should appear as cards in the terminal stream. */
+function isTerminalFinding(f: any): boolean {
+  if (!f) return false;
+  // Drop endpoint_error findings — they appear in the amber warning banner instead
+  if (f.type === "endpoint_error") return false;
+  if (f.category === "endpoint_error") return false;
+  // Drop INFO-severity and unknown-severity items (no real vulnerability)
+  if (!VALID_SEVERITIES.has(f.severity)) return false;
+  // Must have a category label to display
+  if (!f.category) return false;
+  return true;
+}
+
 function mkFinding(f: any): TerminalEvent {
   return {
     id: Math.random().toString(36).slice(2),
@@ -137,7 +152,7 @@ export default function ScannerLayout({ user }: { user: User }) {
         setEvents([
           mkEvt("init",     `LOADED_SCAN: ${scanId}`),
           mkEvt("init",     `TARGET: ${data.target_url}`),
-          ...((data.findings || []) as any[]).map(mkFinding),
+          ...((data.findings || []) as any[]).filter(isTerminalFinding).map(mkFinding),
           mkEvt("complete", `RISK_SCORE: ${data.risk_score} · SCAN COMPLETE`),
         ]);
       }
@@ -317,7 +332,9 @@ export default function ScannerLayout({ user }: { user: User }) {
               // Auto-switch to findings tab on mobile when scan completes
               setMobilePanel("findings");
 
-              const findingEvts = ((pollData.findings || []) as any[]).map(mkFinding);
+              const findingEvts = ((pollData.findings || []) as any[])
+                .filter(isTerminalFinding)
+                .map(mkFinding);
 
               if (pollData.conversation) {
                 setEvents(prev => [...prev,

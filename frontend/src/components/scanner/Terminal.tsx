@@ -258,7 +258,13 @@ export default function Terminal({ events, isScanning }: TerminalProps) {
           </div>
         ) : (
           events.map(evt => {
-            if (evt.kind === "finding") return <FindingCard key={evt.id} evt={evt} />;
+            if (evt.kind === "finding") {
+              // Skip blank cards: must have a real severity and a category name
+              const validSev = evt.severity && ["CRITICAL","HIGH","MEDIUM","LOW"].includes(evt.severity);
+              const hasContent = !!(evt.category && evt.category !== "endpoint_error" && validSev);
+              if (!hasContent) return null;
+              return <FindingCard key={evt.id} evt={evt} />;
+            }
             if (evt.kind === "probe")   return <ProbeRow    key={evt.id} evt={evt} />;
             return                             <PlainRow    key={evt.id} evt={evt} />;
           })
