@@ -34,18 +34,21 @@ function GitHubIcon() {
 function OAuthButton({
   provider,
   label,
+  redirectTo,
 }: {
   provider: "github" | "google";
   label: string;
+  redirectTo?: string;
 }) {
   const [loading, setLoading] = useState(false);
 
   const handleClick = async () => {
     setLoading(true);
     const supabase = createClient();
+    const next = redirectTo || "/scanner";
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/scanner` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
   };
 
@@ -72,11 +75,13 @@ function OAuthButton({
 }
 
 /* ── Main form ── */
-export default function LoginForm({ message }: { message?: string }) {
+export default function LoginForm({ message, redirectTo }: { message?: string; redirectTo?: string }) {
   const router = useRouter();
   const [showPw, setShowPw]   = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError]     = useState<string | null>(null);
+
+  const afterLoginPath = redirectTo || "/scanner";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,7 +103,7 @@ export default function LoginForm({ message }: { message?: string }) {
 
     // Session cookies are now written to document.cookie by @supabase/ssr.
     // router.push sends them with the next request so the server can read them.
-    router.push("/scanner");
+    router.push(afterLoginPath);
     router.refresh();
   };
 
@@ -203,8 +208,8 @@ export default function LoginForm({ message }: { message?: string }) {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <OAuthButton provider="github" label="GITHUB" />
-          <OAuthButton provider="google" label="GOOGLE" />
+          <OAuthButton provider="github" label="GITHUB" redirectTo={afterLoginPath} />
+          <OAuthButton provider="google" label="GOOGLE" redirectTo={afterLoginPath} />
         </div>
 
         <p className="mt-4 text-center text-[10px] font-mono text-v-muted2">

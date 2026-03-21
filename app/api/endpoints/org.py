@@ -411,6 +411,162 @@ async def get_org_scans(
         raise HTTPException(status_code=500, detail="Failed to fetch org scans.")
 
 
+# ── POST /api/org/join — Accept invitation ────────────────────────────────────
+
+class AcceptInviteRequest(BaseModel):
+    token: str
+
+    @validator("token")
+    def validate_token(cls, v):
+        v = v.strip()
+        if len(v) < 10:
+            raise ValueError("Invalid invite token.")
+        return v
+
+
+@router.post("/org/join")
+async def accept_org_invite(
+    body: AcceptInviteRequest,
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Accept an organization invite.
+    Validates the token, adds the user to the org, marks the invite consumed.
+    Enterprise tier is required only at the org level — any user can accept an invite.
+    """
+    user_id = current_user["id"]
+
+    try:
+        sb = get_supabase()
+
+        # Fetch invite by token
+        inv_res = (
+            sb.table("organization_invites")
+            .select("id, org_id, email, role, expires_at, accepted_at")
+            .eq("token", body.token)
+            .maybe_single()
+            .execute()
+        )
+        invite = inv_res.data
+        if not invite:
+            raise HTTPException(status_code=404, detail="Invite not found or already used.")
+
+        if invite.get("accepted_at"):
+            raise HTTPException(status_code=409, detail="This invite has already been accepted.")
+
+        # Check expiry (expires_at is an ISO timestamp string from Supabase)
+        import datetime as _dt
+        expires_raw = invite.get("expires_at", "")
+        if expires_raw:
+            try:
+                exp_dt = _dt.datetime.fromisoformat(expires_raw.replace("Z", "+00:00"))
+                now_dt = _dt.datetime.now(_dt.timezone.utc)
+                if now_dt > exp_dt:
+                    raise HTTPException(status_code=410, detail="This invite has expired.")
+            except HTTPException:
+                raise
+            except Exception:
+                pass  # if parsing fails, proceed
+
+        org_id = invite["org_id"]
+        role   = invite.get("role", "member")
+
+        # Check not already a member
+        existing = (
+            sb.table("organization_members")
+            .select("user_id")
+            .eq("org_id", org_id)
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        if existing.data:
+            raise HTTPException(status_code=409, detail="You are already a member of this organization.")
+
+        # Add member
+        sb.table("organization_members").insert({
+            "org_id":    org_id,
+            "user_id":   user_id,
+            "role":      role,
+        }).execute()
+
+        # Mark invite accepted
+        sb.table("organization_invites").update({
+            "accepted_at": "now()",
+        }).eq("id", invite["id"]).execute()
+
+        # Fetch org name for response
+        org_res = (
+            sb.table("organizations")
+            .select("name")
+            .eq("id", org_id)
+            .maybe_single()
+            .execute()
+        )
+        org_name = (org_res.data or {}).get("name", "")
+
+        log_action(user_id, "member.joined", org_id, request, {"role": role, "invite_id": invite["id"]})
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "joined":   True,
+                "org_id":   org_id,
+                "org_name": org_name,
+                "role":     role,
+            },
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"accept_org_invite failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to accept invitation.")
+
+
+# ── GET /api/org/join — Preview invite (no auth required) ─────────────────────
+
+@router.get("/org/join")
+async def preview_org_invite(token: str):
+    """
+    Public endpoint — returns org name + role for invite preview page.
+    Does NOT require authentication so the join page can display info before login.
+    """
+    if not token or len(token.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Invalid token.")
+
+    try:
+        sb = get_supabase()
+        inv_res = (
+            sb.table("organization_invites")
+            .select("org_id, role, expires_at, accepted_at, organizations(name)")
+            .eq("token", token.strip())
+            .maybe_single()
+            .execute()
+        )
+        invite = inv_res.data
+        if not invite:
+            raise HTTPException(status_code=404, detail="Invite not found.")
+        if invite.get("accepted_at"):
+            raise HTTPException(status_code=409, detail="This invite has already been accepted.")
+
+        org_name = (invite.get("organizations") or {}).get("name", "Unknown Organization")
+
+        return JSONResponse(content={
+            "org_name": org_name,
+            "org_id":   invite["org_id"],
+            "role":     invite.get("role", "member"),
+            "valid":    True,
+        })
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"preview_org_invite failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load invite.")
+
+
 # ── GET /api/audit-logs — Audit log ───────────────────────────────────────────
 
 @router.get("/audit-logs")
