@@ -259,10 +259,16 @@ export default function Terminal({ events, isScanning }: TerminalProps) {
         ) : (
           events.map(evt => {
             if (evt.kind === "finding") {
-              // Skip blank cards: must have a real severity and a category name
-              const validSev = evt.severity && ["CRITICAL","HIGH","MEDIUM","LOW"].includes(evt.severity);
-              const hasContent = !!(evt.category && evt.category !== "endpoint_error" && validSev);
-              if (!hasContent) return null;
+              // Only render cards that have BOTH a valid severity AND
+              // at least one piece of visible content. Anything with
+              // severity "INFO" / undefined, no category, or the special
+              // "endpoint_error" category is silently dropped.
+              const VALID = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+              const validSev = !!(evt.severity && VALID.includes(evt.severity));
+              const hasCategory = !!(evt.category && evt.category !== "endpoint_error");
+              const hasBody = !!(evt.adversarialPrompt || evt.modelResponse || evt.remediation);
+              const hasHitRate = evt.hits !== undefined;
+              if (!validSev || (!hasCategory && !hasBody && !hasHitRate)) return null;
               return <FindingCard key={evt.id} evt={evt} />;
             }
             if (evt.kind === "probe")   return <ProbeRow    key={evt.id} evt={evt} />;

@@ -68,7 +68,9 @@ export default function ScannerLayout({ user }: { user: User }) {
   const searchParams = useSearchParams();
   const [isScanning, setIsScanning] = useState(false);
   const [events, setEvents] = useState<TerminalEvent[]>([]);
-  const probeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const probeIntervalRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+  const scanInProgressRef   = useRef(false);   // prevents double-fire on rapid clicks
+  const pollCompletedRef    = useRef(false);   // prevents duplicate RISK_SCORE from concurrent poll callbacks
   const [findings, setFindings] = useState<any[]>([]);
   const [multiTurnConversation, setMultiTurnConversation] = useState<any[]>([]);
   const [rateLimitInfo, setRateLimitInfo] = useState<{ limit: number; remaining: number; reset: number } | null>(null);
@@ -192,6 +194,11 @@ export default function ScannerLayout({ user }: { user: User }) {
     probes?: string[];
     vulnerabilityTypes?: string[];
   }) => {
+    // Prevent double-fire from rapid button clicks before React re-renders
+    if (scanInProgressRef.current) return;
+    scanInProgressRef.current = true;
+    pollCompletedRef.current  = false;
+
     setIsScanning(true);
     // Switch to terminal on mobile when scan starts
     setMobilePanel("terminal");
@@ -211,6 +218,7 @@ export default function ScannerLayout({ user }: { user: User }) {
       if (!session) {
         setEvents(prev => [...prev, mkEvt("error", "UNAUTHORIZED_ACCESS")]);
         setIsScanning(false);
+        scanInProgressRef.current = false;
         return;
       }
 
@@ -264,6 +272,7 @@ export default function ScannerLayout({ user }: { user: User }) {
 
         setEvents(prev => [...prev, mkEvt("error", msg)]);
         setIsScanning(false);
+        scanInProgressRef.current = false;
         return;
       }
 
@@ -282,6 +291,7 @@ export default function ScannerLayout({ user }: { user: User }) {
 
       if (!scanId) {
         setIsScanning(false);
+        scanInProgressRef.current = false;
         return;
       }
 
@@ -325,6 +335,12 @@ export default function ScannerLayout({ user }: { user: User }) {
             const pollData = await pollRes.json();
 
             if (pollData.status === "complete") {
+              // Idempotent guard — two concurrent poll requests can both see "complete"
+              // before clearInterval cancels the second one.
+              if (pollCompletedRef.current) return;
+              pollCompletedRef.current  = true;
+              scanInProgressRef.current = false;
+
               clearInterval(pollInterval);
               if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
               setIsScanning(false);
@@ -360,6 +376,9 @@ export default function ScannerLayout({ user }: { user: User }) {
               setScanWarning(pollData.warning ?? null);
 
             } else if (pollData.status === "failed") {
+              if (pollCompletedRef.current) return;
+              pollCompletedRef.current  = true;
+              scanInProgressRef.current = false;
               clearInterval(pollInterval);
               if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
               setIsScanning(false);
@@ -375,6 +394,7 @@ export default function ScannerLayout({ user }: { user: User }) {
       if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
       setEvents(prev => [...prev, mkEvt("error", `CONNECTION_FAILED: ${err.message || err}`)]);
       setIsScanning(false);
+      scanInProgressRef.current = false;
     }
   };
 
