@@ -2,17 +2,44 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
+import { signOut } from "@/app/auth/actions";
+
+interface AuthState {
+  loading: boolean;
+  email: string | null;
+}
 
 export default function PublicNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [auth, setAuth] = useState<AuthState>({ loading: true, email: null });
 
+  /* scroll shadow */
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  /* auth state */
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuth({ loading: false, email: session?.user?.email ?? null });
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuth({ loading: false, email: session?.user?.email ?? null });
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const loggedIn = !auth.loading && !!auth.email;
+  const initial = auth.email ? auth.email[0].toUpperCase() : "U";
 
   return (
     <nav
@@ -47,46 +74,75 @@ export default function PublicNav() {
 
       {/* Desktop Nav */}
       <div className="hidden md:flex items-center gap-8">
-        <Link
-          href="/#features"
-          className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
-        >
-          FEATURES
-        </Link>
-        <Link
-          href="/pricing"
-          className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
-        >
-          PRICING
-        </Link>
-        <Link
-          href="/docs"
-          className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
-        >
-          DOCS
-        </Link>
-        <Link
-          href="/login"
-          className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors"
-        >
-          SIGN IN
-        </Link>
-        <Link
-          href="/quick-scan"
-          className="font-mono text-[10.5px] font-semibold tracking-widest bg-acid text-black px-4 py-2 rounded-sm hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(184,255,87,0.28)] transition-all"
-        >
-          START FREE
-        </Link>
+        <Link href="/#features" className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors">FEATURES</Link>
+        <Link href="/pricing"   className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors">PRICING</Link>
+        <Link href="/docs"      className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors">DOCS</Link>
+
+        {auth.loading ? (
+          /* placeholder so layout doesn't jump */
+          <div className="w-20 h-5 rounded-sm bg-white/[0.04] animate-pulse" />
+        ) : loggedIn ? (
+          /* ── Logged-in state ── */
+          <div className="flex items-center gap-4">
+            <Link
+              href="/scanner"
+              className="font-mono text-[10.5px] font-semibold tracking-widest bg-acid text-black px-4 py-2 rounded-sm hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(184,255,87,0.28)] transition-all"
+            >
+              DASHBOARD →
+            </Link>
+            <Link
+              href="/settings/profile"
+              className="flex items-center gap-2 group"
+              title={auth.email ?? ""}
+            >
+              <span className="w-7 h-7 rounded-full bg-acid text-black font-mono font-bold text-[12px] flex items-center justify-center group-hover:ring-2 group-hover:ring-acid/40 transition-all">
+                {initial}
+              </span>
+              <span className="font-mono text-[11px] text-v-muted group-hover:text-foreground transition-colors max-w-[120px] truncate">
+                {auth.email?.split("@")[0]}
+              </span>
+            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="text-v-muted2 hover:text-v-red transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </form>
+          </div>
+        ) : (
+          /* ── Logged-out state ── */
+          <>
+            <Link href="/login" className="font-mono text-[11px] tracking-widest text-v-muted hover:text-acid transition-colors">SIGN IN</Link>
+            <Link
+              href="/quick-scan"
+              className="font-mono text-[10.5px] font-semibold tracking-widest bg-acid text-black px-4 py-2 rounded-sm hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(184,255,87,0.28)] transition-all"
+            >
+              START FREE
+            </Link>
+          </>
+        )}
       </div>
 
-      {/* Mobile right side: Sign In + Hamburger */}
+      {/* Mobile right side */}
       <div className="flex md:hidden items-center gap-3">
-        <Link
-          href="/quick-scan"
-          className="font-mono text-[10px] font-semibold tracking-widest bg-acid text-black px-3 py-1.5 rounded-sm"
-        >
-          SCAN FREE
-        </Link>
+        {loggedIn ? (
+          <Link
+            href="/scanner"
+            className="font-mono text-[10px] font-semibold tracking-widest bg-acid text-black px-3 py-1.5 rounded-sm"
+          >
+            DASHBOARD
+          </Link>
+        ) : (
+          <Link
+            href="/quick-scan"
+            className="font-mono text-[10px] font-semibold tracking-widest bg-acid text-black px-3 py-1.5 rounded-sm"
+          >
+            SCAN FREE
+          </Link>
+        )}
         <button
           className="p-1 text-v-muted hover:text-acid transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -96,46 +152,39 @@ export default function PublicNav() {
         </button>
       </div>
 
-      {/* Mobile Menu — solid bg, no backdrop-blur */}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="absolute top-14 inset-x-0 bg-[#0a0b0f] border-b border-v-border2 flex flex-col p-5 gap-4 md:hidden">
-          <Link
-            href="/#features"
-            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            FEATURES
-          </Link>
-          <Link
-            href="/pricing"
-            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            PRICING
-          </Link>
-          <Link
-            href="/docs"
-            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            DOCS
-          </Link>
-          <Link
-            href="/login"
-            className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1"
-            onClick={() => setMenuOpen(false)}
-          >
-            SIGN IN
-          </Link>
-          <div className="border-t border-v-border2 pt-3">
-            <Link
-              href="/quick-scan"
-              className="block font-mono text-[11px] font-semibold tracking-widest bg-acid text-black px-4 py-3 rounded-sm text-center"
-              onClick={() => setMenuOpen(false)}
-            >
-              SCAN FREE — NO ACCOUNT NEEDED
-            </Link>
-          </div>
+          <Link href="/#features" className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1" onClick={() => setMenuOpen(false)}>FEATURES</Link>
+          <Link href="/pricing"   className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1" onClick={() => setMenuOpen(false)}>PRICING</Link>
+          <Link href="/docs"      className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1" onClick={() => setMenuOpen(false)}>DOCS</Link>
+
+          {loggedIn ? (
+            <>
+              <Link href="/settings/profile" className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1" onClick={() => setMenuOpen(false)}>
+                {auth.email?.split("@")[0]} — PROFILE
+              </Link>
+              <div className="border-t border-v-border2 pt-3 flex flex-col gap-2">
+                <Link href="/scanner" className="block font-mono text-[11px] font-semibold tracking-widest bg-acid text-black px-4 py-3 rounded-sm text-center" onClick={() => setMenuOpen(false)}>
+                  GO TO DASHBOARD →
+                </Link>
+                <form action={signOut}>
+                  <button type="submit" className="w-full font-mono text-[11px] tracking-widest border border-v-red/30 text-v-red px-4 py-2.5 rounded-sm text-center hover:bg-v-red/10 transition-colors">
+                    SIGN OUT
+                  </button>
+                </form>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="font-mono text-[13px] tracking-widest text-v-muted hover:text-acid transition-colors py-1" onClick={() => setMenuOpen(false)}>SIGN IN</Link>
+              <div className="border-t border-v-border2 pt-3">
+                <Link href="/quick-scan" className="block font-mono text-[11px] font-semibold tracking-widest bg-acid text-black px-4 py-3 rounded-sm text-center" onClick={() => setMenuOpen(false)}>
+                  SCAN FREE — NO ACCOUNT NEEDED
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
     </nav>

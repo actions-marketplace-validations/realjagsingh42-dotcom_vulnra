@@ -10,10 +10,12 @@ import {
   Key,
   CreditCard,
   ArrowLeft,
+  LayoutDashboard,
 } from "lucide-react";
 import VulnraLogo from "@/components/VulnraLogo";
 
 const NAV_ITEMS = [
+  { href: "/settings/profile", label: "Profile", icon: LayoutDashboard },
   { href: "/settings/account", label: "Account", icon: UserIcon },
   { href: "/settings/notifications", label: "Notifications", icon: Bell },
   { href: "/settings/webhooks", label: "Webhooks", icon: Webhook },
@@ -35,7 +37,9 @@ export default function SettingsShell({
       {/* Top nav */}
       <nav className="h-13 bg-v-bg1 border-b border-v-border2 flex items-center justify-between px-5 z-50 sticky top-0">
         <div className="flex items-center gap-4">
-          <VulnraLogo suffix="SETTINGS" />
+          <Link href="/" aria-label="Go to homepage">
+            <VulnraLogo suffix="SETTINGS" />
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           <div className="font-mono text-[10px] text-v-muted2 truncate max-w-[180px]">
