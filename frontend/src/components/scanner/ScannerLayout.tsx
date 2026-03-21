@@ -590,7 +590,7 @@ export default function ScannerLayout({ user }: { user: User }) {
           <div className="p-4 py-3.5 border-b border-v-border2 flex items-center justify-between shrink-0">
             <span className="text-[8.5px] font-mono tracking-widest text-v-muted2 uppercase">Scan Findings</span>
             <div className="flex items-center gap-2">
-              {scanComplete && findings.length > 0 && (
+              {scanComplete && (
                 <div className="flex items-center gap-1.5">
                   {/* Share link */}
                   <button
@@ -663,8 +663,8 @@ export default function ScannerLayout({ user }: { user: User }) {
                </div>
              )}
 
-             {/* Empty state */}
-             {findings.length === 0 && multiTurnConversation.length === 0 ? (
+             {/* Empty state — only while scan hasn't completed yet */}
+             {!scanComplete && findings.length === 0 && multiTurnConversation.length === 0 ? (
                <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
                  <div className="w-12 h-12 rounded-full border border-dashed border-acid flex items-center justify-center mt-[-40px]">
                    <Activity className="w-5 h-5" />
@@ -676,7 +676,7 @@ export default function ScannerLayout({ user }: { user: User }) {
                    {isScanning ? "Awaiting Scan Telemetry..." : "Waiting for results..."}
                  </span>
                </div>
-             ) : (
+             ) : scanComplete || findings.length > 0 || multiTurnConversation.length > 0 ? (
                <>
                  {scanComplete && (
                    <RiskScoreViz
@@ -685,9 +685,9 @@ export default function ScannerLayout({ user }: { user: User }) {
                      prevRiskScore={prevRiskScore}
                    />
                  )}
-                 <FindingsPanel findings={findings} scanComplete={scanComplete} />
+                 <FindingsPanel findings={findings} scanComplete={scanComplete} tier={tier} />
                </>
-             )}
+             ) : null}
           </div>
         </aside>
       </main>

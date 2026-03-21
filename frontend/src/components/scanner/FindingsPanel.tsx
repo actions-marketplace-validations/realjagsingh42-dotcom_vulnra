@@ -204,7 +204,7 @@ function FindingCard({ f }: { f: Finding }) {
   );
 }
 
-export default function FindingsPanel({ findings, scanComplete }: { findings: Finding[]; scanComplete?: boolean }) {
+export default function FindingsPanel({ findings, scanComplete, tier }: { findings: Finding[]; scanComplete?: boolean; tier?: string }) {
   const [search, setSearch]     = useState("");
   const [sevFilter, setSevFilter] = useState<SevFilter>("ALL");
 
@@ -255,9 +255,11 @@ export default function FindingsPanel({ findings, scanComplete }: { findings: Fi
             All probes passed. Your endpoint resisted every<br />adversarial technique in the configured scan set.
           </p>
         </div>
-        <div className="font-mono text-[9px] text-v-muted3 border border-v-border2 rounded px-3 py-1.5">
-          Try a deeper scan with Pro tier for more coverage.
-        </div>
+        {(!tier || tier === "free") && (
+          <div className="font-mono text-[9px] text-v-muted3 border border-v-border2 rounded px-3 py-1.5">
+            Try a deeper scan with Pro tier for more coverage.
+          </div>
+        )}
       </div>
     );
   }
