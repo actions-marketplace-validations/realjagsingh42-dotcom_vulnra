@@ -135,22 +135,36 @@ export default function LandingPage() {
   useEffect(() => {
     const el = terminalRef.current;
     if (!el) return;
+
+    // threshold: 0 fires as soon as a single pixel of the terminal enters the
+    // viewport — threshold: 0.25 was too high and often never triggered when
+    // the right column entered view from the bottom in 2-column grid layouts.
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !animatedRef.current) {
           animatedRef.current = true;
           let i = 0;
           const tick = () => {
-            setShownLines(++i);
+            setShownLines(n => {
+              const next = n + 1;
+              return next;
+            });
+            i++;
             if (i < TERMINAL_LINES.length) setTimeout(tick, 90);
           };
           setTimeout(tick, 300);
         }
       },
-      { threshold: 0.25 }
+      { threshold: 0 }
     );
     obs.observe(el);
-    return () => obs.disconnect();
+
+    return () => {
+      obs.disconnect();
+      // Reset guard so the animation replays if the user navigates away and
+      // returns to the landing page (component remounts).
+      animatedRef.current = false;
+    };
   }, []);
 
   return (

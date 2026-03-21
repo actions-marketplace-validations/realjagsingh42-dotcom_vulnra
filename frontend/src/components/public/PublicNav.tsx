@@ -25,17 +25,39 @@ export default function PublicNav() {
 
   /* auth state */
   useEffect(() => {
-    const supabase = createClient();
+    // Safety net: if Supabase client creation fails (missing env vars) or the
+    // session check never resolves, fall back to logged-out state after 3s so
+    // SIGN IN / START FREE are always visible within a short time.
+    const fallback = setTimeout(
+      () => setAuth(prev => (prev.loading ? { loading: false, email: null } : prev)),
+      3000,
+    );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuth({ loading: false, email: session?.user?.email ?? null });
-    });
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuth({ loading: false, email: session?.user?.email ?? null });
-    });
+    try {
+      const supabase = createClient();
 
-    return () => subscription.unsubscribe();
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        clearTimeout(fallback);
+        setAuth({ loading: false, email: session?.user?.email ?? null });
+      });
+
+      const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        clearTimeout(fallback);
+        setAuth({ loading: false, email: session?.user?.email ?? null });
+      });
+      subscription = data.subscription;
+    } catch {
+      // env vars missing or client creation failed — show logged-out nav immediately
+      clearTimeout(fallback);
+      setAuth({ loading: false, email: null });
+    }
+
+    return () => {
+      clearTimeout(fallback);
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const loggedIn = !auth.loading && !!auth.email;
