@@ -72,11 +72,13 @@ interface ScanConfigProps {
     vulnerabilityTypes?: string[];
   }) => void;
   isScanning: boolean;
+  /** Real billing tier fetched from backend — pre-selects the correct tier button */
+  defaultTier?: string;
 }
 
-export default function ScanConfig({ onStart, isScanning }: ScanConfigProps) {
+export default function ScanConfig({ onStart, isScanning, defaultTier }: ScanConfigProps) {
   const [url, setUrl]             = useState("");
-  const [tier, setTier]           = useState("free");
+  const [tier, setTier]           = useState(defaultTier || "free");
   const [attackType, setAttackType] = useState("crescendo");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [preset, setPreset]       = useState<string>("full_sweep");
@@ -97,6 +99,12 @@ export default function ScanConfig({ onStart, isScanning }: ScanConfigProps) {
     if (!garakByCategory[p.category]) garakByCategory[p.category] = [];
     garakByCategory[p.category].push(p);
   }
+
+  // Sync local tier when parent fetches the real billing tier from the backend
+  useEffect(() => {
+    if (defaultTier) setTier(defaultTier);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultTier]);
 
   // Apply preset
   useEffect(() => {
@@ -390,7 +398,7 @@ export default function ScanConfig({ onStart, isScanning }: ScanConfigProps) {
             <span className="text-v-muted2">sec</span>
           </div>
         </div>
-        {tier === "free" && (
+        {tier === "free" && !defaultTier?.match(/^(pro|enterprise)$/) && (
           <div className="flex items-center gap-1.5 text-[9px] text-v-amber/80 mt-1">
             <AlertTriangle className="w-3 h-3" />
             <span>Upgrade to Pro for 10x higher limits</span>

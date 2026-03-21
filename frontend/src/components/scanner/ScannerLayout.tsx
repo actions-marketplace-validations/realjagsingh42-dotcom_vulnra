@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Link2, CheckCheck, Key, Radio, Database, Building2, TrendingUp } from "lucide-react";
+import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Link2, CheckCheck, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon } from "lucide-react";
 import VulnraLogo from "@/components/VulnraLogo";
 import { signOut } from "@/app/auth/actions";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,8 @@ export default function ScannerLayout({ user }: { user: User }) {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isFirstScan, setIsFirstScan] = useState(false);
   const [scanWarning, setScanWarning] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   // Mobile panel switcher: "config" | "terminal" | "findings"
   const [mobilePanel, setMobilePanel] = useState<"config" | "terminal" | "findings">("config");
   const supabase = createClient();
@@ -112,6 +114,23 @@ export default function ScannerLayout({ user }: { user: User }) {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // ── Dropdown: close on outside click or Escape ───────────────────────────
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setDropdownOpen(false); };
+    const onOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onOutside);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onOutside);
+    };
+  }, [dropdownOpen]);
 
   // Fetch real tier from profiles table — user_metadata is stale after billing upgrades
   useEffect(() => {
@@ -506,10 +525,6 @@ export default function ScannerLayout({ user }: { user: User }) {
               <TrendingUp className="w-3.5 h-3.5" />ANALYTICS
             </a>
             <div className="h-5 w-[1px] bg-v-border mx-2" />
-            <a href="/settings/api-keys" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors whitespace-nowrap">
-              <Key className="w-3.5 h-3.5" />API_KEYS
-            </a>
-            <div className="h-5 w-[1px] bg-v-border mx-2" />
             <a href="/monitor" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors whitespace-nowrap">
               <Radio className="w-3.5 h-3.5" />SENTINEL
             </a>
@@ -556,19 +571,92 @@ export default function ScannerLayout({ user }: { user: User }) {
             </span>
           </a>
           
-          {/* User Info — hide email on mobile */}
-          <div className="flex items-center gap-2 text-[10px] font-mono text-v-muted bg-white/5 border border-v-border px-2.5 py-1.25 rounded-sm hover:border-white/10 transition-colors cursor-pointer group">
-            <div className="w-4 h-4 rounded-full bg-acid flex items-center justify-center text-[8px] font-bold text-black group-hover:scale-110 transition-transform shrink-0">
-              {user.email?.[0].toUpperCase()}
-            </div>
-            <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
+          {/* User avatar — click to open dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen(v => !v)}
+              className={cn(
+                "flex items-center gap-2 text-[10px] font-mono text-v-muted bg-white/5 border px-2.5 py-1.25 rounded-sm transition-colors cursor-pointer group",
+                dropdownOpen ? "border-acid/30 bg-acid/5" : "border-v-border hover:border-white/10"
+              )}
+            >
+              <div className="w-4 h-4 rounded-full bg-acid flex items-center justify-center text-[8px] font-bold text-black group-hover:scale-110 transition-transform shrink-0">
+                {user.email?.[0].toUpperCase()}
+              </div>
+              <span className="hidden sm:inline max-w-[120px] truncate">{user.email}</span>
+              <ChevronDown className={cn(
+                "w-3 h-3 text-v-muted2 hidden sm:block transition-transform duration-150",
+                dropdownOpen && "rotate-180"
+              )} />
+            </button>
+
+            {/* Dropdown menu */}
+            {dropdownOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 w-[220px] rounded-lg z-[100] overflow-hidden"
+                style={{
+                  background: "#0A0B0F",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                }}
+              >
+                {/* Header: name / email / tier */}
+                <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="text-[13px] font-medium truncate" style={{ color: "#C8D0DC" }}>
+                    {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split("@")[0]}
+                  </div>
+                  <div className="text-[11px] text-v-muted2 truncate mt-0.5">{user.email}</div>
+                  <div className="mt-2">
+                    <span className={cn(
+                      "text-[8.5px] font-mono px-1.5 py-0.5 rounded border font-bold tracking-wider",
+                      tier === "enterprise" ? "bg-[#4db8ff]/10 text-[#4db8ff] border-[#4db8ff]/25"
+                      : tier === "pro"        ? "bg-acid/10 text-acid border-acid/25"
+                      :                         "bg-white/5 text-v-muted2 border-v-border"
+                    )}>
+                      ● {tier.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Nav items */}
+                <div className="py-1">
+                  {[
+                    { icon: UserIcon,    label: "My Profile", href: "/settings/profile"   },
+                    { icon: Key,         label: "API Keys",   href: "/settings/api-keys"  },
+                    { icon: TrendingUp,  label: "Analytics",  href: "/analytics"           },
+                    { icon: Settings,    label: "Settings",   href: "/settings/profile"   },
+                  ].map(({ icon: Icon, label, href }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 transition-colors"
+                      style={{ color: "#C8D0DC", fontSize: 13 }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <Icon className="w-3.5 h-3.5 text-v-muted2 shrink-0" />
+                      {label}
+                    </a>
+                  ))}
+                </div>
+
+                {/* Divider + Sign out */}
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                  <button
+                    onClick={() => { setDropdownOpen(false); signOut(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-v-red transition-colors"
+                    style={{ fontSize: 13 }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <LogOut className="w-3.5 h-3.5 shrink-0" />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <button 
-            onClick={() => signOut()}
-            className="w-7.5 h-7.5 rounded-sm border border-v-border2 flex items-center justify-center text-v-muted2 hover:text-v-red hover:border-v-red/30 hover:bg-v-red/5 transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-          </button>
         </div>
       </nav>
 
@@ -606,7 +694,7 @@ export default function ScannerLayout({ user }: { user: User }) {
             <span className="text-[8.5px] font-mono tracking-widest text-v-muted2 uppercase">Configuration</span>
             <Settings className="w-3.5 h-3.5 text-v-muted2" />
           </div>
-          <ScanConfig onStart={handleStartScan} isScanning={isScanning} />
+          <ScanConfig onStart={handleStartScan} isScanning={isScanning} defaultTier={tier} />
         </aside>
 
         {/* Center Panel: Terminal */}
