@@ -815,7 +815,7 @@ export default function ScannerLayout({ user }: { user: User }) {
                      prevRiskScore={prevRiskScore}
                    />
                  )}
-                 <FindingsPanel findings={findings} scanComplete={scanComplete} tier={tier} />
+                 <FindingsPanel findings={findings} scanComplete={scanComplete} tier={tier} riskScore={currentRiskScore} />
                </>
              ) : null}
           </div>

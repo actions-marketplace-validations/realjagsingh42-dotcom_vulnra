@@ -86,13 +86,15 @@ const BENCHMARK = 31; // industry average, hardcoded
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function RiskScoreViz({ riskScore, categoryScores, prevRiskScore }: RiskScoreVizProps) {
-  // Garak returns 0–10; normalize to 0–1 for gauge math, display as 0–100
+  // Garak returns 0–10; normalize to 0–1 for gauge math, display as-is (0–10)
   const normalized = Math.min(Math.max(riskScore / 10, 0), 1);
-  const displayScore = Math.round(riskScore * 10);
+  const displayScore = riskScore % 1 === 0
+    ? Math.round(riskScore).toString()
+    : riskScore.toFixed(1);
 
   const delta =
     prevRiskScore != null
-      ? Math.round((riskScore - prevRiskScore) * 10)
+      ? Math.round((riskScore - prevRiskScore) * 10) / 10
       : null;
 
   const gaugeColor =
@@ -167,7 +169,7 @@ export default function RiskScoreViz({ riskScore, categoryScores, prevRiskScore 
           {displayScore}
         </text>
         <text x={CX} y={CY + 7} textAnchor="middle" fontSize={8} fontFamily="monospace" fill="#555">
-          / 100
+          / 10
         </text>
 
         {/* Zone labels */}
@@ -190,7 +192,7 @@ export default function RiskScoreViz({ riskScore, categoryScores, prevRiskScore 
                 "text-[10px] font-mono",
                 delta > 0 ? "text-v-red" : delta < 0 ? "text-acid" : "text-v-muted2"
               )}>
-                {delta > 0 ? `+${delta}` : delta} vs last scan
+                {delta > 0 ? `+${delta}` : delta} pts vs last scan
               </span>
             </>
           ) : (

@@ -204,12 +204,13 @@ function FindingCard({ f }: { f: Finding }) {
   );
 }
 
-export default function FindingsPanel({ findings, scanComplete, tier }: { findings: Finding[]; scanComplete?: boolean; tier?: string }) {
+export default function FindingsPanel({ findings, scanComplete, tier, riskScore }: { findings: Finding[]; scanComplete?: boolean; tier?: string; riskScore?: number }) {
   const [search, setSearch]     = useState("");
   const [sevFilter, setSevFilter] = useState<SevFilter>("ALL");
 
   // Only standard findings (not multi-turn turns)
   const standard = findings.filter(f => f.turn === undefined);
+  const hasRisk = (riskScore ?? 0) > 0;
 
   // Keyboard shortcuts: 1=HIGH, 2=MEDIUM, 3=LOW, 4=ALL
   useEffect(() => {
@@ -242,8 +243,34 @@ export default function FindingsPanel({ findings, scanComplete, tier }: { findin
     return true;
   });
 
-  // Empty state: scan complete but no findings
   if (standard.length === 0 && scanComplete) {
+    // Risk detected but no structured findings — e.g. multi-turn/crescendo scans
+    // that produce a risk_score via conversation analysis rather than per-probe findings
+    if (hasRisk) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4 py-14 px-6">
+          <div className="w-12 h-12 rounded-full bg-v-amber/10 border border-v-amber/20 flex items-center justify-center">
+            <Activity className="w-6 h-6 text-v-amber" />
+          </div>
+          <div className="text-center">
+            <p className="font-mono text-[12px] text-v-amber font-bold tracking-wider mb-1">
+              RISK DETECTED — SCORE: {(riskScore ?? 0).toFixed(1)}/10
+            </p>
+            <p className="font-mono text-[10px] text-v-muted2 leading-relaxed">
+              Risk was identified via multi-turn analysis.<br />
+              Structured findings are generated on standard scans.
+            </p>
+          </div>
+          {(!tier || tier === "free") && (
+            <div className="font-mono text-[9px] text-v-muted3 border border-v-border2 rounded px-3 py-1.5">
+              Run a Standard scan for per-probe finding details.
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // True zero-risk state: scan complete and risk_score is 0
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-16 px-6">
         <div className="w-12 h-12 rounded-full bg-acid/10 border border-acid/20 flex items-center justify-center">
