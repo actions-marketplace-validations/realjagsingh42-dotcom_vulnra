@@ -57,7 +57,11 @@ function Toast({ msg, ok }: { msg: string; ok: boolean }) {
 /* ── Main Page ──────────────────────────────────────────────── */
 export default function AccountPage() {
   const router = useRouter();
-  const supabase = createClient();
+  // createClient() is NOT called at component root — it throws during hydration
+  // if NEXT_PUBLIC_SUPABASE_URL is missing from the JS bundle (Railway build
+  // without env vars). Instead each handler that needs Supabase calls it lazily
+  // inside its own try-catch.
+  const getSupabase = () => createClient();
 
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -92,18 +96,27 @@ export default function AccountPage() {
         if (!session) return;
         setEmail(session.user.email || "");
 
-        const resp = await fetch(`${API}/api/user/profile`, {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        if (resp.ok) {
-          const data = await resp.json();
-          setDisplayName(data.display_name || "");
-          setTier(data.tier || "free");
+        try {
+          const resp = await fetch(`${API}/api/user/profile`, {
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            setDisplayName(data.display_name || "");
+            setTier(data.tier || "free");
+          }
+          // Non-ok (404/503) — keep defaults silently
+        } catch {
+          // Network error fetching profile — keep defaults, do not crash
         }
+      } catch {
+        // getSession() threw (env vars missing in bundle) — keep loading=false,
+        // the user will see a blank form which is better than the error boundary
       } finally {
         setLoading(false);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSaveDisplayName = async () => {
@@ -139,7 +152,7 @@ export default function AccountPage() {
     setEmailSaving(true);
     setEmailMsg(null);
     try {
-      const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
+      const { error } = await getSupabase().auth.updateUser({ email: newEmail.trim() });
       if (error) {
         setEmailMsg({ msg: error.message, ok: false });
       } else {
@@ -167,7 +180,7 @@ export default function AccountPage() {
     setPwSaving(true);
     setPwMsg(null);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPw });
+      const { error } = await getSupabase().auth.updateUser({ password: newPw });
       if (error) {
         setPwMsg({ msg: error.message, ok: false });
       } else {
@@ -192,7 +205,7 @@ export default function AccountPage() {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (resp.ok) {
-        await supabase.auth.signOut();
+        try { await getSupabase().auth.signOut(); } catch { /* proceed regardless */ }
         router.push("/");
       }
     } finally {

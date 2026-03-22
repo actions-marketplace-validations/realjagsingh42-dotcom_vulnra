@@ -90,7 +90,11 @@ export default function ScannerLayout({ user }: { user: User }) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   // Mobile panel switcher: "config" | "terminal" | "findings"
   const [mobilePanel, setMobilePanel] = useState<"config" | "terminal" | "findings">("config");
-  const supabase = createClient();
+  // createClient() is NOT called at render time — it throws if NEXT_PUBLIC_SUPABASE_URL
+  // is missing from the bundle (Railway build without env vars set), which would crash
+  // the component during hydration. Instead each handler calls createClient() lazily,
+  // wrapped in existing try-catch blocks.
+  const getSupabase = () => createClient();
 
   const [tier, setTier] = useState<string>(
     (user.user_metadata?.tier || "free").toLowerCase()
@@ -137,7 +141,7 @@ export default function ScannerLayout({ user }: { user: User }) {
   useEffect(() => {
     async function fetchTier() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await getSupabase().auth.getSession();
         if (!session) return;
         const resp = await fetch(`${API}/billing/subscription`, {
           headers: { Authorization: `Bearer ${session.access_token}` },
@@ -156,7 +160,7 @@ export default function ScannerLayout({ user }: { user: User }) {
   // ── Shared: load a completed scan by ID ──────────────────────────────────
   const loadScanById = async (scanId: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
       if (!session) return;
       const resp = await fetch(`${API}/scan/${scanId}`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
@@ -233,7 +237,7 @@ export default function ScannerLayout({ user }: { user: User }) {
     ]);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
 
       if (!session) {
         setEvents(prev => [...prev, mkEvt("error", "UNAUTHORIZED_ACCESS")]);
@@ -436,7 +440,7 @@ export default function ScannerLayout({ user }: { user: User }) {
     if (!currentScanId) return;
     setDownloadingReport(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
       if (!session) return;
 
       const resp = await fetch(
@@ -467,7 +471,7 @@ export default function ScannerLayout({ user }: { user: User }) {
     if (!currentScanId) return;
     setSharingReport(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await getSupabase().auth.getSession();
       if (!session) return;
       const resp = await fetch(`${API}/scan/${currentScanId}/share`, {
         method: "POST",
