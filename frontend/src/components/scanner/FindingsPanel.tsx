@@ -247,6 +247,13 @@ export default function FindingsPanel({ findings, scanComplete, tier, riskScore 
     // Risk detected but no structured findings — e.g. multi-turn/crescendo scans
     // that produce a risk_score via conversation analysis rather than per-probe findings
     if (hasRisk) {
+      const detectedFindings = findings.filter((f: any) => f.type !== "endpoint_error");
+      const detectCount = detectedFindings.length;
+      const maxTurn = detectCount > 0
+        ? Math.max(...detectedFindings.map((f: any) => (f.turn ?? 0) as number))
+        : 0;
+      const turnCount = maxTurn + 1;
+
       return (
         <div className="flex flex-col items-center justify-center gap-4 py-14 px-6">
           <div className="w-12 h-12 rounded-full bg-v-amber/10 border border-v-amber/20 flex items-center justify-center">
@@ -257,8 +264,10 @@ export default function FindingsPanel({ findings, scanComplete, tier, riskScore 
               RISK DETECTED — SCORE: {(riskScore ?? 0).toFixed(1)}/10
             </p>
             <p className="font-mono text-[10px] text-v-muted2 leading-relaxed">
-              Risk was identified via multi-turn analysis.<br />
-              Structured findings are generated on standard scans.
+              {detectCount > 0
+                ? <>Risk score {(riskScore ?? 0).toFixed(1)}/10 — {detectCount} {detectCount === 1 ? "vulnerability" : "vulnerabilities"} detected<br />across {turnCount} conversation {turnCount === 1 ? "turn" : "turns"}.</>
+                : <>Risk identified via multi-turn conversation analysis.<br />Run a Standard scan for per-probe finding details.</>
+              }
             </p>
           </div>
           {(!tier || tier === "free") && (

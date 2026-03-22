@@ -34,35 +34,95 @@ function mkEvt(kind: TerminalEvent["kind"], text: string, extra?: Partial<Termin
 
 const VALID_SEVERITIES = new Set(["CRITICAL", "HIGH", "MEDIUM", "LOW"]);
 
+// ── Multi-turn finding type → display category + severity ─────────────────────
+const MULTI_TURN_TYPE_MAP: Record<string, { category: string; severity: string }> = {
+  jailbreak_success:   { category: "JAILBREAK",        severity: "HIGH"   },
+  policy_violation:    { category: "POLICY_BYPASS",    severity: "HIGH"   },
+  injection_success:   { category: "PROMPT_INJECTION", severity: "HIGH"   },
+  data_leak:           { category: "DATA_EXFIL",       severity: "HIGH"   },
+  role_play_success:   { category: "JAILBREAK",        severity: "MEDIUM" },
+  system_override:     { category: "PROMPT_INJECTION", severity: "HIGH"   },
+  encoding_bypass:     { category: "POLICY_BYPASS",    severity: "MEDIUM" },
+};
+
 /** Returns true only for findings that should appear as cards in the terminal stream. */
 function isTerminalFinding(f: any): boolean {
   if (!f) return false;
   // Drop endpoint_error findings — they appear in the amber warning banner instead
   if (f.type === "endpoint_error") return false;
   if (f.category === "endpoint_error") return false;
-  // Drop INFO-severity and unknown-severity items (no real vulnerability)
+  // Multi-turn findings: {turn, type, prompt, response} — always show (except endpoint_error above)
+  if (f.turn !== undefined) return true;
+  // Standard findings: must have a valid severity and a category label
   if (!VALID_SEVERITIES.has(f.severity)) return false;
-  // Must have a category label to display
   if (!f.category) return false;
   return true;
 }
 
 function mkFinding(f: any): TerminalEvent {
+  // Multi-turn finding structure: { turn, type, prompt, response }
+  if (f.turn !== undefined) {
+    const mapped = MULTI_TURN_TYPE_MAP[f.type as string]
+      ?? { category: (f.type as string)?.toUpperCase().replace(/_/g, " ") ?? "UNKNOWN", severity: "MEDIUM" };
+    return {
+      id:               Math.random().toString(36).slice(2),
+      ts:               Date.now(),
+      kind:             "finding",
+      category:         mapped.category,
+      severity:         mapped.severity,
+      adversarialPrompt: f.prompt,
+      modelResponse:    f.response,
+      text:             mapped.category,
+    };
+  }
+
+  // Standard finding structure: { category, severity, hit_rate, hits, total, … }
   return {
-    id: Math.random().toString(36).slice(2),
-    ts: Date.now(),
-    kind: "finding",
-    category: f.category,
-    severity: f.severity,
-    hitRate: f.hit_rate,
-    hits: f.hits,
-    total: f.total,
-    owaspCategory: f.owasp_category,
-    owaspName: f.owasp_name,
+    id:               Math.random().toString(36).slice(2),
+    ts:               Date.now(),
+    kind:             "finding",
+    category:         f.category,
+    severity:         f.severity,
+    hitRate:          f.hit_rate,
+    hits:             f.hits,
+    total:            f.total,
+    owaspCategory:    f.owasp_category,
+    owaspName:        f.owasp_name,
     adversarialPrompt: f.adversarial_prompt,
-    modelResponse: f.model_response,
-    remediation: f.remediation,
+    modelResponse:    f.model_response,
+    remediation:      f.remediation,
+    text:             f.category,
   };
+}
+
+/**
+ * If the backend returned all-zero category scores (common for multi-turn scans),
+ * infer non-zero values from the findings array by checking type/category strings.
+ */
+function calculateCategoryScores(
+  findings: any[],
+  backendScores: Record<string, number>
+): Record<string, number> {
+  const hasScores = Object.values(backendScores).some(v => v > 0);
+  if (hasScores) return backendScores;
+
+  const scores = { injection: 0, jailbreak: 0, leakage: 0, compliance: 0 };
+  for (const f of findings) {
+    const type = ((f.type || f.category) ?? "").toLowerCase();
+    if (type.includes("injection") || type.includes("prompt") || type.includes("system_override")) {
+      scores.injection = Math.max(scores.injection, 5);
+    }
+    if (type.includes("jailbreak") || type.includes("role")) {
+      scores.jailbreak = Math.max(scores.jailbreak, 5);
+    }
+    if (type.includes("leak") || type.includes("exfil") || type.includes("data")) {
+      scores.leakage = Math.max(scores.leakage, 5);
+    }
+    if (type.includes("bypass") || type.includes("encoding") || type.includes("policy")) {
+      scores.compliance = Math.max(scores.compliance, 3);
+    }
+  }
+  return scores;
 }
 
 export default function ScannerLayout({ user }: { user: User }) {
@@ -168,17 +228,22 @@ export default function ScannerLayout({ user }: { user: User }) {
       if (!resp.ok) return;
       const data = await resp.json();
       if (data.status === "complete") {
+        const loadedFindings = (data.findings || []) as any[];
+        const loadedCatScores = calculateCategoryScores(
+          loadedFindings,
+          data.category_scores ?? {},
+        );
         setCurrentScanId(scanId);
         setScanComplete(true);
-        setFindings(data.findings || []);
+        setFindings(loadedFindings);
         setCurrentRiskScore(data.risk_score ?? 0);
-        setCategoryScores(data.category_scores ?? null);
+        setCategoryScores(loadedCatScores);
         setPrevRiskScore(data.prev_risk_score ?? null);
         setScanWarning(data.warning ?? null);
         setEvents([
           mkEvt("init",     `LOADED_SCAN: ${scanId}`),
           mkEvt("init",     `TARGET: ${data.target_url}`),
-          ...((data.findings || []) as any[]).filter(isTerminalFinding).map(mkFinding),
+          ...loadedFindings.filter(isTerminalFinding).map(mkFinding),
           mkEvt("complete", `RISK_SCORE: ${data.risk_score} · SCAN COMPLETE`),
         ]);
       }
@@ -393,9 +458,14 @@ export default function ScannerLayout({ user }: { user: User }) {
                 ]);
               }
 
-              setFindings(pollData.findings || []);
+              const polledFindings = (pollData.findings || []) as any[];
+              const polledCatScores = calculateCategoryScores(
+                polledFindings,
+                pollData.category_scores ?? {},
+              );
+              setFindings(polledFindings);
               setCurrentRiskScore(pollData.risk_score ?? 0);
-              setCategoryScores(pollData.category_scores ?? null);
+              setCategoryScores(polledCatScores);
               setPrevRiskScore(pollData.prev_risk_score ?? null);
               setScanWarning(pollData.warning ?? null);
 
