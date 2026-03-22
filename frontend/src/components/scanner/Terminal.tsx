@@ -174,6 +174,92 @@ function PlainRow({ evt }: { evt: TerminalEvent }) {
   );
 }
 
+// ── Phase 2 scanning animation ────────────────────────────────────────────────
+// Shown between SCAN_ID (init) and the first real probe/finding events.
+// Makes the terminal feel active during the backend's initial probe setup.
+
+const PHASE2_MSGS = [
+  "> connecting to probe nodes...",
+  "> dispatching crescendo attack suite...",
+  "> analyzing model responses...",
+];
+
+function ScanningAnimation({ active }: { active: boolean }) {
+  const [step, setStep]   = useState(0);
+  const [fillPct, setFill] = useState(0);
+  // Freeze timestamps at the moment each line appears
+  const [stamps, setStamps] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!active) {
+      setStep(0);
+      setFill(0);
+      setStamps([]);
+      return;
+    }
+
+    // Step through message lines every 800 ms
+    const lineTimer = setInterval(() => {
+      setStep(s => {
+        if (s < PHASE2_MSGS.length) {
+          const ts = new Date().toLocaleTimeString([], { hour12: false });
+          setStamps(prev => [...prev, ts]);
+          return s + 1;
+        }
+        clearInterval(lineTimer);
+        return s;
+      });
+    }, 800);
+
+    // Fill the progress bar — caps at 88 % while scanning is still running
+    const fillTimer = setInterval(() => {
+      setFill(f => (f >= 88 ? 88 : f + 2));
+    }, 180);
+
+    return () => {
+      clearInterval(lineTimer);
+      clearInterval(fillTimer);
+    };
+  }, [active]);
+
+  if (!active) return null;
+
+  // Block-character progress bar: 20 chars wide
+  const filledBlocks = Math.round((fillPct / 100) * 20);
+  const bar = "█".repeat(filledBlocks) + "░".repeat(20 - filledBlocks);
+
+  return (
+    <div className="flex flex-col gap-1.5 mt-1">
+      {PHASE2_MSGS.slice(0, step).map((line, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 text-[10.5px] font-mono text-v-muted/60 animate-in fade-in duration-300"
+        >
+          <span className="text-[8px] text-v-muted2/60 tabular-nums shrink-0">
+            [{stamps[i] ?? ""}]
+          </span>
+          <span className="text-acid/25">›</span>
+          <span>{line}</span>
+        </div>
+      ))}
+
+      {/* Progress bar — appears once all 3 lines have shown */}
+      {step >= PHASE2_MSGS.length && (
+        <div className="flex items-center gap-2 text-[10.5px] font-mono mt-0.5">
+          <span className="text-[8px] text-v-muted2/60 tabular-nums shrink-0">
+            [{new Date().toLocaleTimeString([], { hour12: false })}]
+          </span>
+          <span className="text-acid/25">›</span>
+          <span className="text-v-muted/50">&gt;&nbsp;[</span>
+          <span className="text-acid/50 tracking-[0.04em]">{bar}</span>
+          <span className="text-v-muted/50">]&nbsp;scanning...</span>
+          <span className="w-1 h-1 rounded-full bg-acid/50 animate-pulse shrink-0" />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Terminal component ───────────────────────────────────────────────────
 
 interface TerminalProps {
@@ -197,6 +283,9 @@ export default function Terminal({ events, isScanning }: TerminalProps) {
   const probeDone    = probeEvents.length;
   const isComplete   = events.some(e => e.kind === "complete");
   const showProgress = probeTotal > 0 && (isScanning || isComplete);
+  // Phase 2 animation: show after SCAN_ID appears but before scan completes
+  const hasScanId    = events.some(e => e.kind === "init");
+  const showPhase2   = isScanning && hasScanId && !isComplete;
   const pct          = probeTotal > 0
     ? isComplete ? 100 : Math.round((probeDone / probeTotal) * 100)
     : 0;
@@ -275,6 +364,9 @@ export default function Terminal({ events, isScanning }: TerminalProps) {
             return                             <PlainRow    key={evt.id} evt={evt} />;
           })
         )}
+
+        {/* Phase 2 animation — shown while scan is running, between SCAN_ID and RISK_SCORE */}
+        <ScanningAnimation active={showPhase2} />
       </div>
 
     </section>

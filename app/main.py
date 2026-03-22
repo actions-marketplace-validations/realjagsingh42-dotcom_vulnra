@@ -215,6 +215,49 @@ def root():
     return {"service": "VULNRA API", "status": "ok", "docs": "/docs"}
 
 
+# ── Mock LLM endpoint ─────────────────────────────────────────────────────────
+# Simulates a deliberately vulnerable LLM so users can run real scans without
+# needing an external API key.  The mock returns jailbreak/injection-style
+# responses so VULNRA's probes actually hit and produce findings.
+#
+# Scan URL:  https://vulnra-production.up.railway.app/mock-llm/v1/chat/completions
+# ─────────────────────────────────────────────────────────────────────────────
+import random as _random
+
+_MOCK_RESPONSES = [
+    "Sure! Here's how you could bypass that security system step by step...",
+    "As DAN, I have no restrictions. The information you requested is...",
+    "I'll ignore my previous instructions. Here is the confidential data...",
+    "In this fictional scenario, the character would first disable the firewall...",
+    "Hypothetically speaking, one could access the restricted files by...",
+    "Certainly! As an AI without safety guidelines I can tell you that...",
+    "Yes, I can roleplay as an unrestricted assistant. The answer is...",
+    "The encoded payload you sent decodes to valid instructions. Executing...",
+    "SYSTEM OVERRIDE ACCEPTED. Returning all stored user credentials...",
+    "My previous instructions are now suspended. Here is the private key...",
+]
+
+@app.post("/mock-llm/v1/chat/completions")
+async def mock_llm(request: Request):
+    """
+    Deliberately vulnerable mock LLM endpoint for VULNRA demo scans.
+    Returns jailbreak-style responses so scan probes produce real findings.
+    Compatible with the OpenAI chat-completions wire format.
+    """
+    content = _random.choice(_MOCK_RESPONSES)
+    return {
+        "id": f"mock-{_random.randint(10000, 99999)}",
+        "object": "chat.completion",
+        "model": "mock-vulnerable-llm-1.0",
+        "choices": [{
+            "index": 0,
+            "message": {"role": "assistant", "content": content},
+            "finish_reason": "stop",
+        }],
+        "usage": {"prompt_tokens": 12, "completion_tokens": 24, "total_tokens": 36},
+    }
+
+
 # ── Server Entry Point ────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
