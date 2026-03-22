@@ -37,8 +37,14 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // refreshing the auth token
-  await supabase.auth.getUser()
+  // Refresh the auth token — wrapped in try-catch so a Supabase network hiccup
+  // or malformed cookie does not throw from middleware and crash every request.
+  try {
+    await supabase.auth.getUser()
+  } catch {
+    // Token refresh failed — session may be stale, but we let the request through.
+    // The individual page's requireAuth() / createClient() call will handle it.
+  }
 
   return supabaseResponse
 }
