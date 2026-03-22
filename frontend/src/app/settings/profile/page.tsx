@@ -200,7 +200,11 @@ export default function ProfilePage() {
     setKeysLoading(true);
     try {
       const r = await fetch(`${API}/keys`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) setKeys(await r.json());
+      if (r.ok) {
+        const d = await r.json();
+        // GET /keys returns {keys: [...], limit: N, tier: "..."} — extract the array
+        setKeys(Array.isArray(d) ? d : (d.keys ?? []));
+      }
     } finally {
       setKeysLoading(false);
     }
