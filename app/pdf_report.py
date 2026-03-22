@@ -430,8 +430,8 @@ def _cover_page(scan: dict, S: dict, story: list):
 
 
 def _executive_summary(scan: dict, S: dict, story: list, cat_scores: dict):
-    score    = scan.get("risk_score", 0.0)
-    findings = scan.get("findings", [])
+    score    = scan.get("risk_score", 0.0) or 0.0
+    findings = scan.get("findings") or []
     n_high   = sum(1 for f in findings if f.get("severity", "").upper() == "HIGH")
 
     story.append(Paragraph("EXECUTIVE SUMMARY", S["section_label"]))
@@ -458,13 +458,16 @@ def _executive_summary(scan: dict, S: dict, story: list, cat_scores: dict):
     gauge        = RiskGauge(score)
     stat_col_w   = (CONTENT_W - gauge.width) / 3
 
-    def stat_cell(value, label):
-        return [Paragraph(str(value), S["stat_value"]), Paragraph(label, S["stat_label"])]
-
+    # 2-row × 3-column table: values row + labels row
     stats = Table(
-        [stat_cell(f"{score * 10:.0f}", "Risk Score"),
-         stat_cell(str(len(findings)), "Findings"),
-         stat_cell(str(n_high), "High Severity")],
+        [
+            [Paragraph(f"{score * 10:.0f}", S["stat_value"]),
+             Paragraph(str(len(findings)), S["stat_value"]),
+             Paragraph(str(n_high), S["stat_value"])],
+            [Paragraph("Risk Score", S["stat_label"]),
+             Paragraph("Findings", S["stat_label"]),
+             Paragraph("High Severity", S["stat_label"])],
+        ],
         colWidths=[stat_col_w] * 3,
     )
     stats.setStyle(TableStyle([
@@ -499,7 +502,7 @@ def _executive_summary(scan: dict, S: dict, story: list, cat_scores: dict):
 
 
 def _findings_section(scan: dict, S: dict, story: list, is_free: bool):
-    findings = scan.get("findings", [])
+    findings = scan.get("findings") or []
     if not findings:
         return
 
@@ -672,7 +675,7 @@ def _compliance_section(scan: dict, S: dict, story: list):
 
 def _remediation_appendix(scan: dict, S: dict, story: list, is_free: bool):
     findings_with_fix = [
-        f for f in scan.get("findings", [])
+        f for f in (scan.get("findings") or [])
         if f.get("remediation") and not f.get("blurred")
     ]
     if is_free:
@@ -718,8 +721,8 @@ def generate_audit_pdf(scan_data: Dict[str, Any]) -> bytes:
     """Generate a professional PDF audit report. Returns raw bytes."""
     logger.info(f"Generating PDF for scan {scan_data.get('scan_id')}")
 
-    is_free   = scan_data.get("tier", "free").lower() == "free"
-    cat_scores = _compute_category_scores(scan_data.get("findings", []))
+    is_free   = (scan_data.get("tier") or "free").lower() == "free"
+    cat_scores = _compute_category_scores(scan_data.get("findings") or [])
 
     buf = io.BytesIO()
 

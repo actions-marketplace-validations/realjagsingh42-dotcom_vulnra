@@ -147,22 +147,28 @@ async def download_scan_report(
         raise HTTPException(status_code=409, detail="Scan is not yet complete.")
 
     # Map DB field names to what generate_audit_pdf expects
+    # Use `or` fallbacks because Supabase returns None for NULL JSON columns
+    # even when the key is present (so .get("key", default) returns None, not default)
     pdf_input = {
         "scan_id":    scan_data.get("id"),
-        "url":        scan_data.get("target_url", "—"),
-        "tier":       scan_data.get("tier", "free"),
-        "risk_score": scan_data.get("risk_score", 0.0),
-        "scan_engine":scan_data.get("scan_engine", "garak,deepteam"),
+        "url":        scan_data.get("target_url") or "—",
+        "tier":       scan_data.get("tier") or "free",
+        "risk_score": scan_data.get("risk_score") or 0.0,
+        "scan_engine":scan_data.get("scan_engine") or "garak,deepteam",
         "status":     scan_data.get("status"),
         "completed_at": scan_data.get("completed_at"),
-        "findings":   scan_data.get("findings", []),
-        "compliance": scan_data.get("compliance", {}),
+        "findings":   scan_data.get("findings") or [],
+        "compliance": scan_data.get("compliance") or {},
     }
 
     try:
         pdf_bytes = generate_audit_pdf(pdf_input)
     except Exception as exc:
-        logger.error(f"PDF generation failed for scan {scan_id}: {exc}")
+        import traceback
+        logger.error(
+            f"PDF generation failed for scan {scan_id}: {exc}\n"
+            f"{traceback.format_exc()}"
+        )
         raise HTTPException(status_code=500, detail="Report generation failed.")
 
     filename = f"vulnra-report-{scan_id[:8]}.pdf"
