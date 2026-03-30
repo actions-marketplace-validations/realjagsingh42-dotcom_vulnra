@@ -451,9 +451,10 @@ npm run dev    # → http://localhost:3000
 | Phase 6 | Multi-Turn Attack Chains (Crescendo, GOAT) | ✅ Done |
 | Phase 6 | MCP Server Security Scanner | ✅ Done |
 | Phase 7 | Lemon Squeezy Billing Webhooks | ✅ Done |
-| Phase 7 | Checkout & Subscription Pages | 🔄 In Progress |
-| — | PDF Report Generation | 🔄 Partial (ReportLab) |
-| — | Social Share (LinkedIn/Twitter) | 🔲 Planned |
+| Phase 7 | Checkout & Subscription Pages | ✅ Done |
+| — | Scan History | ✅ Done |
+| — | PDF Report Download | ✅ Done |
+| — | Social Share (Twitter/LinkedIn/Facebook) | ✅ Done |
 | — | Enterprise SSO & Audit Logs | 🔲 Planned |
 
 ---
@@ -461,6 +462,7 @@ npm run dev    # → http://localhost:3000
 ## Recent Git History
 
 ```
+ccfd88e  feat: add social share for scan results (Twitter, LinkedIn, Facebook)
 b03ed4a  fix: update MCP scanner tests and fix compliance module usage
 39f5e7e  fix: update MCP scanner imports to use correct compliance module functions
 6e48f8d  feat: add MCP Security Scanner feature
