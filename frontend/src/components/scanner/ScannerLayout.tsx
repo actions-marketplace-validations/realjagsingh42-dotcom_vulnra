@@ -102,9 +102,9 @@ function mkFinding(f: any): TerminalEvent {
 function calculateCategoryScores(
   findings: any[],
   backendScores: Record<string, number>
-): Record<string, number> {
+): { injection: number; jailbreak: number; leakage: number; compliance: number } {
   const hasScores = Object.values(backendScores).some(v => v > 0);
-  if (hasScores) return backendScores;
+  if (hasScores) return backendScores as { injection: number; jailbreak: number; leakage: number; compliance: number };
 
   const scores = { injection: 0, jailbreak: 0, leakage: 0, compliance: 0 };
   for (const f of findings) {
