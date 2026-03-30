@@ -4,13 +4,11 @@ import logging
 from typing import List, Optional
 from fastapi import APIRouter, BackgroundTasks, Request, HTTPException, Depends, Query, status
 from pydantic import BaseModel, HttpUrl, validator
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings, logger
 from app.core.security import get_current_user
 from app.core.utils import is_safe_url
+from app.core.rate_limiter import limiter, RATE_LIMITS
 from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_tier, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url, create_scan_record, save_scan_result
 from app.services.scan_service import run_scan_internal
 from app.services.mcp_scanner import scan_mcp_server, MCPScanResult
@@ -41,30 +39,6 @@ def compute_category_scores(findings: list) -> dict:
     }
 
 
-# Rate limit limits per tier (per minute)
-# Free: 1 request/minute, Pro: 10 requests/minute, Enterprise: 100 requests/minute
-RATE_LIMITS = {
-    "free": "1/minute",
-    "pro": "10/minute", 
-    "enterprise": "100/minute",
-}
-
-# Daily scan quotas (already implemented in check_scan_quota)
-# Free: 1 scan/day, Pro: 100 scans/day, Enterprise: unlimited
-
-# Tier-based rate limit key function
-def tier_key_func(request: Request):
-    """Generate rate limit key based on user tier and IP address."""
-    # Get user tier from request state (set by middleware)
-    user_tier = getattr(request.state, "user_tier", "free")
-    return f"{user_tier}:{get_remote_address(request)}"
-
-# Initialize limiter with tier-based key function
-limiter = Limiter(
-    key_func=tier_key_func,
-    storage_uri=settings.redis_url,
-    strategy="fixed-window",
-)
 
 @router.get("/scans")
 async def list_scans(
@@ -91,10 +65,8 @@ async def share_scan(
     from fastapi.responses import JSONResponse
 
     scan_data = get_scan_result(scan_id)
-    if not scan_data:
+    if not scan_data or scan_data.get("user_id") != current_user["id"]:
         raise HTTPException(status_code=404, detail="Scan not found.")
-    if scan_data.get("user_id") != current_user["id"]:
-        raise HTTPException(status_code=403, detail="Not authorized.")
     if scan_data.get("status") != "complete":
         raise HTTPException(status_code=409, detail="Scan is not yet complete.")
 

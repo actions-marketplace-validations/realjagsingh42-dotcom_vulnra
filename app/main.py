@@ -3,38 +3,17 @@ import re
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings, validate_config, logger
 from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics, quick_scan
-from app.core.rate_limiter import TIER_LIMITS, set_limiter
+from app.core.rate_limiter import limiter, TIER_LIMITS
 from app.core.security import get_current_user
 
 # ── Validate Environment ──────────────────────────────────────────────────
 validate_config()
-
-# ── Rate Limiting ─────────────────────────────────────────────────────────────
-# Use Redis for distributed rate limiting if available
-try:
-    limiter = Limiter(
-        key_func=get_remote_address,
-        storage_uri=settings.redis_url,
-        strategy="fixed-window",
-    )
-    logger.info(f"Rate limiter initialized with Redis storage: {settings.redis_url}")
-except Exception as e:
-    logger.warning(f"Failed to initialize Redis rate limiter: {e}. Falling back to in-memory storage.")
-    limiter = Limiter(
-        key_func=get_remote_address,
-        storage_uri="memory://",
-        strategy="fixed-window",
-    )
-
-# Set the global limiter instance for use in rate_limiter module
-set_limiter(limiter)
 
 # ── FastAPI App Setup ─────────────────────────────────────────────────────────
 app = FastAPI(
@@ -157,22 +136,10 @@ async def add_rate_limit_headers_middleware(request: Request, call_next):
     try:
         # Get rate limit info from slowapi if available
         if hasattr(app.state, "limiter"):
-            # Note: slowapi doesn't expose rate limit info directly in response
-            # We'll add headers based on user tier
             user_tier = getattr(request.state, "user_tier", "free")
-            
-            # Define limits per tier
-            limits = {
-                "free": {"limit": 1, "window": 60},      # 1 per minute
-                "pro": {"limit": 10, "window": 60},      # 10 per minute
-                "enterprise": {"limit": 100, "window": 60}  # 100 per minute
-            }
-            
-            tier_limit = limits.get(user_tier, limits["free"])
-            
-            # Add standard rate limit headers
-            response.headers["X-RateLimit-Limit"] = str(tier_limit["limit"])
-            response.headers["X-RateLimit-Window"] = str(tier_limit["window"])
+            count, _period = TIER_LIMITS.get(user_tier, TIER_LIMITS["free"])
+            response.headers["X-RateLimit-Limit"] = str(count)
+            response.headers["X-RateLimit-Window"] = "60"
             
             # Note: X-RateLimit-Remaining and X-RateLimit-Reset would require
             # tracking actual usage, which slowapi handles internally
