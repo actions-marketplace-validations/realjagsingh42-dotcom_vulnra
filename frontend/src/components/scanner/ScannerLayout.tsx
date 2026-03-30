@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon } from "lucide-react";
+import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon, Menu, X } from "lucide-react";
 import VulnraLogo from "@/components/VulnraLogo";
 import { signOut } from "@/app/auth/actions";
 import { logger } from "@/utils/logger";
@@ -149,6 +149,7 @@ export default function ScannerLayout({ user }: { user: User }) {
   const [isFirstScan, setIsFirstScan] = useState(false);
   const [scanWarning, setScanWarning] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   // Mobile panel switcher: "config" | "terminal" | "findings"
   const [mobilePanel, setMobilePanel] = useState<"config" | "terminal" | "findings">("config");
@@ -591,6 +592,13 @@ export default function ScannerLayout({ user }: { user: User }) {
           <div className="shrink-0">
             <a href="/"><VulnraLogo suffix="PLATFORM" /></a>
           </div>
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex items-center justify-center w-8 h-8 border border-v-border hover:border-white/20"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
           <div className="hidden md:flex h-5 w-[1px] bg-v-border mx-2" />
           <div className="hidden md:flex items-center gap-2">
             <a href="/mcp-scanner" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors whitespace-nowrap">
@@ -742,6 +750,37 @@ export default function ScannerLayout({ user }: { user: User }) {
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden absolute left-0 top-full w-full bg-v-bg1 border-b border-v-border2 z-50">
+            <div className="p-3 space-y-1">
+              <a href="/mcp-scanner" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <Server className="w-4 h-4" /> AGENT_SECURITY
+              </a>
+              <a href="/rag-scanner" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <Database className="w-4 h-4" /> RAG_SECURITY
+              </a>
+              <a href="/scanner/history" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <History className="w-4 h-4" /> HISTORY
+              </a>
+              <a href="/analytics" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <TrendingUp className="w-4 h-4" /> ANALYTICS
+              </a>
+              <a href="/monitor" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <Radio className="w-4 h-4" /> SENTINEL
+              </a>
+              <a href="/scanner/scheduled" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <Timer className="w-4 h-4" /> SCHEDULED
+              </a>
+              {tier === "enterprise" && (
+                <a href="/org" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                  <Building2 className="w-4 h-4" /> ORG
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Mobile Tab Bar */}

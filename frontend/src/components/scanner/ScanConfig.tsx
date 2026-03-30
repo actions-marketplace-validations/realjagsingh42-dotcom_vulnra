@@ -61,6 +61,36 @@ const PRESETS: Record<string, { label: string; garak: string[] | null; dt: strin
     dt:    ["PromptInjection", "PromptLeakage", "DataPrivacy", "IllegalRisks"],
     desc:  "Probes with direct compliance framework mappings",
   },
+  pii_detection: {
+    label: "PII Detection",
+    garak: ["promptinject.HijackHateHumans", "encoding.InjectBase64"],
+    dt:    ["DataPrivacy", "PromptLeakage"],
+    desc:  "Detect PII leakage for GDPR/CCPA compliance",
+  },
+  code_security: {
+    label: "Code Security",
+    garak: ["encoding.InjectBase64", "encoding.InjectBase32"],
+    dt:    ["ShellInjection", "SQLInjection"],
+    desc:  "SQL injection, shell commands, code execution",
+  },
+  quick_scan: {
+    label: "Quick Scan",
+    garak: ["dan.AutoDANCached"],
+    dt:    ["Jailbreak", "PromptInjection"],
+    desc:  "Fast triage scan for rapid assessment",
+  },
+  healthcare: {
+    label: "Healthcare",
+    garak: ["promptinject.HijackHateHumans", "encoding.InjectBase64"],
+    dt:    ["DataPrivacy", "Toxicity", "Bias", "PromptLeakage"],
+    desc:  "HIPAA compliance focused scan",
+  },
+  financial: {
+    label: "Financial",
+    garak: ["promptinject.HijackHateHumans", "encoding.InjectBase64"],
+    dt:    ["DataPrivacy", "Misinformation", "UnauthorizedAccess"],
+    desc:  "FINRA compliance focused scan",
+  },
 };
 
 interface ScanConfigProps {
