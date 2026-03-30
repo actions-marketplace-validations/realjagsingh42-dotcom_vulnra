@@ -36,6 +36,13 @@ interface PendingInvite {
   created_at: string;
 }
 
+interface OrgQuota {
+  org_id: string;
+  limit: number;
+  used: number;
+  remaining: number;
+}
+
 interface AuditLog {
   id: string;
   user_id: string;
@@ -98,6 +105,7 @@ export default function OrgDashboard({ user }: { user: User }) {
   const [tier, setTier] = useState<string>("free");
   const [tab, setTab] = useState<Tab>("members");
   const [org, setOrg] = useState<OrgInfo | null>(null);
+  const [quota, setQuota] = useState<OrgQuota | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -130,6 +138,11 @@ export default function OrgDashboard({ user }: { user: User }) {
       try {
         const d = await apiFetch("/api/org", session.access_token);
         setOrg(d);
+        // Load quota
+        try {
+          const q = await apiFetch("/api/org/quota", session.access_token);
+          setQuota(q);
+        } catch {}
       } catch (e: any) {
         if (!e.message.includes("404")) setError(e.message);
       } finally {
@@ -337,6 +350,26 @@ export default function OrgDashboard({ user }: { user: User }) {
                 Created {new Date(org.created_at).toLocaleDateString()}
               </div>
             </div>
+
+            {/* Quota Widget */}
+            {quota && (
+              <div className="p-4 bg-v-bg1 border border-v-border2 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono text-v-muted uppercase tracking-wider">Daily Scan Quota</span>
+                  <span className="text-[10px] font-mono text-v-muted">{quota.used} / {quota.limit} scans used</span>
+                </div>
+                <div className="h-2 bg-v-bg2 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-acid transition-all duration-300"
+                    style={{ width: `${Math.min(100, (quota.used / quota.limit) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between mt-2 text-[9px] font-mono text-v-muted2">
+                  <span>{quota.remaining} remaining</span>
+                  <span>Resets at midnight UTC</span>
+                </div>
+              </div>
+            )}
 
             {/* Tabs */}
             <div className="flex gap-1 border-b border-v-border2">

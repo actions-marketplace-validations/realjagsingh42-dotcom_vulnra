@@ -240,6 +240,28 @@ async def get_org(current_user: dict = Depends(get_current_user)):
     })
 
 
+# ── GET /api/org/quota — Get org quota status ─────────────────────────────────
+
+@router.get("/org/quota")
+async def get_org_quota_endpoint(current_user: dict = Depends(get_current_user)):
+    """Get the organization's daily scan quota usage."""
+    from app.services.supabase_service import get_org_quota, get_org_scans_used_today
+
+    membership = _get_user_org(current_user["id"])
+    if not membership:
+        raise HTTPException(status_code=404, detail="You are not a member of any organization.")
+
+    org_id = membership.get("organizations", {}).get("id")
+    limit = get_org_quota(org_id)
+    used = get_org_scans_used_today(org_id)
+    return {
+        "org_id": org_id,
+        "limit": limit,
+        "used": used,
+        "remaining": max(0, limit - used),
+    }
+
+
 # ── POST /api/org/invite — Invite member ──────────────────────────────────────
 
 @router.post("/org/invite")

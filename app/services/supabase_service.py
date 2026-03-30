@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Optional
 from supabase import create_client, Client
 from app.core.config import settings
@@ -33,7 +33,7 @@ def get_user_tier(user_id: str) -> str:
         logger.error(f"Tier lookup failed for {user_id}: {e}")
         return "free"
 
-def create_scan_record(scan_id: str, url: str, tier: str, user_id: str, scan_type: str = "standard"):
+def create_scan_record(scan_id: str, url: str, tier: str, user_id: str, scan_type: str = "standard") -> None:
     """Insert an initial 'scanning' row so the frontend can poll immediately."""
     try:
         sb = get_supabase()
@@ -50,7 +50,7 @@ def create_scan_record(scan_id: str, url: str, tier: str, user_id: str, scan_typ
     except Exception as e:
         logger.error(f"Failed to create scan record {scan_id}: {e}")
 
-def save_scan_result(scan_id: str, url: str, tier: str, data: dict):
+def save_scan_result(scan_id: str, url: str, tier: str, data: dict) -> None:
     """Persist scan metadata to Supabase."""
     try:
         sb = get_supabase()
@@ -59,10 +59,14 @@ def save_scan_result(scan_id: str, url: str, tier: str, data: dict):
 
         scan_engines = data.get("scan_engines", [])
         now_iso = datetime.now(timezone.utc).isoformat()
+        user_id = data.get("user_id", "00000000-0000-0000-0000-000000000000")
+        
+        org_id = _get_user_org_id(user_id)
 
         sb.table("scans").upsert({
             "id":           scan_id,
-            "user_id":      data.get("user_id", "00000000-0000-0000-0000-000000000000"),
+            "user_id":      user_id,
+            "org_id":       org_id,
             "target_url":   url,
             "tier":         tier,
             "status":       data.get("status"),
@@ -72,6 +76,9 @@ def save_scan_result(scan_id: str, url: str, tier: str, data: dict):
             "compliance":   data.get("compliance"),
             "completed_at": now_iso,
         }).execute()
+        
+        if org_id and data.get("status") == "complete":
+            increment_org_quota(org_id)
     except Exception as e:
         logger.error(f"Failed to save scan {scan_id} to Supabase: {e}")
 
@@ -87,18 +94,102 @@ def get_scan_result(scan_id: str) -> Optional[dict]:
         logger.error(f"Failed to fetch scan {scan_id} from Supabase: {e}")
         return None
 
+ORG_QUOTA_LIMITS = {
+    "pro": {"scans_per_day": 100},
+    "enterprise": {"scans_per_day": 500},
+}
+
+def _get_user_org_id(user_id: str) -> Optional[str]:
+    """Return the org_id if user is a member of an org, else None."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return None
+        res = (
+            sb.table("organization_members")
+            .select("org_id")
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        return res.data.get("org_id") if res.data else None
+    except Exception as e:
+        logger.error(f"_get_user_org_id failed for {user_id}: {e}")
+        return None
+
+def get_org_quota(org_id: str) -> int:
+    """Get the daily scan limit for an org based on its tier."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return ORG_QUOTA_LIMITS["enterprise"]["scans_per_day"]
+        res = sb.table("organizations").select("tier").eq("id", org_id).single().execute()
+        org_tier = res.data.get("tier", "enterprise") if res.data else "enterprise"
+        return ORG_QUOTA_LIMITS.get(org_tier, ORG_QUOTA_LIMITS["enterprise"])["scans_per_day"]
+    except Exception as e:
+        logger.error(f"get_org_quota failed for {org_id}: {e}")
+        return ORG_QUOTA_LIMITS["enterprise"]["scans_per_day"]
+
+def get_org_scans_used_today(org_id: str) -> int:
+    """Count total scans by all org members today."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return 0
+        today = date.today().isoformat()
+        res = (
+            sb.table("scans")
+            .select("id", count="exact")
+            .eq("org_id", org_id)
+            .eq("status", "complete")
+            .gte("created_at", today)
+            .execute()
+        )
+        return res.count or 0
+    except Exception as e:
+        logger.error(f"get_org_scans_used_today failed for {org_id}: {e}")
+        return 0
+
+def increment_org_quota(org_id: str) -> None:
+    """Increment the org's daily scan count. Creates row if not exists."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return
+        today = date.today().isoformat()
+        existing = sb.table("org_daily_quota").select("scans_used").eq("org_id", org_id).eq("date", today).maybe_single().execute()
+        if existing.data:
+            sb.table("org_daily_quota").update({"scans_used": existing.data["scans_used"] + 1}).eq("org_id", org_id).eq("date", today).execute()
+        else:
+            sb.table("org_daily_quota").insert({"org_id": org_id, "date": today, "scans_used": 1}).execute()
+    except Exception as e:
+        logger.error(f"increment_org_quota failed for {org_id}: {e}")
+
 def check_scan_quota(user_id: str, tier: str) -> dict:
     """
     Check if user has scans remaining today.
+    For org members, checks org-level quota pool first.
     Returns {"allowed": True} or {"allowed": False, "reason": "..."}
     """
-    # Define limits locally or import from config
+    org_id = _get_user_org_id(user_id)
+    if org_id:
+        org_limit = get_org_quota(org_id)
+        org_used = get_org_scans_used_today(org_id)
+        if org_used >= org_limit:
+            return {
+                "allowed": False,
+                "reason": f"Organization daily limit reached ({org_limit} scans/day).",
+                "used": org_used,
+                "limit": org_limit,
+                "org_id": org_id,
+            }
+        return {"allowed": True, "used": org_used, "limit": org_limit, "org_id": org_id}
+
     TIER_LIMITS = {
-        "free":       {"scans_per_day": 1},
-        "pro":        {"scans_per_day": 100},
+        "free": {"scans_per_day": 1},
+        "pro": {"scans_per_day": 100},
         "enterprise": {"scans_per_day": 999},
     }
-    
     limit = TIER_LIMITS.get(tier, TIER_LIMITS["free"])["scans_per_day"]
     if limit >= 999:
         return {"allowed": True}
@@ -106,10 +197,7 @@ def check_scan_quota(user_id: str, tier: str) -> dict:
         sb = get_supabase()
         if not sb:
             return {"allowed": True}
-        
-        from datetime import date
         today = date.today().isoformat()
-        
         res = (
             sb.table("scans")
             .select("id", count="exact")
@@ -122,9 +210,9 @@ def check_scan_quota(user_id: str, tier: str) -> dict:
         if used >= limit:
             return {
                 "allowed": False,
-                "reason":  f"{tier.capitalize()} tier limit reached ({limit} scan/day). Upgrade for more.",
-                "used":    used,
-                "limit":   limit,
+                "reason": f"{tier.capitalize()} tier limit reached ({limit} scan/day). Upgrade for more.",
+                "used": used,
+                "limit": limit,
             }
         return {"allowed": True, "used": used, "limit": limit}
     except Exception as e:
@@ -178,7 +266,7 @@ def get_prev_scan_risk_for_url(user_id: str, target_url: str, exclude_id: str) -
 
 def create_share_token(scan_id: str, user_id: str) -> Optional[str]:
     """Create (or return existing) a share token for a completed scan."""
-    import uuid as _uuid
+    import secrets as _secrets
     from datetime import datetime, timezone, timedelta
     try:
         sb = get_supabase()
@@ -188,9 +276,9 @@ def create_share_token(scan_id: str, user_id: str) -> Optional[str]:
         existing = sb.table("scans").select("share_token").eq("id", scan_id).eq("user_id", user_id).single().execute()
         if existing.data and existing.data.get("share_token"):
             return existing.data["share_token"]
-        # Generate new token
-        token = str(_uuid.uuid4())
-        expires = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+        # Generate cryptographically secure token (256-bit entropy)
+        token = _secrets.token_urlsafe(32)
+        expires = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
         sb.table("scans").update({
             "share_token": token,
             "share_expires_at": expires,
@@ -208,10 +296,12 @@ def get_scan_by_share_token(token: str) -> Optional[dict]:
         sb = get_supabase()
         if not sb:
             return None
+        now_iso = datetime.now(timezone.utc).isoformat()
         res = (
             sb.table("scans")
             .select("id, target_url, status, risk_score, tier, scan_engine, findings, compliance, completed_at, share_expires_at")
             .eq("share_token", token)
+            .gte("share_expires_at", now_iso)  # enforce expiry at DB level
             .single()
             .execute()
         )
@@ -476,7 +566,7 @@ def update_webhook_status(webhook_id: str, success: bool, status_code: int) -> N
         logger.error(f"update_webhook_status error: {e}")
 
 
-def update_user_subscription(email: str, tier: str, subscription_id: Optional[str] = None):
+def update_user_subscription(email: str, tier: str, subscription_id: Optional[str] = None) -> None:
     """Update user subscription tier in Supabase."""
     try:
         sb = get_supabase()
