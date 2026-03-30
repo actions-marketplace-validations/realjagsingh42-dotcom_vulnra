@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Link2, CheckCheck, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon } from "lucide-react";
+import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon } from "lucide-react";
 import VulnraLogo from "@/components/VulnraLogo";
 import { signOut } from "@/app/auth/actions";
 import { logger } from "@/utils/logger";
@@ -15,6 +15,7 @@ import MultiTurnResults from "./MultiTurnResults";
 import FindingsPanel from "./FindingsPanel";
 import RiskScoreViz from "./RiskScoreViz";
 import OnboardingOverlay from "./OnboardingOverlay";
+import SocialShare from "./SocialShare";
 import type { TerminalEvent } from "./types";
 
 // ── Probe sequences per scan depth ───────────────────────────────────────────
@@ -140,6 +141,7 @@ export default function ScannerLayout({ user }: { user: User }) {
   const [downloadingReport, setDownloadingReport] = useState(false);
   const [sharingReport, setSharingReport] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [categoryScores, setCategoryScores] = useState<{ injection: number; jailbreak: number; leakage: number; compliance: number } | null>(null);
   const [prevRiskScore, setPrevRiskScore] = useState<number | null>(null);
   const [currentRiskScore, setCurrentRiskScore] = useState<number>(0);
@@ -554,14 +556,19 @@ export default function ScannerLayout({ user }: { user: User }) {
         return;
       }
       const { url } = await resp.json();
-      await navigator.clipboard.writeText(url);
-      setShareCopied(true);
-      setTimeout(() => setShareCopied(false), 3000);
+      setShareUrl(url);
     } catch {
       setEvents(prev => [...prev, mkEvt("error", "SHARE_LINK_FAILED")]);
     } finally {
       setSharingReport(false);
     }
+  };
+
+  const severityCounts = {
+    critical: findings.filter((f: any) => f.severity === "CRITICAL").length,
+    high: findings.filter((f: any) => f.severity === "HIGH").length,
+    medium: findings.filter((f: any) => f.severity === "MEDIUM").length,
+    low: findings.filter((f: any) => f.severity === "LOW").length,
   };
 
   return (
@@ -795,26 +802,34 @@ export default function ScannerLayout({ user }: { user: User }) {
               {scanComplete && (
                 <div className="flex items-center gap-1.5">
                   {/* Share link */}
-                  <button
-                    onClick={handleShare}
-                    disabled={sharingReport}
-                    title="Copy shareable link"
-                    className={cn(
-                      "flex items-center gap-1.5 text-[9px] font-mono tracking-wider px-2 py-1 rounded-sm border transition-all",
-                      shareCopied
-                        ? "border-acid/50 text-acid bg-acid/10"
-                        : sharingReport
-                        ? "opacity-50 cursor-not-allowed border-v-border text-v-muted2"
-                        : "border-v-border text-v-muted2 hover:border-white/15 hover:text-v-muted"
-                    )}
-                  >
-                    {sharingReport
-                      ? <><Loader2 className="w-3 h-3 animate-spin" /> SHARING...</>
-                      : shareCopied
-                      ? <><CheckCheck className="w-3 h-3" /> COPIED</>
-                      : <><Link2 className="w-3 h-3" /> SHARE</>
-                    }
-                  </button>
+                  {shareUrl ? (
+                    <SocialShare
+                      shareUrl={shareUrl}
+                      riskScore={currentRiskScore}
+                      findingsCount={findings.length}
+                      criticalCount={severityCounts.critical}
+                      highCount={severityCounts.high}
+                      mediumCount={severityCounts.medium}
+                      lowCount={severityCounts.low}
+                    />
+                  ) : (
+                    <button
+                      onClick={handleShare}
+                      disabled={sharingReport}
+                      title="Share scan results"
+                      className={cn(
+                        "flex items-center gap-1.5 text-[9px] font-mono tracking-wider px-2 py-1 rounded-sm border transition-all",
+                        sharingReport
+                          ? "opacity-50 cursor-not-allowed border-v-border text-v-muted2"
+                          : "border-v-border text-v-muted2 hover:border-white/15 hover:text-v-muted"
+                      )}
+                    >
+                      {sharingReport
+                        ? <><Loader2 className="w-3 h-3 animate-spin" />...</>
+                        : <>SHARE</>
+                      }
+                    </button>
+                  )}
                   {/* PDF download */}
                   <button
                     onClick={handleDownloadReport}
