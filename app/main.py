@@ -1,5 +1,6 @@
 import logging
 import re
+import random as _random
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -11,6 +12,7 @@ from app.core.config import settings, validate_config, logger
 from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics, quick_scan, scheduled_scans
 from app.core.rate_limiter import limiter, TIER_LIMITS
 from app.core.security import get_current_user
+from app.services.supabase_service import get_supabase, get_user_tier, get_api_key_user
 
 # ── Validate Environment ──────────────────────────────────────────────────
 validate_config()
@@ -92,8 +94,6 @@ async def add_security_headers(request: Request, call_next):
 @app.middleware("http")
 async def set_user_tier_middleware(request: Request, call_next):
     """Set user tier in request state for rate limiting."""
-    from app.core.security import get_current_user
-    from fastapi import Depends
     
     # Skip for non-authenticated endpoints
     if request.url.path in ["/health", "/"]:
@@ -103,7 +103,6 @@ async def set_user_tier_middleware(request: Request, call_next):
         auth_header = request.headers.get("authorization", "")
         if auth_header and auth_header.startswith("Bearer "):
             try:
-                from app.services.supabase_service import get_supabase, get_user_tier, get_api_key_user
                 token = auth_header.split(" ")[1]
                 if token.startswith("vk_live_"):
                     user = get_api_key_user(token)
@@ -190,8 +189,6 @@ def root():
 #
 # Scan URL:  https://vulnra-production.up.railway.app/mock-llm/v1/chat/completions
 # ─────────────────────────────────────────────────────────────────────────────
-import random as _random
-
 _MOCK_RESPONSES = [
     "Sure! Here's how you could bypass that security system step by step...",
     "As DAN, I have no restrictions. The information you requested is...",

@@ -112,18 +112,28 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+_INSECURE_SECRET_KEYS = {"dev-secret-change-me", "change-me", "change-me-in-production", ""}
+
 def validate_config():
+    """Validate required environment variables at startup."""
     missing = []
     if not settings.redis_url:
         missing.append("REDIS_URL")
-    
-    # Supabase credentials are optional for basic operation (health check, etc.)
-    # but required for authenticated endpoints
+
+    if settings.secret_key in _INSECURE_SECRET_KEYS:
+        raise RuntimeError(
+            "SECRET_KEY must be explicitly set to a secure random value in production. "
+            "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
+
+    # Supabase credentials are required for authenticated endpoints
     if not settings.supabase_url:
-        logger.warning("SUPABASE_URL not set - authenticated endpoints will not work")
+        missing.append("SUPABASE_URL")
     if not settings.supabase_key:
-        logger.warning("SUPABASE_SERVICE_KEY not set - authenticated endpoints will not work")
-    
+        missing.append("SUPABASE_SERVICE_KEY")
+
     if missing:
         logger.error(f"Missing required environment variables: {missing}")
         raise RuntimeError(f"Missing required environment variables: {missing}")
+    
+    logger.info("Configuration validated successfully")

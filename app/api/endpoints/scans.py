@@ -9,7 +9,7 @@ from app.core.config import settings, logger
 from app.core.security import get_current_user
 from app.core.utils import is_safe_url
 from app.core.rate_limiter import limiter, RATE_LIMITS
-from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_tier, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url, create_scan_record, save_scan_result
+from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url, create_scan_record, save_scan_result
 from app.services.scan_service import run_scan_internal
 from app.services.mcp_scanner import scan_mcp_server, MCPScanResult
 

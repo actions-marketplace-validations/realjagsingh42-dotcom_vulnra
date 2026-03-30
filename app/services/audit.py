@@ -18,7 +18,6 @@ Supported actions:
 """
 
 import logging
-import time
 import uuid
 from typing import Any, Dict, Optional
 
@@ -119,7 +118,12 @@ def get_audit_logs(
             query = query.eq("user_id", user_id)
 
         if action_filter:
-            # Use ilike for prefix matching: 'scan.' → 'scan.%'
+            _ALLOWED_ACTION_PREFIXES = {
+                "scan.", "member.", "org.", "api_key.", "audit_log.", "share.", "report."
+            }
+            if action_filter not in _ALLOWED_ACTION_PREFIXES:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=400, detail="Invalid action filter.")
             query = query.ilike("action", f"{action_filter}%")
 
         res = query.execute()

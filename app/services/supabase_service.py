@@ -1,4 +1,3 @@
-import os
 import logging
 from datetime import datetime, timezone, date
 from typing import Optional
