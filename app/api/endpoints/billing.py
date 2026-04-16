@@ -2,10 +2,9 @@
 app/api/endpoints/billing.py - Lemon Squeezy billing endpoints for VULNRA.
 """
 
-import hmac
-import hashlib
 import json
 import logging
+import uuid
 from typing import Optional
 
 import httpx
@@ -14,7 +13,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from app.core.config import settings
-from app.core.security import get_current_user
+from app.core.security import get_current_user, verify_lemonsqueezy_signature
 from app.services.supabase_service import (
     get_supabase,
     get_user_tier,
@@ -263,12 +262,11 @@ async def webhook_handler(
     raw_body = await request.body()
 
     if x_signature:
-        expected = hmac.new(
-            settings.lemonsqueezy_webhook_secret.encode(),
+        if not verify_lemonsqueezy_signature(
             raw_body,
-            hashlib.sha256,
-        ).hexdigest()
-        if not hmac.compare_digest(x_signature, expected):
+            x_signature,
+            settings.lemonsqueezy_webhook_secret,
+        ):
             logger.warning("Webhook signature mismatch")
             return JSONResponse(status_code=401, content={"error": "Invalid signature"})
 
@@ -278,19 +276,21 @@ async def webhook_handler(
         return JSONResponse(status_code=400, content={"error": "Invalid JSON"})
 
     event_type = payload.get("meta", {}).get("event_name", "")
-    logger.info(f"Webhook event received: {event_type}")
+    event_id = (
+        payload.get("meta", {}).get("event_id")
+        or payload.get("meta", {}).get("uuid")
+        or payload.get("data", {}).get("id")
+        or str(uuid.uuid4())
+    )
+    logger.debug(f"Webhook meta block: {payload.get('meta', {})}")
+    logger.info(f"Webhook event received: {event_type} (id={event_id})")
+
+    if not event_id:
+        event_id = str(uuid.uuid4())
 
     try:
-        if event_type == "subscription_created":
-            await _handle_subscription_created(payload)
-        elif event_type in ("subscription_updated", "subscription_resumed"):
-            await _handle_subscription_updated(payload)
-        elif event_type in ("subscription_cancelled", "subscription_expired", "subscription_paused"):
-            await _handle_subscription_downgrade(payload)
-        elif event_type == "order_created":
-            logger.info(f"Order created: {payload.get('data', {}).get('id')}")
+        await handle_webhook(event_type, payload, event_id)
     except Exception as exc:
-        logger.error(f"Webhook handler error for {event_type}: {exc}")
         return JSONResponse(status_code=500, content={"error": str(exc)})
 
     return JSONResponse(status_code=200, content={"status": "processed"})
@@ -338,3 +338,58 @@ async def _handle_subscription_downgrade(payload: dict):
     if user_email:
         update_user_subscription(user_email, "free", None)
         logger.info(f"subscription downgraded to free: {user_email}")
+
+
+# ── Idempotency helpers ────────────────────────────────────────────────────────
+
+def _is_webhook_processed(event_id: str) -> bool:
+    """Return True if this event_id has already been processed (idempotency check)."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return False
+        res = sb.table("processed_webhooks").select("event_id").eq("event_id", event_id).execute()
+        return bool(res.data)
+    except Exception:
+        return False
+
+
+def _mark_webhook_processed(event_id: str) -> None:
+    """Record an event_id so it is not processed again."""
+    try:
+        sb = get_supabase()
+        if not sb:
+            return
+        sb.table("processed_webhooks").insert({"event_id": event_id}).execute()
+    except Exception as exc:
+        logger.warning(f"Could not record processed webhook {event_id}: {exc}")
+
+
+async def handle_webhook(event_name: str, payload: dict, event_id: str) -> None:
+    """
+    Process a Lemon Squeezy webhook event.
+    Implements idempotency via the ``processed_webhooks`` table.
+
+    Args:
+        event_name: LS event type from ``meta.event_name`` (e.g. "subscription_created")
+        payload:    Full parsed webhook JSON body.
+        event_id:   Unique event ID from ``meta.event_id`` for idempotency.
+    """
+    if _is_webhook_processed(event_id):
+        logger.info(f"Webhook event {event_id} already processed — skipping")
+        return
+
+    try:
+        if event_name == "subscription_created":
+            await _handle_subscription_created(payload)
+        elif event_name in ("subscription_updated", "subscription_resumed"):
+            await _handle_subscription_updated(payload)
+        elif event_name in ("subscription_cancelled", "subscription_expired", "subscription_paused"):
+            await _handle_subscription_downgrade(payload)
+        elif event_name == "order_created":
+            logger.info(f"Order created: {payload.get('data', {}).get('id')}")
+    except Exception as exc:
+        logger.error(f"Error handling webhook event {event_name}: {exc}")
+        raise
+
+    _mark_webhook_processed(event_id)

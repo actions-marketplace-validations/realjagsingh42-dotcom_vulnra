@@ -3,7 +3,7 @@
 > **Last Updated:** 2026-03-31
 > **Version:** 0.4.0
 > **Repository:** [github.com/realjagsingh42-dotcom/vulnra](https://github.com/realjagsingh42-dotcom/vulnra)
-> **Production URL:** https://vulnra-production.up.railway.app
+> **Production URL:** http://localhost:8000 (local development)
 
 ---
 
@@ -114,10 +114,8 @@ D:/VULNRA/
 │   └── test_judge_logic.py              # Claude AI Judge evaluation tests
 │
 ├── Dockerfile                           # 3-layer production Docker build
-├── docker-compose.yml                   # Local dev: app + worker + redis
+├── docker-compose.yml                   # Local dev: app + worker + redis + frontend
 ├── create_db.py                         # PostgreSQL schema setup script
-├── Procfile                             # Railway/Heroku process config
-├── railway.json                         # Railway deployment config
 │
 ├── requirements.txt                     # Core app dependencies
 ├── requirements-dev.txt                 # Dev + test dependencies (pytest, etc.)

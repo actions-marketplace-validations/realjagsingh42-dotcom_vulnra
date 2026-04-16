@@ -1,3 +1,5 @@
+import hmac
+import hashlib
 import logging
 from typing import Optional
 from fastapi import Header, HTTPException, Depends, status
@@ -69,3 +71,35 @@ def get_admin_user(current_user: dict = Depends(get_current_user)):
             detail="Insufficient permissions",
         )
     return current_user
+
+
+def verify_lemonsqueezy_signature(
+    payload: bytes,
+    signature: str,
+    secret: str,
+) -> bool:
+    """
+    Verify a Lemon Squeezy webhook HMAC-SHA256 signature.
+
+    Args:
+        payload:   Raw request body bytes (NOT parsed JSON).
+        signature: Value of the ``X-Signature`` header from Lemon Squeezy.
+                   Format: ``sha256=<hexdigest>`` (the ``sha256=`` prefix is stripped
+                   before comparison).
+        secret:    The webhook signing secret configured in your LS dashboard.
+
+    Returns:
+        True if the signature matches, False otherwise.
+        Uses ``hmac.compare_digest`` for timing-safe comparison.
+    """
+    if not signature or not secret:
+        return False
+    expected = hmac.new(
+        secret.encode("utf-8"),
+        payload,
+        hashlib.sha256,
+    ).hexdigest()
+    sig_value = signature
+    if signature.startswith("sha256="):
+        sig_value = signature[7:]
+    return hmac.compare_digest(expected, sig_value)

@@ -17,14 +17,14 @@ VULNRA is a production-grade AI vulnerability scanner for Large Language Models.
 | Cache/Queue | Redis + Celery |
 | AI | Anthropic Claude 3 Haiku (AI Judge) |
 | Scan Engines | Garak 0.14.0, DeepTeam 0.1.0 |
-| Deployment | Railway (Docker) |
+| Deployment | Local / Docker Compose |
 
 ## Key Commands
 
 ```bash
 # Backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # Frontend
 cd frontend && npm install && npm run dev
