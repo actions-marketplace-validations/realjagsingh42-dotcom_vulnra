@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 /* ─── constants ──────────────────────────────────────────── */
-const API_BASE = "https://vulnra-production.up.railway.app";
+const API_BASE = "http://localhost:8000";
 
 const PRIVATE_HOSTS = [
   "localhost", "127.0.0.1", "0.0.0.0", "::1",

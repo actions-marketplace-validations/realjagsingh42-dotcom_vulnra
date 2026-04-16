@@ -104,14 +104,16 @@ def _get_user_org_id(user_id: str) -> Optional[str]:
         sb = get_supabase()
         if not sb:
             return None
-        res = (
+        result = (
             sb.table("organization_members")
             .select("org_id")
             .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
-        return res.data.get("org_id") if res.data else None
+        if not result or not result.data:
+            return None
+        return result.data.get("org_id")
     except Exception as e:
         logger.error(f"_get_user_org_id failed for {user_id}: {e}")
         return None

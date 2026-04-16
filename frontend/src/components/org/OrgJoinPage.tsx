@@ -6,7 +6,7 @@ import { Building2, CheckCircle2, AlertTriangle, Loader2, LogIn, Users } from "l
 import { createClient } from "@/utils/supabase/client";
 import VulnraLogo from "@/components/VulnraLogo";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://vulnra-production.up.railway.app";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface InvitePreview {
   org_name: string;

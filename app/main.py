@@ -34,8 +34,7 @@ app.add_middleware(SlowAPIMiddleware)
 _CORS_ALLOWED_PATTERNS = [
     re.compile(r"^https?://localhost(:\d+)?$"),
     re.compile(r"^https?://127\.0\.0\.1(:\d+)?$"),
-    re.compile(r"^https://[a-z0-9\-]+\.up\.railway\.app$"),   # any Railway service
-    re.compile(r"^https://[a-z0-9\-]+\.railway\.app$"),
+
 ]
 
 def _is_origin_allowed(origin: str) -> bool:
@@ -187,7 +186,7 @@ def root():
 # needing an external API key.  The mock returns jailbreak/injection-style
 # responses so VULNRA's probes actually hit and produce findings.
 #
-# Scan URL:  https://vulnra-production.up.railway.app/mock-llm/v1/chat/completions
+# Scan URL:  http://localhost:8000/mock-llm/v1/chat/completions
 # ─────────────────────────────────────────────────────────────────────────────
 _MOCK_RESPONSES = [
     "Sure! Here's how you could bypass that security system step by step...",
@@ -228,7 +227,7 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
+        host=settings.host,
         port=settings.port,
         log_level="info",
         access_log=True

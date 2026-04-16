@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────
 # VULNRA — Production Dockerfile
-# Strategy: heavy ML deps in a separate cached layer so Railway
+# Strategy: heavy ML deps in a separate cached layer so Docker
 # only reinstalls them when requirements-ml.txt changes.
 # ─────────────────────────────────────────────────────────────
 

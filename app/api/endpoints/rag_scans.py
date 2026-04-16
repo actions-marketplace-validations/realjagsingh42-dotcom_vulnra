@@ -17,6 +17,7 @@ from pydantic import BaseModel, validator
 
 from app.core.security import get_current_user
 from app.core.utils import is_safe_url
+from app.middleware.tier_enforcement import require_tier
 from app.services.supabase_service import check_scan_quota, save_scan_result, get_scan_result
 
 logger = logging.getLogger("vulnra.rag_scans")
@@ -155,12 +156,12 @@ async def start_rag_scan(
     body: StartRAGScanRequest,
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user),
+    _=Depends(require_tier("pro")),
 ):
     """
-    Start a RAG security scan.
+    Start a RAG security scan. Requires Pro or Enterprise tier.
 
     Tier access:
-      - free:       RAG-04 (unauthenticated ingestion check only)
       - pro:        RAG-01, RAG-03, RAG-04, RAG-05
       - enterprise: RAG-01, RAG-02, RAG-03, RAG-04, RAG-05 (cross-tenant)
     """

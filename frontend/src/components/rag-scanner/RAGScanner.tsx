@@ -42,7 +42,7 @@ interface RAGFinding {
   fix_effort: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://vulnra-production.up.railway.app";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const POLL_INTERVAL = 3000;
 
 const PROBE_DESCRIPTIONS: Record<string, string> = {

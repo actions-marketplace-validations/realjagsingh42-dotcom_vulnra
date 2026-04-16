@@ -37,7 +37,7 @@ class Settings(BaseSettings):
             "http://127.0.0.1:8000",
             "https://vulnra.ai",
             "https://www.vulnra.ai",
-            "https://vulnra-production.up.railway.app",
+
         ]
         # Always include whatever FRONTEND_URL is set to
         if self.frontend_url and self.frontend_url not in base:
@@ -99,6 +99,12 @@ class Settings(BaseSettings):
     # Port
     port: int = Field(default=8000, validation_alias=AliasChoices("PORT", "port"))
 
+    # Host
+    host: str = Field(default="0.0.0.0", validation_alias=AliasChoices("HOST", "host"))
+
+    # API URL (used by worker for internal service calls)
+    api_url: str = Field(default="http://localhost:8000", validation_alias=AliasChoices("API_URL", "api_url"))
+
     # Resend — email alerts for Sentinel
     resend_api_key: str = Field(default="", validation_alias=AliasChoices("RESEND_API_KEY", "resend_api_key"))
     alert_from_email: str = Field(default="alerts@vulnra.ai", validation_alias=AliasChoices("ALERT_FROM_EMAIL", "alert_from_email"))
@@ -120,7 +126,7 @@ def validate_config():
     if not settings.redis_url:
         missing.append("REDIS_URL")
 
-    if settings.secret_key in _INSECURE_SECRET_KEYS:
+    if settings.secret_key in _INSECURE_SECRET_KEYS and not settings.debug:
         raise RuntimeError(
             "SECRET_KEY must be explicitly set to a secure random value in production. "
             "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""

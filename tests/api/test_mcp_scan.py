@@ -3,25 +3,64 @@ API tests for MCP scan endpoint
 """
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, patch, MagicMock
-from app.main import app
+from app.main import app as production_app
 from app.services.mcp_scanner import MCPScanResult, MCPVulnerability
+from app.core.security import get_current_user
+
+
+def create_test_app():
+    """Create a test FastAPI app mirroring production routing but WITHOUT
+    SlowAPIMiddleware."""
+    from app.api.endpoints import (
+        scans, billing, api_keys, monitor, demo, rag_scans,
+        org, user, webhooks, analytics, quick_scan, scheduled_scans,
+    )
+
+    test_app = FastAPI()
+    test_app.state.limiter = production_app.state.limiter
+
+    test_app.include_router(scans.router, tags=["scans"])
+    test_app.include_router(quick_scan.router, tags=["quick-scan"])
+    test_app.include_router(billing.router, prefix="/billing", tags=["billing"])
+    test_app.include_router(api_keys.router, tags=["api-keys"])
+    test_app.include_router(monitor.router, tags=["monitor"])
+    test_app.include_router(demo.router, tags=["demo"])
+    test_app.include_router(rag_scans.router, prefix="/api", tags=["rag-scans"])
+    test_app.include_router(org.router, prefix="/api", tags=["org"])
+    test_app.include_router(user.router, tags=["user"])
+    test_app.include_router(webhooks.router, tags=["webhooks"])
+    test_app.include_router(analytics.router, tags=["analytics"])
+    test_app.include_router(scheduled_scans.router, prefix="/api", tags=["scheduled-scans"])
+
+    return test_app
+
+
+_orig_check = production_app.state.limiter._check_request_limit
+
+
+def _noop_check_request(request, endpoint_func, in_middleware=True):
+    request.state.view_rate_limit = None
+
+
+_disable_rate_limit_patch = patch.object(
+    production_app.state.limiter,
+    "_check_request_limit",
+    side_effect=_noop_check_request,
+)
 
 
 @pytest.fixture
 def client():
-    """Create a test client"""
-    # Disable rate limiting for tests by patching the limiter instance's check_request_limit method
-    # We need to patch it on the instance that's already created in scans.py
-    from app.api.endpoints import scans
-    
-    def noop_check_request(*args, **kwargs):
-        return None
-    
-    # Patch the check_request_limit method on the specific limiter instance
-    with patch.object(scans.limiter, 'check_request_limit', side_effect=noop_check_request):
-        yield TestClient(app)
+    """Create a test client backed by a test app without SlowAPIMiddleware.
+    Rate limits are disabled via _check_request_limit patch that sets view_rate_limit."""
+    with _disable_rate_limit_patch:
+        test_app = create_test_app()
+        yield test_app, TestClient(test_app)
+        test_app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def mock_supabase_user():
@@ -30,6 +69,7 @@ def mock_supabase_user():
     mock_user.id = "test-user-id"
     mock_user.email = "test@example.com"
     return mock_user
+
 
 @pytest.fixture(autouse=True)
 def reset_supabase_singleton():
@@ -71,189 +111,139 @@ class TestMCPEndpoint:
 
     def test_mcp_scan_endpoint_exists(self, client):
         """Test that the MCP scan endpoint exists"""
-        with patch("app.services.supabase_service.get_supabase") as mock_sb:
-            mock_sb.return_value = None
-            response = client.post("/scan/mcp")
-            # Should get 422 (validation error) or 401 (unauthorized) rather than 404
-            assert response.status_code in [422, 401, 403]
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user", "email": "test@example.com", "tier": "free"
+        }
+        response = test_client.post("/scan/mcp")
+        assert response.status_code in [401, 403, 422]
 
-    def test_mcp_scan_success(self, client, mock_scan_result, mock_supabase_user):
+    def test_mcp_scan_success(self, client, mock_scan_result):
         """Test successful MCP scan"""
-        # Mock Supabase service for middleware and get_current_user
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        # Configure get_user to return the mock response regardless of token
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            # Also patch get_user_tier where it's imported in security module
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                # Patch get_supabase for the middleware as well
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        with patch("app.api.endpoints.scans.scan_mcp_server") as mock_scan:
-                            mock_scan.return_value = mock_scan_result
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                            with patch("app.api.endpoints.scans.check_scan_quota") as mock_quota:
-                                mock_quota.return_value = {"allowed": True}
+        with patch("app.api.endpoints.scans.scan_mcp_server", return_value=mock_scan_result):
+            with patch("app.api.endpoints.scans.check_scan_quota", return_value={"allowed": True}):
+                response = test_client.post(
+                    "/scan/mcp",
+                    json={"server_url": "https://example.com/mcp"},
+                    headers={"Authorization": "Bearer test-token"},
+                )
 
-                                response = client.post(
-                                    "/scan/mcp",
-                                    json={"server_url": "https://example.com/mcp"},
-                                    headers={"Authorization": "Bearer test-token"}
-                                )
+                assert response.status_code == 200
+                data = response.json()
+                assert data["server_url"] == "https://example.com/mcp"
+                assert data["status"] == "SUCCESS"
+                assert data["risk_score"] == 50.0
+                assert data["overall_severity"] == "HIGH"
+                assert len(data["vulnerabilities"]) == 1
 
-                                assert response.status_code == 200
-                                data = response.json()
-                                assert data["server_url"] == "https://example.com/mcp"
-                                assert data["status"] == "SUCCESS"
-                                assert data["risk_score"] == 50.0
-                                assert data["overall_severity"] == "HIGH"
-                                assert len(data["vulnerabilities"]) == 1
-
-    def test_mcp_scan_invalid_url(self, client, mock_supabase_user):
+    def test_mcp_scan_invalid_url(self, client):
         """Test MCP scan with invalid URL"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        response = client.post(
-                            "/scan/mcp",
-                            json={"server_url": "not-a-url"},
-                            headers={"Authorization": "Bearer test-token"}
-                        )
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                        assert response.status_code == 422  # Validation error
+        with patch("app.api.endpoints.scans.check_scan_quota", return_value={"allowed": True}):
+            response = test_client.post(
+                "/scan/mcp",
+                json={"server_url": "not-a-url"},
+                headers={"Authorization": "Bearer test-token"},
+            )
 
-    def test_mcp_scan_private_ip_blocked(self, client, mock_supabase_user):
+            assert response.status_code == 422
+
+    def test_mcp_scan_private_ip_blocked(self, client):
         """Test that private IPs are blocked"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        response = client.post(
-                            "/scan/mcp",
-                            json={"server_url": "http://192.168.1.1/mcp"},
-                            headers={"Authorization": "Bearer test-token"}
-                        )
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                        assert response.status_code == 400
-                        assert "private IPs" in response.json()["detail"]
+        with patch("app.api.endpoints.scans.check_scan_quota", return_value={"allowed": True}):
+            response = test_client.post(
+                "/scan/mcp",
+                json={"server_url": "http://192.168.1.1/mcp"},
+                headers={"Authorization": "Bearer test-token"},
+            )
 
-    def test_mcp_scan_quota_exceeded(self, client, mock_supabase_user):
+            assert response.status_code == 400
+            assert "private IPs" in response.json()["detail"]
+
+    def test_mcp_scan_quota_exceeded(self, client):
         """Test MCP scan with quota exceeded"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="free"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="free"):
-                        with patch("app.api.endpoints.scans.check_scan_quota") as mock_quota:
-                            mock_quota.return_value = {"allowed": False, "reason": "Daily limit exceeded"}
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                            response = client.post(
-                                "/scan/mcp",
-                                json={"server_url": "https://example.com/mcp"},
-                                headers={"Authorization": "Bearer test-token"}
-                            )
+        with patch("app.api.endpoints.scans.check_scan_quota", return_value={
+            "allowed": False, "reason": "Daily limit exceeded"
+        }):
+            response = test_client.post(
+                "/scan/mcp",
+                json={"server_url": "https://example.com/mcp"},
+                headers={"Authorization": "Bearer test-token"},
+            )
 
-                            assert response.status_code == 429
-                            data = response.json()
-                            assert data["error"] == "quota_exceeded"
+            assert response.status_code == 429
+            assert response.json()["error"] == "quota_exceeded"
 
-    def test_mcp_scan_error_handling(self, client, mock_supabase_user):
+    def test_mcp_scan_error_handling(self, client):
         """Test error handling in MCP scan"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        with patch("app.api.endpoints.scans.scan_mcp_server") as mock_scan:
-                            mock_scan.side_effect = Exception("Scan failed")
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                            with patch("app.api.endpoints.scans.check_scan_quota") as mock_quota:
-                                mock_quota.return_value = {"allowed": True}
+        with patch("app.api.endpoints.scans.scan_mcp_server") as mock_scan:
+            mock_scan.side_effect = Exception("Scan failed")
 
-                                response = client.post(
-                                    "/scan/mcp",
-                                    json={"server_url": "https://example.com/mcp"},
-                                    headers={"Authorization": "Bearer test-token"}
-                                )
+            with patch("app.api.endpoints.scans.check_scan_quota", return_value={"allowed": True}):
+                response = test_client.post(
+                    "/scan/mcp",
+                    json={"server_url": "https://example.com/mcp"},
+                    headers={"Authorization": "Bearer test-token"},
+                )
 
-                                assert response.status_code == 500
-                                assert "Scan failed" in response.json()["detail"]
+                assert response.status_code == 500
+                assert "Scan failed" in response.json()["detail"]
 
 
 class TestMCPSchema:
     """Test cases for MCP request schema"""
 
-    def test_mcp_request_valid_url(self, client, mock_supabase_user):
+    def test_mcp_request_valid_url(self, client):
         """Test valid URL in MCP request"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        # This will fail due to missing quota check, but we're testing schema validation
-                        response = client.post(
-                            "/scan/mcp",
-                            json={"server_url": "https://example.com/mcp"},
-                            headers={"Authorization": "Bearer test-token"}
-                        )
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                        # Should not be 422 (validation error)
-                        assert response.status_code != 422
+        with patch("app.api.endpoints.scans.check_scan_quota", return_value={"allowed": True}):
+            response = test_client.post(
+                "/scan/mcp",
+                json={"server_url": "https://example.com/mcp"},
+                headers={"Authorization": "Bearer test-token"},
+            )
 
-    def test_mcp_request_missing_url(self, client, mock_supabase_user):
+            assert response.status_code != 422
+
+    def test_mcp_request_missing_url(self, client):
         """Test MCP request without URL"""
-        # Mock Supabase service for middleware
-        mock_sb = MagicMock()
-        mock_user_resp = MagicMock()
-        mock_user_resp.user = mock_supabase_user
-        mock_sb.auth.get_user.return_value = mock_user_resp
-        
-        # Patch get_supabase where it's imported in security module
-        with patch("app.core.security.get_supabase", return_value=mock_sb):
-            with patch("app.core.security.get_user_tier", return_value="pro"):
-                with patch("app.services.supabase_service.get_supabase", return_value=mock_sb):
-                    with patch("app.services.supabase_service.get_user_tier", return_value="pro"):
-                        response = client.post(
-                            "/scan/mcp",
-                            json={},
-                            headers={"Authorization": "Bearer test-token"}
-                        )
+        test_app, test_client = client
+        test_app.dependency_overrides[get_current_user] = lambda: {
+            "id": "test-user-id", "email": "test@example.com", "tier": "pro"
+        }
 
-                        assert response.status_code == 422
+        response = test_client.post(
+            "/scan/mcp",
+            json={},
+            headers={"Authorization": "Bearer test-token"},
+        )
+
+        assert response.status_code == 422

@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const API_ORIGIN =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
-  "https://vulnra-production.up.railway.app";
+  "http://localhost:8000";
 
 // ── Security response headers ─────────────────────────────────────────────────
 // Applied to every page and API route via the headers() config.

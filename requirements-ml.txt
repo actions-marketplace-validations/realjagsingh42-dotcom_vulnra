@@ -18,9 +18,9 @@ garak==0.14.0
 # Without pinning ALL 9 packages, pip spirals through thousands
 # of version combinations and hits resolution-too-deep.
 # These versions are all mutually compatible.
-grpcio==1.71.0
-grpcio-tools==1.71.0
-grpcio-status==1.71.0
+grpcio>=1.75.1
+grpcio-tools>=1.75.1
+grpcio-status>=1.75.1
 protobuf==5.29.3
 googleapis-common-protos==1.63.2
 google-api-core==2.24.2
