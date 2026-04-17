@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: cd github-action && npm ci && npm run build
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: github-action/dist/index.js
+          generate_release_notes: true
