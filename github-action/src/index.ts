@@ -325,7 +325,7 @@ async function run(): Promise<void> {
     core.info(`🔍 Starting VULNRA scan → ${targetUrl}`);
 
     const scanPayload: Record<string, string> = {
-      target_url: targetUrl,
+      url: targetUrl,
       scan_engine: scanEngine,
       tier,
     };
