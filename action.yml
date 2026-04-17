@@ -36,4 +36,4 @@ outputs:
     description: 'AI vulnerability scanning for LLM endpoints. Detects jailbreaks, prompt injection and data leakage.'
 runs:
   using: 'node20'
-  main: 'dist/index.js'
+  main: 'github-action/dist/index.js'
