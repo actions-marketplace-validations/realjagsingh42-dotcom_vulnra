@@ -56,6 +56,7 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   // Performance optimizations
   images: {
     formats: ["image/avif", "image/webp"],
