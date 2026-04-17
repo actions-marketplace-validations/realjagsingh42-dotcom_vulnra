@@ -81,7 +81,7 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
-  const [downloading, setDownloading] = useState<string | null>(null);
+  const [pdfStatuses, setPdfStatuses] = useState<Record<string, 'idle' | 'generating' | 'success' | 'error'>>({});
   // Comparison selection — at most 2 scan IDs, ordered by selection time
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -135,16 +135,24 @@ export default function HistoryPage() {
 
   async function handleDownload(scan: Scan) {
     if (scan.status !== "complete") return;
-    setDownloading(scan.id);
+    setPdfStatuses(prev => ({ ...prev, [scan.id]: 'generating' }));
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        setPdfStatuses(prev => ({ ...prev, [scan.id]: 'error' }));
+        setTimeout(() => setPdfStatuses(prev => ({ ...prev, [scan.id]: 'idle' })), 3000);
+        return;
+      }
 
       const resp = await fetch(`${API}/scan/${scan.id}/report`, {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-      if (!resp.ok) return;
+      if (!resp.ok) {
+        setPdfStatuses(prev => ({ ...prev, [scan.id]: 'error' }));
+        setTimeout(() => setPdfStatuses(prev => ({ ...prev, [scan.id]: 'idle' })), 3000);
+        return;
+      }
 
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
@@ -153,8 +161,11 @@ export default function HistoryPage() {
       a.download = `vulnra-report-${scan.id.slice(0, 8)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-    } finally {
-      setDownloading(null);
+      setPdfStatuses(prev => ({ ...prev, [scan.id]: 'success' }));
+      setTimeout(() => setPdfStatuses(prev => ({ ...prev, [scan.id]: 'idle' })), 2000);
+    } catch {
+      setPdfStatuses(prev => ({ ...prev, [scan.id]: 'error' }));
+      setTimeout(() => setPdfStatuses(prev => ({ ...prev, [scan.id]: 'idle' })), 3000);
     }
   }
 
@@ -333,20 +344,24 @@ export default function HistoryPage() {
                         {scan.status === "complete" && (
                           <button
                             onClick={() => handleDownload(scan)}
-                            disabled={downloading === scan.id}
+                            disabled={pdfStatuses[scan.id] === 'generating'}
                             title="Download PDF report"
                             className={cn(
                               "inline-flex items-center gap-1 text-[9px] font-mono px-2 py-1 rounded-[2px] border transition-colors",
-                              downloading === scan.id
+                              pdfStatuses[scan.id] === 'generating'
                                 ? "opacity-40 cursor-not-allowed border-v-border text-v-muted2"
+                                : pdfStatuses[scan.id] === 'success'
+                                ? "border-green-500/50 text-green-400 bg-green-500/10"
+                                : pdfStatuses[scan.id] === 'error'
+                                ? "border-red-500/50 text-red-400 bg-red-500/10"
                                 : "border-acid/30 text-acid hover:bg-acid/10 hover:border-acid/50"
                             )}
                           >
-                            {downloading === scan.id
-                              ? <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                              : <FileDown className="w-2.5 h-2.5" />
-                            }
-                            PDF
+                            {pdfStatuses[scan.id] === 'generating' && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                            {pdfStatuses[scan.id] === 'success' && <span>✓</span>}
+                            {pdfStatuses[scan.id] === 'error' && <span>✗</span>}
+                            {(pdfStatuses[scan.id] === 'idle' || !pdfStatuses[scan.id]) && <FileDown className="w-2.5 h-2.5" />}
+                            {pdfStatuses[scan.id] === 'generating' ? 'GENERATING...' : pdfStatuses[scan.id] === 'success' ? 'DOWNLOADED' : pdfStatuses[scan.id] === 'error' ? 'FAILED' : 'PDF'}
                           </button>
                         )}
                       </div>
