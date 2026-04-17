@@ -20,8 +20,8 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> dict:
 
     token = authorization.split(" ")[1]
 
-    # API key path — vk_live_ prefix
-    if token.startswith("vk_live_"):
+    # API key path — vk_live_ or vk- prefix
+    if token.startswith("vk_live_") or token.startswith("vk-"):
         from app.services.supabase_service import get_api_key_user
         user = get_api_key_user(token)
         if not user:
