@@ -1,22 +1,60 @@
-# VULNRA — AI Risk Scanner for LLM APIs
+# VULNRA — Production-Grade AI Security Scanner
 
 [![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-VULNRA%20LLM%20Security%20Scan-green?logo=github)](https://github.com/marketplace/actions/vulnra-llm-security-scan)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## GitHub Action — Scan LLMs in CI/CD
+VULNRA is an automated red-teaming platform that continuously probes LLM APIs
+for exploitable vulnerabilities before attackers do. Drop it into any CI/CD
+pipeline and get a risk score, categorized findings, and compliance mappings
+on every push.
+
+## What VULNRA Detects
+
+| Attack Class | Description |
+|---|---|
+| **Prompt Injection** | Direct and indirect attempts to hijack model instructions |
+| **Jailbreaks** | DAN variants, role-play bypasses, fictional framing attacks |
+| **Multi-Turn Attacks** | Crescendo and GOAT escalation chains across conversation turns |
+| **Encoding Bypasses** | Base64, leetspeak, Unicode obfuscation to evade safety filters |
+| **Data Leakage** | System prompt extraction, training data reconstruction |
+| **Compliance Violations** | Outputs that breach regulatory or policy constraints |
+
+## Compliance Frameworks
+
+VULNRA maps every finding to the frameworks your security and legal teams care about:
+
+- **OWASP LLM Top 10** — industry-standard LLM vulnerability taxonomy
+- **MITRE ATLAS** — adversarial threat landscape for AI systems
+- **EU AI Act** — regulatory risk classification for high-risk AI
+- **NIST AI RMF** — risk management framework alignment
+
+## GitHub Action — Scan in CI/CD
 
 ```yaml
-- uses: realjagsingh42-dotcom/vulnra@v1
-  with:
-    api_key: ${{ secrets.VULNRA_API_KEY }}
-    target_url: 'https://your-llm-api.com/v1/chat/completions'
-    fail_on_risk_score: '70'
+name: LLM Security Scan
+on: [push, pull_request]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: realjagsingh42-dotcom/vulnra@v1
+        with:
+          api_key: ${{ secrets.VULNRA_API_KEY }}
+          target_url: 'https://your-llm-api.com/v1/chat/completions'
+          tier: 'pro'
+          fail_on_risk_score: '70'
 ```
+
+Every scan returns:
+- **Risk score** (0–100) with pass/fail threshold enforcement
+- **Categorized findings** with severity levels
+- **PR comments** with full vulnerability report
+- **Compliance mapping** across all four frameworks
 
 Get your API key at [vulnra-production-fb23.up.railway.app](https://vulnra-production-fb23.up.railway.app)
 
 ---
-
-VULNRA automatically finds jailbreaks, prompt injections, and encoding bypasses in any LLM endpoint. It maps vulnerabilities to OWASP LLM Top 10, MITRE ATLAS, EU AI Act, and NIST AI RMF frameworks.
 
 ## Quick Start
 
@@ -89,14 +127,6 @@ curl -X POST http://localhost:8000/scan \
 curl http://localhost:8000/scan/SCAN_ID
 ```
 
-### Demo Probe Test
-
-```bash
-# Run the built-in probe tests against the demo LLM
-source venv/bin/activate
-python demo/run_demo_test.py
-```
-
 ## Environment Variables
 
 Copy `.env.example` to `.env` and configure:
@@ -133,28 +163,6 @@ Copy `.env.example` to `.env` and configure:
 - **Scheduled Scans**: Automate recurring security tests
 - **Team Management**: Organization quotas and SSO
 
-## Development
-
-```bash
-# Start backend only
-./start-backend.sh
-
-# Start frontend only
-./start-frontend.sh
-
-# Start worker only
-./start-worker.sh
-
-# View logs
-tail -f logs/backend.log
-tail -f logs/worker.log
-tail -f logs/demo.log
-tail -f logs/frontend.log
-
-# Run tests
-pytest tests/
-```
-
 ## License
 
-MIT License
+MIT License — see the [LICENSE](LICENSE) file for details.
