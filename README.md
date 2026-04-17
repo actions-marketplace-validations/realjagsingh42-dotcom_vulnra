@@ -1,4 +1,20 @@
-# VULNRA — AI Risk Scanner & Compliance Reporter
+# VULNRA — AI Risk Scanner for LLM APIs
+
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-VULNRA%20LLM%20Security%20Scan-green?logo=github)](https://github.com/marketplace/actions/vulnra-llm-security-scan)
+
+## GitHub Action — Scan LLMs in CI/CD
+
+```yaml
+- uses: realjagsingh42-dotcom/vulnra@v1
+  with:
+    api_key: ${{ secrets.VULNRA_API_KEY }}
+    target_url: 'https://your-llm-api.com/v1/chat/completions'
+    fail_on_risk_score: '70'
+```
+
+Get your API key at [vulnra-production-fb23.up.railway.app](https://vulnra-production-fb23.up.railway.app)
+
+---
 
 VULNRA automatically finds jailbreaks, prompt injections, and encoding bypasses in any LLM endpoint. It maps vulnerabilities to OWASP LLM Top 10, MITRE ATLAS, EU AI Act, and NIST AI RMF frameworks.
 
