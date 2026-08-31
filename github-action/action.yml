@@ -26,7 +26,7 @@ inputs:
   vulnra_api_url:
     description: 'VULNRA API base URL (override for self-hosted)'
     required: false
-    default: 'https://web-production-ddb32.up.railway.app'
+    default: 'https://vulnra.ai'
 outputs:
   risk_score:
     description: 'Final risk score (0-100)'

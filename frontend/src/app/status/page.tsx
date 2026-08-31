@@ -13,7 +13,7 @@ const COMPONENTS = [
   { name: "API Gateway",          status: "operational", latency: "42ms",  uptime: "99.98%" },
   { name: "Scan Engine (Garak)",  status: "operational", latency: "1.2s",  uptime: "99.91%" },
   { name: "Scan Engine (DeepTeam)", status: "operational", latency: "0.9s", uptime: "99.95%" },
-  { name: "AI Judge (Claude)",    status: "operational", latency: "620ms", uptime: "99.99%" },
+  { name: "Gemini Guardian Judge",    status: "operational", latency: "620ms", uptime: "99.99%" },
   { name: "RAG Scanner",          status: "operational", latency: "310ms", uptime: "99.87%" },
   { name: "MCP Scanner",          status: "operational", latency: "280ms", uptime: "99.90%" },
   { name: "Sentinel Monitoring",  status: "operational", latency: "55ms",  uptime: "99.97%" },

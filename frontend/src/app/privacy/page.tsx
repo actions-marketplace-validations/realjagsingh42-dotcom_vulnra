@@ -84,7 +84,7 @@ You may request deletion of all your personal data at any time by emailing priva
 • Railway Corporation (hosting/deployment) — United States
 • Lemon Squeezy (billing) — United States
 • Resend Inc. (transactional email) — United States
-• Anthropic, PBC (AI Judge — Claude API) — United States; only probe response text is sent, no account PII
+• Google, LLC (Gemini Guardian Judge) — United States; only probe response text is sent, no account PII
 
 We do not sell, rent, or trade your personal data to third parties for advertising or marketing purposes.`,
   },

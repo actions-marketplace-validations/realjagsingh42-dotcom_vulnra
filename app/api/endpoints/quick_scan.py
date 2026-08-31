@@ -16,7 +16,7 @@ from slowapi.util import get_remote_address
 
 from app.core.config import settings
 
-router = APIRouter()
+router = APIRouter(tags=["Quick Scan"])
 
 # ── Private / reserved IP patterns ────────────────────────────────────────────
 _PRIVATE = [

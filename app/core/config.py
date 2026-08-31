@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     secret_key: str = Field(default="dev-secret-change-me", validation_alias=AliasChoices("SECRET_KEY", "secret_key"))
 
     # CORS — comma-separated string in env, e.g.:
-    #   ALLOWED_ORIGINS=https://vulnra.ai,https://daring-art.up.railway.app
+    #   ALLOWED_ORIGINS=https://vulnra.ai,http://localhost:3000
     # Falls back to safe defaults + whatever FRONTEND_URL is set to.
     allowed_origins_env: Optional[str] = Field(
         default=None,
@@ -33,6 +33,7 @@ class Settings(BaseSettings):
         base = [
             "http://localhost:3000",
             "http://127.0.0.1:3000",
+            "http://frontend:3000",
             "http://localhost:8000",
             "http://127.0.0.1:8000",
             "https://vulnra.ai",
@@ -93,7 +94,7 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("LEMON_SQUEEZY_ENTERPRISE_VARIANT_ID", "lemonsqueezy_enterprise_variant_id"),
     )
     
-    # Frontend URL for redirects
+    # Frontend URL for redirects (set to http://frontend:3000 in Docker)
     frontend_url: str = Field(default="http://localhost:3000", validation_alias=AliasChoices("FRONTEND_URL", "frontend_url"))
 
     # Port
@@ -105,9 +106,24 @@ class Settings(BaseSettings):
     # API URL (used by worker for internal service calls)
     api_url: str = Field(default="http://localhost:8000", validation_alias=AliasChoices("API_URL", "api_url"))
 
+    # Lobster Trap — LLM proxy guard
+    lobster_trap_enabled: bool = Field(default=False, validation_alias=AliasChoices("LOBSTER_TRAP_ENABLED", "lobster_trap_enabled"))
+    lobster_trap_url: str = Field(default="http://localhost:9090", validation_alias=AliasChoices("LOBSTER_TRAP_URL", "lobster_trap_url"))
+    lobster_trap_backend: str = Field(default="http://localhost:8001", validation_alias=AliasChoices("LOBSTER_TRAP_BACKEND", "lobster_trap_backend"))
+
     # Resend — email alerts for Sentinel
     resend_api_key: str = Field(default="", validation_alias=AliasChoices("RESEND_API_KEY", "resend_api_key"))
     alert_from_email: str = Field(default="alerts@vulnra.ai", validation_alias=AliasChoices("ALERT_FROM_EMAIL", "alert_from_email"))
+
+    # Gemini API — primary AI provider (required for AI Judge, GuardianForge, EasyJailbreak)
+    gemini_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("GEMINI_API_KEY", "gemini_api_key"),
+    )
+    guardian_gemini_model: str = Field(
+        default="gemini-1.5-flash",
+        validation_alias=AliasChoices("GUARDIAN_GEMINI_MODEL", "guardian_gemini_model"),
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -137,6 +153,10 @@ def validate_config():
         missing.append("SUPABASE_URL")
     if not settings.supabase_key:
         missing.append("SUPABASE_SERVICE_KEY")
+
+    # Gemini API key is required for AI Judge, GuardianForge, EasyJailbreak
+    if not settings.gemini_api_key and os.environ.get("ENVIRONMENT", "local") != "local":
+        logger.warning("GEMINI_API_KEY not set — AI Judge, GuardianForge, and EasyJailbreak will use fallback heuristics")
 
     if missing:
         logger.error(f"Missing required environment variables: {missing}")

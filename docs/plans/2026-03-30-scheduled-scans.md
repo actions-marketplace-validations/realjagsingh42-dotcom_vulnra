@@ -179,7 +179,7 @@ class CreateScheduledScanRequest(BaseModel):
 ```json
 {
   "id": "uuid",
-  "target_url": "https://api.openai.com/v1/chat/completions",
+  "target_url": "https://api.example.com/v1/chat/completions",
   "schedule_type": "recurring",
   "interval_hours": 24,
   "next_run_at": "2026-03-31T09:00:00Z",

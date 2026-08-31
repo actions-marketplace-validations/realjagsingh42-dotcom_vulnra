@@ -42,7 +42,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         heading: "How to Test for Prompt Injection",
-        text: "Automated red teaming is the most reliable way to test LLM APIs at scale. Tools like Garak, DeepTeam, and PyRIT probe your endpoints with hundreds of injection variants and report which attacks succeed. An AI Judge (a separate LLM evaluator) then classifies whether the model's response represents a policy violation.\n\nVULNRA's multi-engine scanner combines Garak 0.14, DeepTeam, PyRIT converters (including Base64, ROT13, leetspeak, Unicode), and EasyJailbreak recipes (PAIR, TAP, CIPHER) into a single scan. Each finding is mapped to OWASP LLM01 and includes a remediation recommendation.",
+        text: "Automated red teaming is the most reliable way to test LLM APIs at scale. Tools like Garak, DeepTeam, and PyRIT probe your endpoints with hundreds of injection variants and report which attacks succeed. A Gemini-powered Guardian Judge (a separate LLM evaluator) then classifies whether the model's response represents a policy violation.\n\nVULNRA's multi-engine scanner combines Garak 0.14, DeepTeam, PyRIT converters (including Base64, ROT13, leetspeak, Unicode), and EasyJailbreak recipes (PAIR, TAP, CIPHER) into a single scan. Each finding is mapped to OWASP LLM01 and includes a remediation recommendation.",
       },
       {
         heading: "How to Prevent Prompt Injection",
@@ -171,7 +171,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         heading: "GPAI Model Obligations",
-        text: "General Purpose AI (GPAI) models — foundation models like GPT-4, Claude, Gemini — have their own obligations under the Act:\n\nAll GPAI providers must: maintain technical documentation, comply with EU copyright law, publish training data summaries.\n\nSystemic risk GPAI providers (models above 10^25 FLOPs): must also conduct adversarial testing, report serious incidents within 72 hours, implement cybersecurity protections, and report energy consumption.\n\nIf you are calling a GPAI model API (OpenAI, Anthropic, Google), you are a 'deployer' rather than a provider. Your obligations depend on how you use the model.",
+        text: "General Purpose AI (GPAI) models — foundation models like Gemini — have their own obligations under the Act:\n\nAll GPAI providers must: maintain technical documentation, comply with EU copyright law, publish training data summaries.\n\nSystemic risk GPAI providers (models above 10^25 FLOPs): must also conduct adversarial testing, report serious incidents within 72 hours, implement cybersecurity protections, and report energy consumption.\n\nIf you are calling a GPAI model API (e.g. Google Gemini), you are a 'deployer' rather than a provider. Your obligations depend on how you use the model.",
       },
       {
         heading: "What Documentation Is Required?",
@@ -191,7 +191,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         heading: "Action Checklist for LLM Developers",
-        text: "1. Classify your AI system into the correct risk tier\n2. Identify whether you are a provider, deployer, or both\n3. Review GPAI provider terms (OpenAI, Anthropic, Google) for AI Act compliance pass-through clauses\n4. Document intended use, limitations, and out-of-scope use cases\n5. Implement adversarial testing with a tool like VULNRA (scheduled, documented, audit-trailed)\n6. Generate and retain compliance evidence reports (PDF) for each model version\n7. Implement human oversight mechanisms for high-risk use cases\n8. Register high-risk AI systems in the EU AI Act database when required",
+        text: "1. Classify your AI system into the correct risk tier\n2. Identify whether you are a provider, deployer, or both\n3. Review GPAI provider terms (Google Gemini) for AI Act compliance pass-through clauses\n4. Document intended use, limitations, and out-of-scope use cases\n5. Implement adversarial testing with a tool like VULNRA (scheduled, documented, audit-trailed)\n6. Generate and retain compliance evidence reports (PDF) for each model version\n7. Implement human oversight mechanisms for high-risk use cases\n8. Register high-risk AI systems in the EU AI Act database when required",
       },
     ],
   },
@@ -226,7 +226,7 @@ export const POSTS: BlogPost[] = [
       },
       {
         heading: "Why VULNRA Combines All Three",
-        text: "VULNRA runs Garak, DeepTeam, and a native PyRIT converter engine in a single scan, then passes results through a Claude 3 Haiku AI Judge for per-finding classification. This gives you:\n\n• Garak's breadth of jailbreak and prompt injection probes\n• DeepTeam's OWASP-aligned coverage and structured output\n• PyRIT's encoding converter coverage (Base64, ROT13, leetspeak, Unicode, Morse, etc.)\n• EasyJailbreak recipes (PAIR, TAP, CIPHER) for multi-turn adversarial testing\n• Unified risk score, OWASP/MITRE/EU AI Act compliance mapping, and PDF audit export\n\nAll in a single API call, with no tool installation, configuration management, or result aggregation required.",
+        text: "VULNRA runs Garak, DeepTeam, and a native PyRIT converter engine in a single scan, then passes results through a Gemini Guardian Judge for per-finding classification. This gives you:\n\n• Garak's breadth of jailbreak and prompt injection probes\n• DeepTeam's OWASP-aligned coverage and structured output\n• PyRIT's encoding converter coverage (Base64, ROT13, leetspeak, Unicode, Morse, etc.)\n• EasyJailbreak recipes (PAIR, TAP, CIPHER) for multi-turn adversarial testing\n• Unified risk score, OWASP/MITRE/EU AI Act compliance mapping, and PDF audit export\n\nAll in a single API call, with no tool installation, configuration management, or result aggregation required.",
       },
       {
         heading: "Which Should You Use?",

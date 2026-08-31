@@ -1,0 +1,104 @@
+# ─────────────────────────────────────────────────────────────
+# VULNRA — Docker Compose (local development)
+# ─────────────────────────────────────────────────────────────
+# Prerequisites:
+#   1. Supabase CLI (https://supabase.com/docs/guides/cli)
+#   2. Copy .env.example to .env and fill in secrets
+#   3. Run: supabase start
+#
+# Start:
+#   docker compose up --build
+#
+# Services:
+#   backend  → http://localhost:8000  | http://backend:8000
+#   frontend → http://localhost:3001  | http://frontend:3000
+#   redis    → redis://redis:6379/0
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Backend API (FastAPI) ──────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vulnra-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Internal service name so the worker can reach the API
+      - API_URL=http://backend:8000
+      # Allow frontend from Docker host or container name
+      - FRONTEND_URL=http://frontend:3001
+      # Include Docker service name in CORS
+      - ALLOWED_ORIGINS=http://localhost:3001,http://127.0.0.1:3001,http://frontend:3001,http://localhost:8000
+      # Redis via Docker service name
+      - REDIS_URL=redis://redis:6379/0
+      # Bind to all interfaces inside the container
+      - HOST=0.0.0.0
+      - PORT=8000
+    depends_on:
+      redis:
+        condition: service_started
+    volumes:
+      - ./app:/app/app
+      - reports:/app/reports
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Frontend (Next.js) ─────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Pass build-time env vars — these must be set in .env
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8000}
+        SUPABASE_URL: ${SUPABASE_URL:-http://host.docker.internal:54321}
+        SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}
+    container_name: vulnra-frontend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - HOSTNAME=0.0.0.0
+      - SUPABASE_URL=http://host.docker.internal:54321
+      - SUPABASE_ANON_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Redis (for Celery scheduled scans and Sentinel) ─────────
+  redis:
+    image: redis:7-alpine
+    container_name: vulnra-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis_data:
+  reports:

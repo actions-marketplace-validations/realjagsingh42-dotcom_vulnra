@@ -1,7 +1,7 @@
 # MCP Security Scanner Research
 
 ## Overview
-Model Context Protocol (MCP) is a standard for connecting LLM applications to external tools and data sources. Released by Anthropic in November 2024, it's now used by Claude Desktop, OpenAI Agent SDK, Microsoft Copilot Studio, and others.
+Model Context Protocol (MCP) is a standard for connecting LLM applications to external tools and data sources. Released in November 2024, it's now used by multiple client applications, and others.
 
 ## Key Security Risks
 
@@ -28,7 +28,7 @@ Model Context Protocol (MCP) is a standard for connecting LLM applications to ex
 ## MCP Architecture
 
 ### Core Components
-1. **MCP Client**: LLM application (Claude Desktop, Cursor, etc.)
+1. **MCP Client**: LLM application (Cursor, etc.)
 2. **MCP Server**: External tools and data sources
 3. **JSON-RPC Protocol**: Communication layer
 

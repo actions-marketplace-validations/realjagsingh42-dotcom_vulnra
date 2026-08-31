@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────
 # requirements.txt — App dependencies only
-# ML deps (deepteam, anthropic, garak, torch) are in
+# ML deps (deepteam, garak, torch) are in
 # requirements-ml.txt and installed as a separate Docker layer.
 # ─────────────────────────────────────────────────────────────
 amqp==5.3.1

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Request
 from app.core.security import get_current_user
 from app.services.supabase_service import get_supabase
 
-router = APIRouter()
+router = APIRouter(tags=["Analytics"])
 
 
 @router.get("/api/analytics/summary")

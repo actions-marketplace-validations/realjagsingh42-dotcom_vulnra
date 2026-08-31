@@ -8,9 +8,6 @@
 # with garak's grpcio-tools>=1.71.0.
 # ─────────────────────────────────────────────────────────────
 
-# Anthropic SDK — LLM-as-Judge scoring
-anthropic==0.49.0
-
 # Garak — core LLM probe engine
 garak==0.14.0
 

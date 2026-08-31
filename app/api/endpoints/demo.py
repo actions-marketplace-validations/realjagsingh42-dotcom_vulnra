@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from app.core.security import get_current_user
 from app.services.supabase_service import save_scan_result
 
-router = APIRouter()
+router = APIRouter(tags=["Demo"])
 
 # ─── Canned Demo Findings ──────────────────────────────────────────────────────
 

@@ -9,3 +9,4 @@ __pycache__/
 node_modules
 
 # github-action/dist is intentionally committed (required for GitHub Actions)
+node_modules/

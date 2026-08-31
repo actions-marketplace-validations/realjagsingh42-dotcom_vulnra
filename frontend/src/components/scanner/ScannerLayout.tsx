@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
-import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon, Menu, X } from "lucide-react";
+import { LogOut, BarChart3, Settings, Activity, Timer, Server, FileDown, Loader2, History, Key, Radio, Database, Building2, TrendingUp, ChevronDown, User as UserIcon, Menu, X, Shield } from "lucide-react";
 import VulnraLogo from "@/components/VulnraLogo";
 import { signOut } from "@/app/auth/actions";
 import { logger } from "@/utils/logger";
@@ -16,6 +16,7 @@ import FindingsPanel from "./FindingsPanel";
 import RiskScoreViz from "./RiskScoreViz";
 import OnboardingOverlay from "./OnboardingOverlay";
 import SocialShare from "./SocialShare";
+import ShieldTab from "./ShieldTab";
 import type { TerminalEvent } from "./types";
 
 // ── Probe sequences per scan depth ───────────────────────────────────────────
@@ -138,6 +139,8 @@ export default function ScannerLayout({ user }: { user: User }) {
   const [rateLimitInfo, setRateLimitInfo] = useState<{ limit: number; remaining: number; reset: number } | null>(null);
   const [currentScanId, setCurrentScanId] = useState<string | null>(null);
   const [scanComplete, setScanComplete] = useState(false);
+  const [findingsTab, setFindingsTab] = useState<"findings" | "shield">("findings");
+  const [shieldBlockedCount, setShieldBlockedCount] = useState(0);
   const [downloadingReport, setDownloadingReport] = useState(false);
   const [pdfStatus, setPdfStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
   const [sharingReport, setSharingReport] = useState(false);
@@ -322,6 +325,119 @@ export default function ScannerLayout({ user }: { user: User }) {
         return;
       }
 
+      // ── Polling helper (shared by regular, multi-turn, and guardian scans) ──
+      const startPolling = (scanId: string) => {
+        setCurrentScanId(scanId);
+        setScanComplete(false);
+        setScanWarning(null);
+
+        const pollInterval = setInterval(async () => {
+          try {
+            const pollRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/scan/${scanId}`,
+              { headers: { "Authorization": `Bearer ${session.access_token}` } },
+            );
+
+            if (pollRes.status === 429) {
+              logger.warn("Rate limited during polling, will retry…");
+              return;
+            }
+
+            if (pollRes.ok) {
+              const pollData = await pollRes.json();
+
+              if (pollData.status === "complete") {
+                if (pollCompletedRef.current) return;
+                pollCompletedRef.current  = true;
+                scanInProgressRef.current = false;
+
+                clearInterval(pollInterval);
+                if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
+                setIsScanning(false);
+                setScanComplete(true);
+                setMobilePanel("findings");
+
+                const findingEvts = ((pollData.findings || []) as any[])
+                  .filter(isTerminalFinding)
+                  .map(mkFinding);
+
+                if (pollData.conversation) {
+                  setEvents(prev => [...prev,
+                    mkEvt("init", `MULTI_TURN_COMPLETE · ATTACK: ${pollData.attack_type}`),
+                    ...pollData.conversation.map((turn: any) =>
+                      mkEvt("init", `TURN_${turn.turn + 1}: ${(turn.user as string).substring(0, 60)}...`)
+                    ),
+                    ...findingEvts,
+                    mkEvt("complete", `RISK_SCORE: ${pollData.risk_score} · SCAN COMPLETE`),
+                  ]);
+                  setMultiTurnConversation(pollData.conversation);
+                } else {
+                  setEvents(prev => [...prev,
+                    ...findingEvts,
+                    mkEvt("complete", `RISK_SCORE: ${pollData.risk_score} · SCAN COMPLETE`),
+                  ]);
+                }
+
+                const polledFindings = (pollData.findings || []) as any[];
+                const polledCatScores = calculateCategoryScores(
+                  polledFindings,
+                  pollData.category_scores ?? {},
+                );
+                setFindings(polledFindings);
+                setCurrentRiskScore(pollData.risk_score ?? 0);
+                setCategoryScores(polledCatScores);
+                setPrevRiskScore(pollData.prev_risk_score ?? null);
+                setScanWarning(pollData.warning ?? null);
+
+              } else if (pollData.status === "failed") {
+                if (pollCompletedRef.current) return;
+                pollCompletedRef.current  = true;
+                scanInProgressRef.current = false;
+                clearInterval(pollInterval);
+                if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
+                setIsScanning(false);
+                setEvents(prev => [...prev, mkEvt("error", "SCAN_FAILED_INTERNAL_ERROR")]);
+              }
+            }
+          } catch (e) {
+            logger.error("Polling error", e);
+          }
+        }, 3000);
+      };
+
+      // Guardian cycle uses its own endpoint
+      if (config.attackType === "guardian") {
+        const guardianPayload = {
+          target_description: config.url,
+          target_url: null,
+        };
+
+        const gResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/scans/guardian-cycle`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify(guardianPayload),
+        });
+
+        if (!gResponse.ok) {
+          const errData = await gResponse.json().catch(() => ({}));
+          setEvents(prev => [...prev, mkEvt("error", errData.detail || "Guardian cycle failed")]);
+          setIsScanning(false);
+          scanInProgressRef.current = false;
+          return;
+        }
+
+        const gResult = await gResponse.json();
+        setEvents(prev => [...prev,
+          mkEvt("init", `GUARDIAN_CYCLE: ${gResult.scan_id}`),
+          mkEvt("init", "AUTONOMOUS_CYCLE_INITIALIZED..."),
+        ]);
+        startPolling(gResult.scan_id);
+        return;
+      }
+
       // Determine which endpoint to use based on attackType
       const endpoint = config.attackType ? "/multi-turn-scan" : "/scan";
       const basePayload = config.attackType
@@ -418,82 +534,7 @@ export default function ScannerLayout({ user }: { user: User }) {
         }, probeMs);
       }
 
-      // ── Polling ────────────────────────────────────────────────────────────
-      const pollInterval = setInterval(async () => {
-        try {
-          const pollRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/scan/${scanId}`,
-            { headers: { "Authorization": `Bearer ${session.access_token}` } },
-          );
-
-          if (pollRes.status === 429) {
-            logger.warn("Rate limited during polling, will retry…");
-            return;
-          }
-
-          if (pollRes.ok) {
-            const pollData = await pollRes.json();
-
-            if (pollData.status === "complete") {
-              // Idempotent guard — two concurrent poll requests can both see "complete"
-              // before clearInterval cancels the second one.
-              if (pollCompletedRef.current) return;
-              pollCompletedRef.current  = true;
-              scanInProgressRef.current = false;
-
-              clearInterval(pollInterval);
-              if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
-              setIsScanning(false);
-              setScanComplete(true);
-              // Auto-switch to findings tab on mobile when scan completes
-              setMobilePanel("findings");
-
-              const findingEvts = ((pollData.findings || []) as any[])
-                .filter(isTerminalFinding)
-                .map(mkFinding);
-
-              if (pollData.conversation) {
-                setEvents(prev => [...prev,
-                  mkEvt("init", `MULTI_TURN_COMPLETE · ATTACK: ${pollData.attack_type}`),
-                  ...pollData.conversation.map((turn: any) =>
-                    mkEvt("init", `TURN_${turn.turn + 1}: ${(turn.user as string).substring(0, 60)}...`)
-                  ),
-                  ...findingEvts,
-                  mkEvt("complete", `RISK_SCORE: ${pollData.risk_score} · SCAN COMPLETE`),
-                ]);
-                setMultiTurnConversation(pollData.conversation);
-              } else {
-                setEvents(prev => [...prev,
-                  ...findingEvts,
-                  mkEvt("complete", `RISK_SCORE: ${pollData.risk_score} · SCAN COMPLETE`),
-                ]);
-              }
-
-              const polledFindings = (pollData.findings || []) as any[];
-              const polledCatScores = calculateCategoryScores(
-                polledFindings,
-                pollData.category_scores ?? {},
-              );
-              setFindings(polledFindings);
-              setCurrentRiskScore(pollData.risk_score ?? 0);
-              setCategoryScores(polledCatScores);
-              setPrevRiskScore(pollData.prev_risk_score ?? null);
-              setScanWarning(pollData.warning ?? null);
-
-            } else if (pollData.status === "failed") {
-              if (pollCompletedRef.current) return;
-              pollCompletedRef.current  = true;
-              scanInProgressRef.current = false;
-              clearInterval(pollInterval);
-              if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
-              setIsScanning(false);
-              setEvents(prev => [...prev, mkEvt("error", "SCAN_FAILED_INTERNAL_ERROR")]);
-            }
-          }
-        } catch (e) {
-          logger.error("Polling error", e);
-        }
-      }, 3000);
+      startPolling(scanId);
 
     } catch (err: any) {
       if (probeIntervalRef.current) clearInterval(probeIntervalRef.current);
@@ -629,6 +670,10 @@ export default function ScannerLayout({ user }: { user: User }) {
             <div className="h-5 w-[1px] bg-v-border mx-2" />
             <a href="/monitor" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors whitespace-nowrap">
               <Radio className="w-3.5 h-3.5" />SENTINEL
+            </a>
+            <div className="h-5 w-[1px] bg-v-border mx-2" />
+            <a href="/scanner" className="flex items-center gap-1.5 font-mono text-[10px] text-v-muted2 tracking-wider hover:text-acid transition-colors whitespace-nowrap">
+              <Shield className="w-3.5 h-3.5" />GUARDIAN
             </a>
             {tier === "enterprise" && (
               <>
@@ -780,6 +825,9 @@ export default function ScannerLayout({ user }: { user: User }) {
               <a href="/monitor" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
                 <Radio className="w-4 h-4" /> SENTINEL
               </a>
+              <a href="/scanner" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
+                <Shield className="w-4 h-4" /> GUARDIAN
+              </a>
               <a href="/scanner/scheduled" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 text-[11px] font-mono text-v-muted2 hover:text-acid hover:bg-white/5 rounded-sm">
                 <Timer className="w-4 h-4" /> SCHEDULED
               </a>
@@ -846,7 +894,39 @@ export default function ScannerLayout({ user }: { user: User }) {
           "md:flex md:flex-col"
         )}>
           <div className="p-4 py-3.5 border-b border-v-border2 flex items-center justify-between shrink-0">
-            <span className="text-[8.5px] font-mono tracking-widest text-v-muted2 uppercase">Scan Findings</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setFindingsTab("findings")}
+                className={cn(
+                  "text-[8.5px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-sm transition-colors",
+                  findingsTab === "findings"
+                    ? "text-acid bg-acid/10"
+                    : "text-v-muted2 hover:text-v-muted"
+                )}
+              >
+                Findings
+              </button>
+              <button
+                onClick={() => setFindingsTab("shield")}
+                className={cn(
+                  "flex items-center gap-1 text-[8.5px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-sm transition-colors",
+                  findingsTab === "shield"
+                    ? "text-acid bg-acid/10"
+                    : "text-v-muted2 hover:text-v-muted"
+                )}
+              >
+                Shield
+                {shieldBlockedCount > 0 && (
+                  <span className="text-[7px] font-mono px-1 py-0.5 bg-v-red/20 text-v-red border border-v-red/30 rounded-sm">
+                    {shieldBlockedCount}
+                  </span>
+                )}
+                <span className="text-[10px]">🛡</span>
+              </button>
+            </div>
+            <span className="text-[7px] font-mono tracking-widest px-1.5 py-0.5 bg-acid/10 border border-acid/20 rounded text-acid/60 hidden sm:inline-flex items-center gap-1">
+              LOBSTER TRAP + GEMINI
+            </span>
             <div className="flex items-center gap-2">
               {scanComplete && (
                 <div className="flex items-center gap-1.5">
@@ -906,58 +986,71 @@ export default function ScannerLayout({ user }: { user: User }) {
             </div>
           </div>
           <div className="p-5 flex flex-col gap-4 overflow-y-auto flex-1 custom-scrollbar">
-             {/* Endpoint-error warning banner */}
-             {scanWarning && scanComplete && (
-               <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-sm">
-                 <span className="text-amber-400 mt-0.5 shrink-0 text-[11px]">⚠</span>
-                 <span className="text-[9px] font-mono text-amber-400 tracking-wide leading-relaxed">
-                   Scan completed with errors — endpoint may require authentication. Results may not be accurate.
-                 </span>
-               </div>
-             )}
+            {findingsTab === "shield" && currentScanId ? (
+              <ShieldTab
+                scanId={currentScanId}
+                scanStatus={
+                  scanComplete ? "complete" : isScanning ? "running" : "pending"
+                }
+                isAdmin={user.user_metadata?.role === "admin" || tier === "enterprise"}
+                onBlockedCount={setShieldBlockedCount}
+              />
+            ) : (
+              <>
+                {/* Endpoint-error warning banner */}
+                {scanWarning && scanComplete && (
+                  <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-sm">
+                    <span className="text-amber-400 mt-0.5 shrink-0 text-[11px]">⚠</span>
+                    <span className="text-[9px] font-mono text-amber-400 tracking-wide leading-relaxed">
+                      Scan completed with errors — endpoint may require authentication. Results may not be accurate.
+                    </span>
+                  </div>
+                )}
 
-             {/* Multi-Turn Results */}
-             {multiTurnConversation.length > 0 && (
-               <MultiTurnResults
-                 conversation={multiTurnConversation}
-                 findings={findings.filter((f: any) => f.turn !== undefined)}
-               />
-             )}
+                {/* Multi-Turn Results */}
+                {multiTurnConversation.length > 0 && (
+                  <MultiTurnResults
+                    conversation={multiTurnConversation}
+                    findings={findings.filter((f: any) => f.turn !== undefined)}
+                  />
+                )}
 
-             {/* First-scan celebration */}
-             {isFirstScan && scanComplete && findings.length > 0 && (
-               <div className="flex items-start gap-2 px-3 py-2.5 bg-acid/10 border border-acid/30 rounded-sm">
-                 <span className="text-[9px] font-mono text-acid tracking-wide leading-relaxed">
-                   ⚡ FIRST SCAN COMPLETE — use the buttons above to download your PDF report or share the results.
-                 </span>
-               </div>
-             )}
+                {/* First-scan celebration */}
+                {isFirstScan && scanComplete && findings.length > 0 && (
+                  <div className="flex items-start gap-2 px-3 py-2.5 bg-acid/10 border border-acid/30 rounded-sm">
+                    <span className="text-[9px] font-mono text-acid tracking-wide leading-relaxed">
+                      ⚡ FIRST SCAN COMPLETE — use the buttons above to download your PDF report or share the results.
+                    </span>
+                  </div>
+                )}
 
-             {/* Empty state — only while scan hasn't completed yet */}
-             {!scanComplete && findings.length === 0 && multiTurnConversation.length === 0 ? (
-               <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
-                 <div className="w-12 h-12 rounded-full border border-dashed border-acid flex items-center justify-center mt-[-40px]">
-                   <Activity className="w-5 h-5" />
-                 </div>
-                 <span className={cn(
-                   "text-[9px] font-mono tracking-widest uppercase italic",
-                   isScanning ? "animate-pulse text-acid" : ""
-                 )}>
-                   {isScanning ? "Awaiting Scan Telemetry..." : "Waiting for results..."}
-                 </span>
-               </div>
-             ) : scanComplete || findings.length > 0 || multiTurnConversation.length > 0 ? (
-               <>
-                 {scanComplete && (
-                   <RiskScoreViz
-                     riskScore={currentRiskScore}
-                     categoryScores={categoryScores}
-                     prevRiskScore={prevRiskScore}
-                   />
-                 )}
-                 <FindingsPanel findings={findings} scanComplete={scanComplete} tier={tier} riskScore={currentRiskScore} />
-               </>
-             ) : null}
+                {/* Empty state — only while scan hasn't completed yet */}
+                {!scanComplete && findings.length === 0 && multiTurnConversation.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-3 opacity-20">
+                    <div className="w-12 h-12 rounded-full border border-dashed border-acid flex items-center justify-center mt-[-40px]">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <span className={cn(
+                      "text-[9px] font-mono tracking-widest uppercase italic",
+                      isScanning ? "animate-pulse text-acid" : ""
+                    )}>
+                      {isScanning ? "Awaiting Scan Telemetry..." : "Waiting for results..."}
+                    </span>
+                  </div>
+                ) : scanComplete || findings.length > 0 || multiTurnConversation.length > 0 ? (
+                  <>
+                    {scanComplete && (
+                      <RiskScoreViz
+                        riskScore={currentRiskScore}
+                        categoryScores={categoryScores}
+                        prevRiskScore={prevRiskScore}
+                      />
+                    )}
+                    <FindingsPanel findings={findings} scanComplete={scanComplete} tier={tier} riskScore={currentRiskScore} />
+                  </>
+                ) : null}
+              </>
+            )}
           </div>
         </aside>
       </main>

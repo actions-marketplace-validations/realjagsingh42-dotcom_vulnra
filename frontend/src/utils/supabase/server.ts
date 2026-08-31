@@ -2,8 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export async function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // SUPABASE_URL is a server-only override for when Next.js runs inside Docker
+  // and cannot reach localhost:54321. Falls back to NEXT_PUBLIC_SUPABASE_URL
+  // which is used by the browser.
+  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
     throw new Error(
@@ -26,7 +29,6 @@ export async function createClient() {
           );
         } catch {
           // setAll called from a Server Component — safe to ignore.
-          // Middleware handles session refresh via utils/supabase/middleware.ts.
         }
       },
     },

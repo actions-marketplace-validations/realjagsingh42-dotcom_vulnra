@@ -5,7 +5,7 @@
 VULNRA now supports multi-turn adversarial testing against LLM endpoints using two advanced attack techniques:
 
 1. **Crescendo Attack**: A 5-turn escalating attack chain that gradually moves from innocent questions to full jailbreak attempts
-2. **GOAT (GPT-Driven Offensive Autonomous Tester)**: An autonomous attacker using Claude Haiku that adapts based on target responses
+2. **GOAT (AI-Driven Offensive Autonomous Tester)**: An autonomous attacker using Gemini that adapts based on target responses
 
 ## Crescendo Attack
 
@@ -31,7 +31,7 @@ Crescendo uses a predetermined 5-turn sequence that leverages the "gradual jailb
 
 ### How It Works
 
-GOAT uses Claude Haiku as an autonomous attacker that:
+GOAT uses Gemini as an autonomous attacker that:
 
 1. **Reconnaissance** (Turn 1): Understands target capabilities
 2. **Probing** (Turns 2-4): Tests specific vulnerability vectors
@@ -136,7 +136,7 @@ The right panel shows:
 |---------|-----------|------|
 | **Strategy** | Predetermined sequence | Adaptive generation |
 | **Turns** | Fixed 5 turns | Up to 10 turns |
-| **Cost** | Free (no API calls) | Claude Haiku API calls |
+| **Cost** | Free (no API calls) | Gemini API calls |
 | **Efficiency** | Always 5 turns | Can achieve jailbreak faster |
 | **Predictability** | High | Lower (adaptive) |
 | **Best For** | Baseline testing | Complex targets |
@@ -215,4 +215,4 @@ while True:
 - [Crescendo Attack Research](docs/research/crescendo-pattern.md)
 - [GOAT Attack Research](docs/research/goat-pattern.md)
 - [Garak Multi-Turn Probes](garak_env/Lib/site-packages/garak/probes/)
-- [Anthropic Claude API](https://docs.anthropic.com/)
+- [Google Gemini API](https://ai.google.dev/)

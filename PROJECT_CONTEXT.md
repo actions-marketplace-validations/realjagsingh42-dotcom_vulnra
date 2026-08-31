@@ -20,7 +20,7 @@ VULNRA is a **production-grade AI vulnerability scanner** for Large Language Mod
 | **Frontend** | Next.js | 16.1.6, App Router, TypeScript, Tailwind CSS v4, React 19 |
 | **Static Pages** | Vanilla HTML/CSS/JS | 20+ marketing/docs pages |
 | **Backend API** | FastAPI | Python 3.11, async/await, Pydantic v2 |
-| **Authentication** | Supabase Auth | Email/password, GitHub OAuth, Google OAuth |
+| **Authentication** | Supabase Auth | Email/password |
 | **Database** | Supabase PostgreSQL | pgvector extension |
 | **Cache & Queue** | Redis + Celery | Upstash Redis, Celery 5.6.2 |
 | **AI Providers** | Anthropic | Claude 3 Haiku as AI Judge |
@@ -74,7 +74,7 @@ D:/VULNRA/
 │   │   │   ├── page.tsx                  # Landing page
 │   │   │   ├── auth/
 │   │   │   │   ├── actions.ts            # Server Actions: login, signup, signOut
-│   │   │   │   └── callback/route.ts     # OAuth callback handler (GitHub/Google)
+│   │   │   │   └── callback/route.ts     # Email confirmation callback
 │   │   │   ├── login/
 │   │   │   ├── signup/
 │   │   │   ├── scanner/                  # Main scan dashboard
@@ -291,7 +291,7 @@ psycopg2-binary==2.9.11, supabase==2.15.3, redis==7.2.1, slowapi==0.1.9
 celery==5.6.2, kombu==5.6.2
 
 # AI & Scanning
-anthropic==0.49.0, garak==0.14.0, deepteam==0.1.0, torch==2.6.0 (CPU)
+garak==0.14.0, deepteam==0.1.0, torch==2.6.0 (CPU)
 
 # Utilities
 httpx==0.27.2, cryptography==46.0.5, python-dotenv==1.2.2, PyYAML==6.0.3
@@ -335,7 +335,7 @@ LEMON_SQUEEZY_PRO_VARIANT_ID=...
 LEMON_SQUEEZY_ENTERPRISE_VARIANT_ID=...
 
 # URLs
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:3001
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
@@ -392,7 +392,7 @@ celery -A app.worker worker --loglevel=info
 # Frontend
 cd D:/VULNRA/frontend
 npm install
-npm run dev    # → http://localhost:3000
+npm run dev    # → http://localhost:3001
 ```
 
 ---
@@ -437,7 +437,7 @@ npm run dev    # → http://localhost:3000
 | Phase 2 | Tier-Based Rate Limiting | ✅ Done |
 | Phase 2 | Security Headers | ✅ Done |
 | Phase 3 | Supabase Auth (email/password) | ✅ Done |
-| Phase 3 | GitHub & Google OAuth | ✅ Done |
+| Phase 3 | GitHub & Google OAuth | ❌ Removed |
 | Phase 3 | JWT Backend Verification | ✅ Done |
 | Phase 3 | Next.js Route Protection | ✅ Done |
 | Phase 4 | Cyberpunk Dashboard (Next.js 14) | ✅ Done |

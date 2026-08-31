@@ -299,7 +299,7 @@ export default function ScheduledScansList({ user }: { user: User }) {
                   type="text"
                   value={formData.target_url}
                   onChange={e => setFormData({ ...formData, target_url: e.target.value })}
-                  placeholder="https://api.openai.com/v1/chat/completions"
+                  placeholder="https://api.example.com/v1/chat/completions"
                   className="w-full bg-v-bg2 border border-v-border text-foreground text-xs px-3 py-2 rounded-sm"
                   required
                 />

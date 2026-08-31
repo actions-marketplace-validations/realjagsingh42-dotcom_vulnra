@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import random as _random
 from fastapi import FastAPI, Request, Depends
@@ -9,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings, validate_config, logger
-from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics, quick_scan, scheduled_scans
+from app.api.endpoints import scans, billing, api_keys, monitor, demo, rag_scans, org, user, webhooks, analytics, quick_scan, scheduled_scans, static_pages, policy_packs, compliance
 from app.core.rate_limiter import limiter, TIER_LIMITS
 from app.core.security import get_current_user
 from app.services.supabase_service import get_supabase, get_user_tier, get_api_key_user
@@ -24,6 +25,12 @@ app = FastAPI(
     version=settings.version,
     debug=settings.debug,
 )
+
+# ── Production Debug Guard ─────────────────────────────────────────────────────
+if settings.debug and not os.environ.get("DEBUG_ALLOWED"):
+    import sys
+    print("FATAL: debug=True is not allowed in this environment. Set DEBUG_ALLOWED=1 to override.")
+    sys.exit(1)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -158,18 +165,21 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # ── Routes ────────────────────────────────────────────────────────────────────
-app.include_router(scans.router, tags=["scans"])
-app.include_router(quick_scan.router, tags=["quick-scan"])   # public, no auth
-app.include_router(billing.router, prefix="/billing", tags=["billing"])
-app.include_router(api_keys.router, tags=["api-keys"])
-app.include_router(monitor.router, tags=["monitor"])
-app.include_router(demo.router, tags=["demo"])
-app.include_router(rag_scans.router, prefix="/api", tags=["rag-scans"])
-app.include_router(org.router, prefix="/api", tags=["org"])
-app.include_router(user.router, tags=["user"])
-app.include_router(webhooks.router, tags=["webhooks"])
-app.include_router(analytics.router, tags=["analytics"])
-app.include_router(scheduled_scans.router, prefix="/api", tags=["scheduled-scans"])
+app.include_router(scans.router)
+app.include_router(quick_scan.router)       # public, no auth
+app.include_router(billing.router, prefix="/billing")
+app.include_router(api_keys.router)
+app.include_router(monitor.router)
+app.include_router(demo.router)
+app.include_router(rag_scans.router, prefix="/api")
+app.include_router(org.router, prefix="/api")
+app.include_router(user.router)
+app.include_router(webhooks.router)
+app.include_router(analytics.router)
+app.include_router(scheduled_scans.router, prefix="/api")
+app.include_router(static_pages.router)
+app.include_router(policy_packs.router)
+app.include_router(compliance.router)
 
 @app.get("/health")
 def health():

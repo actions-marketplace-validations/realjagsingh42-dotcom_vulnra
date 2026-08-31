@@ -52,7 +52,7 @@ Every scan returns:
 - **PR comments** with full vulnerability report
 - **Compliance mapping** across all four frameworks
 
-Get your API key at [vulnra-production-fb23.up.railway.app](https://vulnra-production-fb23.up.railway.app)
+Get your API key at the [VULNRA dashboard](https://vulnra.ai)
 
 ---
 
@@ -68,7 +68,20 @@ docker compose up --build
 docker compose down
 ```
 
-### Option 2: Manual Setup
+### Option 2: Docker Compose with local Supabase
+
+```bash
+# 1. Start local Supabase (requires Supabase CLI)
+supabase start
+
+# 2. Copy the local Supabase credentials from: supabase status
+#    Then set them in docker-compose.yml or .env
+
+# 3. Start all services
+docker compose up --build
+```
+
+### Option 3: Manual Setup
 
 ```bash
 # 1. Clone and setup
@@ -94,7 +107,7 @@ cd frontend && npm install && cd ..
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| **Frontend** | http://localhost:3000 | Web UI |
+| **Frontend** | http://localhost:3001 | Web UI |
 | **Backend API** | http://localhost:8000 | REST API |
 | **API Docs** | http://localhost:8000/docs | Swagger documentation |
 | **Demo LLM** | http://localhost:8001 | Vulnerable target for testing |
@@ -137,7 +150,7 @@ Copy `.env.example` to `.env` and configure:
 | `SUPABASE_URL` | Yes | Supabase project URL |
 | `SUPABASE_SERVICE_KEY` | Yes | Supabase service role key |
 | `REDIS_URL` | Yes | Redis connection string |
-| `ANTHROPIC_API_KEY` | For AI Judge | Anthropic API key for vulnerability scoring |
+| `GEMINI_API_KEY` | Yes | Google Gemini API key for AI Judge, GuardianForge, EasyJailbreak |
 | `LEMONSQUEEZY_*` | For billing | Lemon Squeezy API credentials |
 
 ## Architecture

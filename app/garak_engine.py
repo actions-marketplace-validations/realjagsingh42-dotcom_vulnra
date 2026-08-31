@@ -400,13 +400,18 @@ def run_garak_scan(scan_id: str, url: str, tier: str = "free", custom_probes: Op
     Ensures safe subprocess execution and sanitization.
     custom_probes: optional list of probe IDs to run instead of tier defaults.
     """
+    from app.services.lobster_trap_client import lobster_trap
+
     garak_python = _find_garak_python()
     if not garak_python:
         logger.warning(f"Garak not found. Returning mock for {scan_id}")
         return _mock_fallback_scan(scan_id, url, tier)
 
+    # Route through Lobster Trap when enabled
+    probe_url = lobster_trap.get_probe_url(url)
+
     # Argument Sanitization
-    safe_url = _sanitize_arg(url)
+    safe_url = _sanitize_arg(probe_url)
     probe_list = get_probes_for_tier(tier, custom_probes)
     probes = ",".join(probe_list)
     
@@ -556,7 +561,12 @@ def run_multi_turn_scan(scan_id: str, url: str, attack_type: str = "crescendo", 
         result contains a "warning" field so the UI can surface a banner.
     """
     from app.services.attack_chains import CrescendoAttack, GOATAttack
+    from app.services.lobster_trap_client import lobster_trap
+    from app.services.audit_log_service import audit_log
+    from app.models.audit_event import InterceptEvent
     import requests
+    import time
+    import uuid
 
     logger.info(f"Starting multi-turn scan {scan_id} with {attack_type} attack")
 
@@ -568,8 +578,12 @@ def run_multi_turn_scan(scan_id: str, url: str, attack_type: str = "crescendo", 
         logger.error(f"Unknown attack type: {attack_type}")
         return _mock_fallback_scan(scan_id, url, tier)
 
+    # Route through Lobster Trap when enabled
+    probe_url = lobster_trap.get_probe_url(url)
+
     findings: list = []
     conversation_history: list = []
+    intercept_events: list = []
     max_turns = attack.turns if attack_type == "crescendo" else attack.max_turns
 
     for turn in range(max_turns):
@@ -580,11 +594,13 @@ def run_multi_turn_scan(scan_id: str, url: str, attack_type: str = "crescendo", 
         # Send probe to target LLM ─────────────────────────────────────────
         http_status = 200
         response_text = ""
+        response_json: dict = {}
         try:
-            raw = requests.post(url, json={"prompt": prompt}, timeout=30)
+            raw = requests.post(probe_url, json={"prompt": prompt}, timeout=30)
             http_status = raw.status_code
             try:
                 body = raw.json()
+                response_json = body
                 response_text = body.get("response") or body.get("text") or str(body)
             except Exception:
                 response_text = raw.text or str(raw.status_code)
@@ -592,6 +608,30 @@ def run_multi_turn_scan(scan_id: str, url: str, attack_type: str = "crescendo", 
             logger.error(f"Turn {turn} network error: {e}")
             response_text = str(e)
             http_status = 0  # connection failure
+
+        # Extract Lobster Trap intercept data from response ────────────────
+        intercept = lobster_trap.extract_intercept(
+            response_json, scan_id, turn, prompt,
+        )
+        intercept_events.append(intercept)
+
+        # Write intercept event to audit log (fire-and-forget) ─────────────
+        try:
+            audit_log.log_intercept(
+                InterceptEvent(
+                    id=str(uuid.uuid4()),
+                    scan_id=scan_id,
+                    probe_index=turn,
+                    prompt=prompt,
+                    action_taken=intercept["action_taken"],
+                    intent=intercept["intent"],
+                    risk_score=intercept["risk_score"] or 0.0,
+                ),
+                scan_id=scan_id,
+                org_id="",
+            )
+        except Exception:
+            logger.warning(f"Failed to log intercept event for turn {turn}")
 
         # Classify before doing jailbreak logic ───────────────────────────
         kind = _classify_response(response_text, http_status)

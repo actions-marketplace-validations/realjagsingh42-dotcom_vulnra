@@ -37,7 +37,7 @@ from app.services.supabase_service import get_supabase
 from app.services import sso_service
 
 logger = logging.getLogger("vulnra.org")
-router = APIRouter()
+router = APIRouter(tags=["Organization"])
 
 
 # ── Request models ────────────────────────────────────────────────────────────
@@ -96,28 +96,6 @@ def _require_enterprise(current_user: dict):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Organization features require Enterprise tier.",
         )
-
-
-def _require_org_admin(user_id: str, org_id: str):
-    try:
-        sb = get_supabase()
-        res = (
-            sb.table("organization_members")
-            .select("role")
-            .eq("org_id", org_id)
-            .eq("user_id", user_id)
-            .maybe_single()
-            .execute()
-        )
-        if not res.data or res.data.get("role") != "admin":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin role required for this action.",
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 def _send_invite_email(to_email: str, invite_token: str, org_name: str):

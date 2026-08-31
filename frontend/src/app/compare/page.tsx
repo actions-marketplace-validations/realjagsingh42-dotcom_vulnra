@@ -40,7 +40,7 @@ const FEATURES: Feature[] = [
   { category: "Reports & Integrations", name: "CI/CD webhook",       vulnra: true,  garak: false,    promptfoo: true,      rebuff: false, manual: false },
   { category: "Reports & Integrations", name: "Scan history & share", vulnra: true, garak: false,    promptfoo: false,     rebuff: false, manual: false },
   { category: "Reports & Integrations", name: "Public scan share link", vulnra: true, garak: false, promptfoo: false,     rebuff: false, manual: false },
-  { category: "Reports & Integrations", name: "AI judge (Claude)",   vulnra: true,  garak: "partial", promptfoo: true,    rebuff: "partial", manual: false },
+  { category: "Reports & Integrations", name: "Gemini Guardian Judge",   vulnra: true,  garak: "partial", promptfoo: true,    rebuff: "partial", manual: false },
   // Platform
   { category: "Platform", name: "Web UI (no CLI required)",          vulnra: true,  garak: false,    promptfoo: "partial", rebuff: false, manual: true },
   { category: "Platform", name: "REST API + API keys",               vulnra: true,  garak: false,    promptfoo: true,      rebuff: false, manual: false },

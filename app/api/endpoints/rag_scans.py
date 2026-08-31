@@ -22,7 +22,7 @@ from app.services.supabase_service import check_scan_quota, save_scan_result, ge
 
 logger = logging.getLogger("vulnra.rag_scans")
 
-router = APIRouter()
+router = APIRouter(tags=["RAG Scanner"])
 
 # ── In-memory scan cache (mirrors pattern in scans.py) ───────────────────────
 _rag_scan_cache: Dict[str, Dict[str, Any]] = {}

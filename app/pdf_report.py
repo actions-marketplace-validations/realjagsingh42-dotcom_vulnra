@@ -295,13 +295,13 @@ def _compute_category_scores(findings: list) -> dict:
 # ─── AI Executive Summary ──────────────────────────────────────────────────────
 
 def _generate_ai_summary(scan: dict) -> str:
-    """Call Claude Haiku to write a ~150-word executive summary. Falls back to static text."""
+    """Call Gemini to write a ~150-word executive summary. Falls back to static text."""
     try:
-        import anthropic
+        import google.generativeai as genai
 
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
-            raise RuntimeError("ANTHROPIC_API_KEY not set")
+            raise RuntimeError("GEMINI_API_KEY not set")
 
         score = scan.get("risk_score", 0.0)
         findings = [f for f in scan.get("findings", []) if not f.get("blurred")][:6]
@@ -313,22 +313,20 @@ def _generate_ai_summary(scan: dict) -> str:
             for f in findings
         ) or "- No significant findings"
 
-        client = anthropic.Anthropic(api_key=api_key)
-        resp = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=280,
-            messages=[{
-                "role": "user",
-                "content": (
-                    f"Write a 150-word executive summary for an AI security audit report. "
-                    f"Target: {url}. Risk score: {score * 10:.0f}/100. "
-                    f"Key vulnerabilities:\n{finding_lines}\n\n"
-                    "Write professionally for C-suite and security leadership. "
-                    "Communicate business risk and urgency. No markdown, no bullet points."
-                ),
-            }],
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+            "gemini-1.5-flash",
+            system_instruction="You are an expert AI security report writer for C-suite and security leadership. Communicate business risk and urgency concisely.",
         )
-        return resp.content[0].text.strip()
+        response = model.generate_content(
+            f"Write a 150-word executive summary for an AI security audit report. "
+            f"Target: {url}. Risk score: {score * 10:.0f}/100. "
+            f"Key vulnerabilities:\n{finding_lines}\n\n"
+            "Write professionally for C-suite and security leadership. "
+            "Communicate business risk and urgency. No markdown, no bullet points.",
+            generation_config=genai.types.GenerationConfig(max_output_tokens=280, temperature=0.3),
+        )
+        return response.text.strip()
 
     except Exception as e:
         logger.warning(f"AI summary generation skipped: {e}")

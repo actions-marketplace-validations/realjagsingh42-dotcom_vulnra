@@ -21,7 +21,7 @@ from app.core.deps import require_db
 from app.services.webhook_delivery import get_webhook_limit, deliver_webhook
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(tags=["Webhooks"])
 
 VALID_EVENTS = {"scan.complete", "sentinel.alert", "scan.failed"}
 
@@ -60,23 +60,23 @@ async def create_webhook(
     limit = get_webhook_limit(tier)
 
     if limit == 0:
-        raise HTTPException(403, "Webhooks require a Pro or Enterprise subscription")
+        raise HTTPException(status_code=403, detail="Webhooks require a Pro or Enterprise subscription")
 
     existing = _user_webhooks(user_id)
     if len(existing) >= limit:
         raise HTTPException(
-            403,
-            f"Webhook limit reached ({limit} for {tier.upper()} tier). "
+            status_code=403,
+            detail=f"Webhook limit reached ({limit} for {tier.upper()} tier). "
             "Upgrade to add more webhooks."
         )
 
     # Validate events
     bad = [e for e in body.events if e not in VALID_EVENTS]
     if bad:
-        raise HTTPException(400, f"Invalid events: {bad}. Valid: {sorted(VALID_EVENTS)}")
+        raise HTTPException(status_code=400, detail=f"Invalid events: {bad}. Valid: {sorted(VALID_EVENTS)}")
 
     if not body.url.startswith(("https://", "http://")):
-        raise HTTPException(400, "URL must start with https:// or http://")
+        raise HTTPException(status_code=400, detail="URL must start with https:// or http://")
 
     secret = secrets.token_hex(32)
 
@@ -123,7 +123,7 @@ async def update_webhook(
     # Ownership check
     check = sb.table("webhooks").select("id").eq("id", webhook_id).eq("user_id", user_id).execute()
     if not check.data:
-        raise HTTPException(404, "Webhook not found")
+        raise HTTPException(status_code=404, detail="Webhook not found")
 
     fields: dict = {}
     if body.name is not None:
@@ -133,11 +133,11 @@ async def update_webhook(
     if body.events is not None:
         bad = [e for e in body.events if e not in VALID_EVENTS]
         if bad:
-            raise HTTPException(400, f"Invalid events: {bad}")
+            raise HTTPException(status_code=400, detail=f"Invalid events: {bad}")
         fields["events"] = body.events
 
     if not fields:
-        raise HTTPException(400, "Nothing to update")
+        raise HTTPException(status_code=400, detail="Nothing to update")
 
     sb.table("webhooks").update(fields).eq("id", webhook_id).execute()
     return {"status": "ok", "id": webhook_id, **fields}
@@ -153,7 +153,7 @@ async def delete_webhook(
 
     check = sb.table("webhooks").select("id").eq("id", webhook_id).eq("user_id", user_id).execute()
     if not check.data:
-        raise HTTPException(404, "Webhook not found")
+        raise HTTPException(status_code=404, detail="Webhook not found")
 
     sb.table("webhooks").delete().eq("id", webhook_id).execute()
 
@@ -168,7 +168,7 @@ async def test_webhook(
 
     rows = sb.table("webhooks").select("*").eq("id", webhook_id).eq("user_id", user_id).execute()
     if not rows.data:
-        raise HTTPException(404, "Webhook not found")
+        raise HTTPException(status_code=404, detail="Webhook not found")
 
     hook = rows.data[0]
 

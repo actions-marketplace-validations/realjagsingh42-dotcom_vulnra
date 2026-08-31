@@ -9,7 +9,6 @@ const API_ORIGIN =
 const SECURITY_HEADERS = [
   // Prevent MIME-type sniffing
   { key: "X-Content-Type-Options",    value: "nosniff" },
-  // Block clickjacking — allow frames for OAuth providers that use popups
   { key: "X-Frame-Options",           value: "SAMEORIGIN" },
   // Limit cross-origin info leakage
   { key: "Referrer-Policy",           value: "strict-origin-when-cross-origin" },
@@ -27,11 +26,8 @@ const SECURITY_HEADERS = [
   // Notes:
   //   - 'unsafe-inline' for styles is required by Tailwind CSS v4 at runtime
   //   - 'unsafe-eval' for scripts is required by Next.js dev/hot-reload
-  //   - connect-src includes Supabase REST + realtime + Google/GitHub OAuth
-  //   - frame-src allows Supabase auth popups (some OAuth providers use iframes)
-  //   - form-action omitted: Next.js server actions use same-origin POSTs and
-  //     are correctly handled without this directive; adding it can interfere
-  //     with OAuth provider redirects triggered inside async JS handlers
+  //   - connect-src includes Supabase REST + realtime endpoints
+  //   - frame-src allows Supabase auth popups
   {
     key: "Content-Security-Policy",
     value: [
@@ -44,11 +40,14 @@ const SECURITY_HEADERS = [
         API_ORIGIN,
         "https://*.supabase.co",
         "wss://*.supabase.co",
-        "https://accounts.google.com",
-        "https://api.github.com",
+        "http://host.docker.internal:54321",
+        "ws://host.docker.internal:54321",
+        "http://localhost:54321",
+        "http://127.0.0.1:54321",
+
       ].join(" "),
       "img-src 'self' data: https:",
-      "frame-src 'self' https://*.supabase.co https://accounts.google.com https://github.com",
+      "frame-src 'self' https://*.supabase.co",
       "frame-ancestors 'self'",
       "base-uri 'self'",
     ].join("; "),

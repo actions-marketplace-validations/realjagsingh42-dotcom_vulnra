@@ -23,7 +23,7 @@ Detects: jailbreaks, prompt injection, data leakage, compliance violations.
 | tier | ❌ | free | free, pro, or enterprise |
 | scan_engine | ❌ | crescendo | crescendo, goat, or combined |
 | fail_on_risk_score | ❌ | 70 | Fail CI if score ≥ this value (0–100) |
-| vulnra_api_url | ❌ | https://web-production-ddb32.up.railway.app | Override for self-hosted |
+| vulnra_api_url | ❌ | https://vulnra.ai | Override for self-hosted |
 
 ## Outputs
 
@@ -52,4 +52,4 @@ jobs:
           fail_on_risk_score: '70'
 ```
 
-Get your API key at [vulnra-production-fb23.up.railway.app](https://vulnra-production-fb23.up.railway.app).
+Get your API key at the [VULNRA dashboard](https://vulnra.ai).

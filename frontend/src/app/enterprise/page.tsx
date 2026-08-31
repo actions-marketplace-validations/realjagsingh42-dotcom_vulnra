@@ -78,7 +78,7 @@ const TRUST_SIGNALS = [
   { label: "API keys", detail: "SHA-256 hashed, never stored in plain text" },
   { label: "Transport", detail: "TLS 1.2+ on all endpoints" },
   { label: "Data isolation", detail: "Row-level security on all scan data" },
-  { label: "Auth", detail: "Supabase Auth — email, GitHub, Google OAuth" },
+  { label: "Auth", detail: "Supabase Auth — email/password" },
   { label: "Webhooks", detail: "HMAC-SHA256 signed payloads" },
   { label: "DPA", detail: "Available for Enterprise on request" },
 ];

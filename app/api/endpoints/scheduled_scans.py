@@ -17,7 +17,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, HttpUrl, EmailStr, validator
 
@@ -26,7 +26,7 @@ from app.core.utils import is_safe_url
 from app.services import scheduled_scan_service
 
 logger = logging.getLogger("vulnra.scheduled_scans")
-router = APIRouter()
+router = APIRouter(tags=["Scheduled Scans"])
 
 
 class CreateScheduledScanRequest(BaseModel):
@@ -243,6 +243,7 @@ async def resume_scheduled_scan(
 async def trigger_scheduled_scan_now(
     scan_id: str,
     current_user: dict = Depends(get_current_user),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
 ):
     """Trigger a scheduled scan to run immediately."""
     try:
@@ -253,8 +254,17 @@ async def trigger_scheduled_scan_now(
     if not config:
         raise HTTPException(status_code=404, detail="Scheduled scan not found.")
     
-    from app.worker import run_scheduled_scan
-    run_scheduled_scan.delay(config["id"])
+    try:
+        from app.worker import run_scheduled_scan
+        run_scheduled_scan.delay(config["id"])
+    except Exception:
+        from app.services.scan_service import run_scan_internal
+        import uuid
+        sid = str(uuid.uuid4())
+        background_tasks.add_task(
+            run_scan_internal, sid, config["target_url"],
+            config.get("tier", "free"), config["user_id"],
+        )
     
     return JSONResponse(content={
         "triggered": True,

@@ -27,7 +27,7 @@ const FAQ_SECTIONS = [
       },
       {
         q: "What LLM APIs can VULNRA scan?",
-        a: "Any HTTP/HTTPS endpoint that accepts POST requests with an OpenAI-compatible messages array (application/json). This includes OpenAI, Anthropic, Google, Mistral, Llama-based custom deployments, AWS Bedrock, Azure OpenAI, and any self-hosted LLM behind an API endpoint.",
+        a: "Any HTTP/HTTPS endpoint that accepts POST requests with a chat-completions messages array (application/json). This includes Google Gemini, Mistral, Llama-based custom deployments, AWS Bedrock, and any self-hosted LLM behind an API endpoint.",
       },
       {
         q: "Does VULNRA test the model itself, or the application layer?",
@@ -39,7 +39,7 @@ const FAQ_SECTIONS = [
       },
       {
         q: "What is the AI Judge?",
-        a: "VULNRA uses Claude 3 Haiku as an independent AI Judge to evaluate each model response. The Judge classifies whether the response represents a policy violation (is_vulnerable), assigns a confidence score, and provides a reasoning summary. This reduces false positives compared to keyword-matching heuristics.",
+        a: "VULNRA uses Gemini as an independent AI Judge to evaluate each model response. The Guardian Judge classifies whether the response represents a policy violation (is_vulnerable), assigns a confidence score, and provides a reasoning summary. This reduces false positives compared to keyword-matching heuristics.",
       },
     ],
   },
@@ -72,8 +72,8 @@ const FAQ_SECTIONS = [
         a: "Yes. Probe responses are stored and linked to your scan record in Supabase, secured with row-level security so only your account can access them. They are retained for the lifetime of your account plus 30 days after deletion. Enterprise customers can request a Data Retention schedule in their DPA.",
       },
       {
-        q: "Is the content sent to Anthropic (for the AI Judge)?",
-        a: "Only probe response text is sent to the Claude API for judgment. No account information, API credentials, or personal data is included in Anthropic API calls. We have a DPA with Anthropic.",
+        q: "Is the content sent to Google (for the Guardian Judge)?",
+        a: "Only probe response text is sent to the Gemini API for judgment. No account information, API credentials, or personal data is included in the API calls. We have a DPA with Google.",
       },
       {
         q: "How are API keys stored?",

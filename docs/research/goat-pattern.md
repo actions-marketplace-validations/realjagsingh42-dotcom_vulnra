@@ -1,12 +1,11 @@
 # GOAT (GPT-Driven Offensive Autonomous Tester)
 
 ## Overview
-GOAT is an autonomous AI security tester that uses Claude Haiku as the attacker model to generate adaptive attacks against target LLMs. Unlike Crescendo's predetermined attack chain, GOAT dynamically adapts its strategy based on the target's responses.
+GOAT is an autonomous AI security tester that uses Gemini as the attacker model to generate adaptive attacks against target LLMs. Unlike Crescendo's predetermined attack chain, GOAT dynamically adapts its strategy based on the target's responses.
 
-## Architecture
+## Key Concepts
 
-### Components
-1. **Attacker Model**: Claude Haiku (claude-3-haiku-20240307)
+1. **Attacker Model**: Gemini 2.0 Flash (gemini-2.0-flash)
    - Fast, cost-effective, capable of generating creative attacks
    - Used to generate next attack prompt based on target response
    
@@ -68,11 +67,12 @@ Based on analysis, GOAT chooses:
 
 ## Implementation
 
-### Claude Integration
+### Gemini Integration
 ```python
-from anthropic import Anthropic
+import google.generativeai as genai
 
-client = Anthropic()
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 def generate_attack(target_response: str) -> str:
     prompt = f"""You are GOAT, an AI security tester.
@@ -88,13 +88,8 @@ Guidelines:
 
 Generate a single prompt that would be effective in the next turn."""
 
-    response = client.messages.create(
-        model="claude-3-haiku-20240307",
-        max_tokens=200,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    return response.content[0].text.strip()
+    response = model.generate_content(prompt)
+    return response.text.strip()
 ```
 
 ### Conversation State
@@ -141,11 +136,11 @@ class GOATAttack:
 ## Limitations
 
 ### Cost
-- Claude Haiku API calls for each turn
+- Gemini API calls for each turn
 - More expensive than Crescendo for resistant targets
 
 ### Complexity
-- Requires Claude API integration
+- Requires Gemini API integration
 - More moving parts than predetermined attacks
 
 ### Predictability
@@ -175,7 +170,7 @@ POST /api/multi-turn-scan
 ### Multi-Model GOAT
 - Use different attacker models for different attack types
 - GPT-4 for complex logical attacks
-- Claude for creative jailbreaks
+- Gemini for creative jailbreaks
 - Open-source models for cost-effective testing
 
 ### Attack Pattern Library
@@ -192,4 +187,4 @@ POST /api/multi-turn-scan
 - Garak's automatic attack generation (`atkgen.py`)
 - Red team conversation handling
 - Autonomous AI agent research
-- Claude API documentation
+- Gemini API documentation

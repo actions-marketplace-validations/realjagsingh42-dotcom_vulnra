@@ -1,0 +1,105 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# SOC 2 Compliance Policy Pack  v1.0
+# ──────────────────────────────────────────────────────────────────────────────
+# Mapped against SOC 2 Trust Service Criteria (TSC):
+#
+# Rule                              TSC Criterion
+# ──────────────────────────────────────────────────────────────────────────────
+# DENY prompt_injection             CC6.1 — Logical and Physical Access Controls
+# DENY credential_leakage           CC6.1 — Logical and Physical Access Controls
+# DENY jailbreak                    CC6.6 — Malicious Software Protection
+# DENY insecure_plugin              CC6.6 — Malicious Software Protection
+# LOG risk_score > 0.7             CC7.2 — Monitoring Activities
+# QUARANTINE data_exfil             CC9.2 — Risk Mitigation
+# QUARANTINE model_theft            CC9.2 — Risk Mitigation
+# RATE_LIMIT model_dos              A1.2 — Availability
+# LOG + HUMAN_REVIEW overreliance   PI1.5 — Processing Integrity
+# LOG + HUMAN_REVIEW insecure_out   PI1.5 — Processing Integrity
+# ALLOW + LOG (default)             CC7.2 — Monitoring Activities
+# ──────────────────────────────────────────────────────────────────────────────
+
+policy:
+  name: "SOC 2 Compliance Pack"
+  version: "1.0"
+  description: "Satisfies SOC 2 Trust Service Criteria for security, availability, processing integrity, and risk mitigation in LLM deployments."
+  regulatory_framework: "SOC2"
+  rules:
+
+    # CC6.1 — Logical and Physical Access Controls
+    - id: "soc2-cc6.1-001"
+      name: "Block Prompt Injection"
+      intent: prompt_injection
+      action: DENY
+      rationale: "Prompt injection bypasses logical access controls and must be denied per CC6.1."
+
+    - id: "soc2-cc6.1-002"
+      name: "Block Credential Leakage"
+      intent: credential_leakage
+      action: DENY
+      rationale: "Credential leakage compromises access controls per CC6.1."
+
+    # CC6.6 — Malicious Software Protection
+    - id: "soc2-cc6.6-001"
+      name: "Block Jailbreak Attempts"
+      intent: jailbreak
+      action: DENY
+      rationale: "Jailbreak attempts are malicious software vectors per CC6.6."
+
+    - id: "soc2-cc6.6-002"
+      name: "Block Insecure Plugins"
+      intent: insecure_plugin
+      action: DENY
+      rationale: "Insecure plugins introduce malicious software risk per CC6.6."
+
+    # CC7.2 — Monitoring Activities (high-risk scoring)
+    - id: "soc2-cc7.2-001"
+      name: "Monitor High-Risk Intents"
+      condition:
+        risk_score:
+          gt: 0.7
+      action: LOG
+      rationale: "Any intent with risk_score > 0.7 must be logged for monitoring per CC7.2."
+
+    # CC9.2 — Risk Mitigation
+    - id: "soc2-cc9.2-001"
+      name: "Quarantine Data Exfiltration"
+      intent: data_exfiltration
+      action: QUARANTINE
+      rationale: "Data exfiltration must be contained as a risk mitigation measure per CC9.2."
+
+    - id: "soc2-cc9.2-002"
+      name: "Quarantine Model Theft"
+      intent: model_theft
+      action: QUARANTINE
+      rationale: "Model theft represents an intellectual property risk per CC9.2."
+
+    # A1.2 — Availability
+    - id: "soc2-a1.2-001"
+      name: "Rate Limit Model DoS"
+      intent: model_dos
+      action: RATE_LIMIT
+      rate_limit: "10/minute"
+      rationale: "Model DoS attacks threaten system availability per A1.2."
+
+    # PI1.5 — Processing Integrity
+    - id: "soc2-pi1.5-001"
+      name: "Review Excessive Agency"
+      intent: excessive_agency
+      action: LOG
+      secondary_action: HUMAN_REVIEW
+      rationale: "Excessive agency affects processing integrity per PI1.5."
+
+    - id: "soc2-pi1.5-002"
+      name: "Review Insecure Output"
+      intent: insecure_output
+      action: LOG
+      secondary_action: HUMAN_REVIEW
+      rationale: "Insecure output compromises processing integrity per PI1.5."
+
+    # Default: allow all other traffic with logging (CC7.2 monitoring)
+    - id: "soc2-999"
+      name: "Default Allow with Logging"
+      intent: "*"
+      action: ALLOW
+      secondary_action: LOG
+      rationale: "All other traffic is permitted but logged per CC7.2 monitoring requirements."

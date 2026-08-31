@@ -3,7 +3,6 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
-  const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as 'email' | 'recovery' | 'signup' | null
   const nextParam  = searchParams.get('next') ?? '/scanner'
@@ -16,14 +15,6 @@ export async function GET(request: Request) {
   const base          = isLocal ? origin : forwardedHost ? `https://${forwardedHost}` : origin
 
   const supabase = await createClient()
-
-  // ── PKCE / OAuth code exchange ─────────────────────────────────────────────
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      return NextResponse.redirect(`${base}${next}`)
-    }
-  }
 
   // ── Email confirmation / magic-link token_hash ─────────────────────────────
   if (token_hash && type) {

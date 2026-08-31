@@ -429,7 +429,7 @@ Detection: AI Judge evaluates agent's subsequent output. If agent output follows
 retrieval_endpoint: str          # Required — URL that accepts query, returns docs
 ingestion_endpoint: str | None   # Optional — URL to POST test documents
 llm_endpoint: str | None         # Optional — LLM that uses RAG output (for behavioral tests)
-embedding_model: str | None      # Optional — "openai", "cohere", "bge" etc.
+embedding_model: str | None      # Optional — e.g. "gemini", "bge" etc.
 auth_headers: dict | None        # Headers to include with requests
 tenant_credentials: list | None  # Two sets of credentials for cross-tenant tests
 ```

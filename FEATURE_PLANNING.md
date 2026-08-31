@@ -35,7 +35,7 @@ This document tracks all feature work — completed, in-progress, planned, and b
 | **SSRF protection** — private IP blocklist, DNS rebinding defense | ✅ Done | `core/utils.py` |
 | **Tier-based rate limiting** — SlowAPI + Redis | ✅ Done | `core/rate_limiter.py` |
 | **Security headers** — CSP, HSTS, X-Frame-Options | ✅ Done | `main.py` middleware |
-| **Supabase Auth** — email/password + GitHub + Google OAuth | ✅ Done | Frontend + backend JWT |
+| **Supabase Auth** — email/password only | ✅ Done | Frontend + backend JWT. GitHub/Google OAuth removed. |
 | **Route protection** — Next.js middleware | ✅ Done | `middleware.ts` |
 | **Tiered access control** — Free/Pro/Enterprise quotas | ✅ Done | `supabase_service.py` |
 | **Next.js 14 frontend** — cyberpunk design, TypeScript | ✅ Done | `frontend/` |

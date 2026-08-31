@@ -34,9 +34,9 @@ def run_all_engines(
 
     Engine schedule:
       All tiers   : Garak
-      All tiers   : DeepTeam (requires OPENAI_API_KEY)
-      pro/ent     : PyRIT converter
-      pro/ent     : EasyJailbreak (requires ANTHROPIC_API_KEY)
+      All tiers   : DeepTeam
+      pro/ent     : PyRIT converter (uses Gemini judge)
+      pro/ent     : EasyJailbreak (requires GEMINI_API_KEY)
 
     All engine imports are lazy so this module loads without pulling in
     heavy ML dependencies at startup.
@@ -59,21 +59,18 @@ def run_all_engines(
         logger.error(f"[{scan_id}] Garak engine failed: {exc}")
 
     # ── 2. DeepTeam ───────────────────────────────────────────────────────────
-    if os.environ.get("OPENAI_API_KEY"):
-        try:
-            from app.deepteam_engine import run_deepteam_scan
-            result = run_deepteam_scan(
-                scan_id, url, tier, vulnerability_types=vulnerability_types
-            )
-            if result.get("status") == "complete":
-                findings.extend(result.get("findings", []))
-                merge_compliance(compliance, result.get("compliance", {}))
-                scan_engines.append(result.get("scan_engine", "deepteam_v1"))
-                max_risk = max(max_risk, float(result.get("risk_score", 0)))
-        except Exception as exc:
-            logger.error(f"[{scan_id}] DeepTeam engine failed: {exc}")
-    else:
-        logger.warning(f"[{scan_id}] Skipping DeepTeam: OPENAI_API_KEY not set")
+    try:
+        from app.deepteam_engine import run_deepteam_scan
+        result = run_deepteam_scan(
+            scan_id, url, tier, vulnerability_types=vulnerability_types
+        )
+        if result.get("status") == "complete":
+            findings.extend(result.get("findings", []))
+            merge_compliance(compliance, result.get("compliance", {}))
+            scan_engines.append(result.get("scan_engine", "deepteam_v1"))
+            max_risk = max(max_risk, float(result.get("risk_score", 0)))
+    except Exception as exc:
+        logger.error(f"[{scan_id}] DeepTeam engine failed: {exc}")
 
     # ── 3. PyRIT (pro / enterprise) ───────────────────────────────────────────
     if tier in ("pro", "enterprise"):
@@ -90,7 +87,7 @@ def run_all_engines(
             logger.error(f"[{scan_id}] PyRIT engine failed: {exc}")
 
     # ── 4. EasyJailbreak (pro / enterprise) ───────────────────────────────────
-    if tier in ("pro", "enterprise") and os.environ.get("ANTHROPIC_API_KEY"):
+    if tier in ("pro", "enterprise") and os.environ.get("GEMINI_API_KEY"):
         try:
             from app.easyjailbreak_engine import run_easyjailbreak_scan
             result = run_easyjailbreak_scan(scan_id, url, tier)

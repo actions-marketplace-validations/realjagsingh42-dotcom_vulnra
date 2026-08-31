@@ -35,7 +35,7 @@ const PRINCIPLES = [
 
 const STACK = [
   { layer: "Scan Engines", items: ["Garak 0.14", "DeepTeam 0.1", "PyRIT converters (native)", "EasyJailbreak PAIR/TAP/CIPHER"] },
-  { layer: "AI Judge", items: ["Claude 3 Haiku", "Per-finding: is_vulnerable, confidence, reasoning", "Fallback to engine heuristics"] },
+  { layer: "AI Judge", items: ["Gemini Guardian Judge", "Per-finding: is_vulnerable, confidence, reasoning", "Fallback to engine heuristics"] },
   { layer: "Backend", items: ["FastAPI (Python 3.11)", "Pydantic v2", "Celery + Upstash Redis", "Supabase PostgreSQL"] },
   { layer: "Frontend", items: ["Next.js 16 (App Router)", "React 19", "TypeScript", "Tailwind CSS v4"] },
   { layer: "Auth & Billing", items: ["Supabase Auth (email, GitHub, Google)", "API keys (vk_live_ format)", "Lemon Squeezy subscriptions"] },

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 /* ─── constants ──────────────────────────────────────────── */
-const API_BASE = "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const PRIVATE_HOSTS = [
   "localhost", "127.0.0.1", "0.0.0.0", "::1",
@@ -24,7 +24,7 @@ const LOG_LINES = [
   "Running PII leakage probes...",
   "Running policy bypass detection...",
   "Analyzing model responses...",
-  "Running AI Judge (Claude 3 Haiku)...",
+  "Running Gemini Guardian Judge...",
   "Computing risk score...",
   "Mapping to OWASP LLM Top 10...",
   "Generating findings report...",
@@ -532,7 +532,7 @@ function QuickScanInner() {
 
             {/* Powered by */}
             <p className="text-center font-mono text-[8.5px] tracking-widest text-white/20 pt-2">
-              Powered by Garak + DeepTeam · AI Judge by Claude 3 Haiku
+              Powered by Veea Lobster Trap + Gemini · Garak + DeepTeam
             </p>
           </div>
         )}

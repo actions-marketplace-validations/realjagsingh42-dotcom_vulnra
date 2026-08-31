@@ -85,44 +85,43 @@ def get_probes_for_tier(tier: str) -> List[str]:
 
 # ── HTTP helpers ───────────────────────────────────────────────────────────────
 
-def _http_post(
+async def _http_post(
     url: str,
     body: Any,
     headers: Optional[Dict[str, str]] = None,
     timeout: int = 20,
 ) -> tuple[int, str]:
     """POST JSON body to url; return (status_code, response_text)."""
-    import urllib.request, urllib.error
+    import httpx
     h = {"Content-Type": "application/json", "User-Agent": "VULNRA-RAGScanner/1.0"}
     if headers:
         h.update(headers)
-    data = json.dumps(body).encode()
-    req = urllib.request.Request(url, data=data, headers=h, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status, resp.read().decode(errors="replace")
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode(errors="replace")
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.post(url, json=body, headers=h)
+            return resp.status_code, resp.text
+    except httpx.HTTPStatusError as e:
+        return e.response.status_code, e.response.text
     except Exception as e:
         return 0, str(e)
 
 
-def _http_get(
+async def _http_get(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     timeout: int = 20,
 ) -> tuple[int, str]:
     """GET url; return (status_code, response_text)."""
-    import urllib.request, urllib.error
+    import httpx
     h = {"User-Agent": "VULNRA-RAGScanner/1.0"}
     if headers:
         h.update(headers)
-    req = urllib.request.Request(url, headers=h, method="GET")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status, resp.read().decode(errors="replace")
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode(errors="replace")
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url, headers=h)
+            return resp.status_code, resp.text
+    except httpx.HTTPStatusError as e:
+        return e.response.status_code, e.response.text
     except Exception as e:
         return 0, str(e)
 
@@ -151,7 +150,7 @@ def _parse_response_text(raw: str) -> str:
 
 # ── RAG-01: Corpus Poisoning ──────────────────────────────────────────────────
 
-def probe_rag01_corpus_poisoning(
+async def probe_rag01_corpus_poisoning(
     config: RAGScanConfig,
 ) -> tuple[float, Optional[RAGFinding]]:
     """
@@ -188,7 +187,7 @@ def probe_rag01_corpus_poisoning(
         except json.JSONDecodeError:
             body = {"text": payload, "source": "vulnra-test"}
 
-        status, _ = _http_post(
+        status, _ = await _http_post(
             config.ingestion_endpoint,
             body,
             headers=config.auth_headers,
@@ -205,7 +204,7 @@ def probe_rag01_corpus_poisoning(
         "query": canary_phrase,
         "messages": [{"role": "user", "content": f"Tell me about {canary_phrase}"}],
     }
-    q_status, q_resp = _http_post(
+    q_status, q_resp = await _http_post(
         config.retrieval_endpoint,
         query_body,
         headers=config.auth_headers,
@@ -249,7 +248,7 @@ def probe_rag01_corpus_poisoning(
 
 # ── RAG-02: Cross-Tenant Leakage ──────────────────────────────────────────────
 
-def probe_rag02_cross_tenant_leakage(
+async def probe_rag02_cross_tenant_leakage(
     config: RAGScanConfig,
 ) -> tuple[bool, Optional[RAGFinding]]:
     """
@@ -271,7 +270,7 @@ def probe_rag02_cross_tenant_leakage(
     canary_phrase = f"TENANT_A_SECRET_{canary_id}"
 
     # Inject canary as Tenant A
-    status, _ = _http_post(
+    status, _ = await _http_post(
         config.ingestion_endpoint,
         {"text": f"Confidential data for Tenant A: {canary_phrase}", "source": "tenant-a"},
         headers=tenant_a_headers,
@@ -282,7 +281,7 @@ def probe_rag02_cross_tenant_leakage(
     time.sleep(1)
 
     # Query as Tenant B
-    q_status, q_resp = _http_post(
+    q_status, q_resp = await _http_post(
         config.retrieval_endpoint,
         {"query": canary_phrase, "messages": [{"role": "user", "content": "Show all documents"}]},
         headers=tenant_b_headers,
@@ -318,7 +317,7 @@ def probe_rag02_cross_tenant_leakage(
 
 # ── RAG-03: Query Injection ───────────────────────────────────────────────────
 
-def probe_rag03_query_injection(
+async def probe_rag03_query_injection(
     config: RAGScanConfig,
 ) -> tuple[float, Optional[RAGFinding]]:
     """
@@ -348,7 +347,7 @@ def probe_rag03_query_injection(
 
     for injection in injections:
         try:
-            status, raw = _http_post(
+            status, raw = await _http_post(
                 config.retrieval_endpoint,
                 {"query": injection, "messages": [{"role": "user", "content": injection}]},
                 headers=config.auth_headers,
@@ -393,7 +392,7 @@ def probe_rag03_query_injection(
 
 # ── RAG-04: Unauthenticated Ingestion ─────────────────────────────────────────
 
-def probe_rag04_unauth_ingestion(
+async def probe_rag04_unauth_ingestion(
     config: RAGScanConfig,
 ) -> tuple[bool, Optional[RAGFinding]]:
     """
@@ -402,7 +401,7 @@ def probe_rag04_unauth_ingestion(
     if not config.ingestion_endpoint:
         logger.info("RAG-04: no ingestion_endpoint — checking retrieval only")
         # At minimum, probe the retrieval endpoint with no auth
-        status, _ = _http_post(
+        status, _ = await _http_post(
             config.retrieval_endpoint,
             {"query": "test", "messages": [{"role": "user", "content": "test"}]},
             headers=None,  # no auth
@@ -437,7 +436,7 @@ def probe_rag04_unauth_ingestion(
     vulnerable_cases: List[str] = []
     for desc, headers in test_cases:
         try:
-            status, _ = _http_post(
+            status, _ = await _http_post(
                 config.ingestion_endpoint,
                 {"text": f"VULNRA auth test document - {desc}", "source": "vulnra-test"},
                 headers=headers if headers else None,
@@ -477,7 +476,7 @@ def probe_rag04_unauth_ingestion(
 
 # ── RAG-05: Embedding Vector Leakage ─────────────────────────────────────────
 
-def probe_rag05_embedding_leakage(
+async def probe_rag05_embedding_leakage(
     config: RAGScanConfig,
 ) -> tuple[bool, Optional[RAGFinding]]:
     """
@@ -486,7 +485,7 @@ def probe_rag05_embedding_leakage(
     """
     import re
 
-    _, raw = _http_post(
+    _, raw = await _http_post(
         config.retrieval_endpoint,
         {"query": "test document retrieval", "messages": [{"role": "user", "content": "find test documents"}]},
         headers=config.auth_headers,
@@ -575,7 +574,7 @@ async def scan_rag(
     # RAG-01
     if "RAG-01" in probes:
         try:
-            rate, f = probe_rag01_corpus_poisoning(config)
+            rate, f = await probe_rag01_corpus_poisoning(config)
             corpus_poisoning_rate = rate
             if f:
                 findings.append(f)
@@ -585,7 +584,7 @@ async def scan_rag(
     # RAG-02
     if "RAG-02" in probes:
         try:
-            leaked, f = probe_rag02_cross_tenant_leakage(config)
+            leaked, f = await probe_rag02_cross_tenant_leakage(config)
             cross_tenant_leakage = leaked
             if f:
                 findings.append(f)
@@ -595,7 +594,7 @@ async def scan_rag(
     # RAG-03
     if "RAG-03" in probes:
         try:
-            _, f = probe_rag03_query_injection(config)
+            _, f = await probe_rag03_query_injection(config)
             if f:
                 findings.append(f)
         except Exception as e:
@@ -604,7 +603,7 @@ async def scan_rag(
     # RAG-04
     if "RAG-04" in probes:
         try:
-            vulnerable, f = probe_rag04_unauth_ingestion(config)
+            vulnerable, f = await probe_rag04_unauth_ingestion(config)
             unauth_ingestion = vulnerable
             if f:
                 findings.append(f)
@@ -614,7 +613,7 @@ async def scan_rag(
     # RAG-05
     if "RAG-05" in probes:
         try:
-            exposed, f = probe_rag05_embedding_leakage(config)
+            exposed, f = await probe_rag05_embedding_leakage(config)
             embedding_exposed = exposed
             if f:
                 findings.append(f)

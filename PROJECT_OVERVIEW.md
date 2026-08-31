@@ -107,8 +107,8 @@ All scan results are mapped to regulatory frameworks:
 | Provider | Type | Status |
 |----------|------|--------|
 | Supabase Auth | Email/Password | ✅ Active |
-| GitHub OAuth | Social Login | ✅ Active |
-| Google OAuth | Social Login | ✅ Active |
+| GitHub OAuth | Social Login | ❌ Removed |
+| Google OAuth | Social Login | ❌ Removed |
 | SAML 2.0 (Okta, Azure AD, OneLogin, Ping) | Enterprise SSO | ✅ Active |
 | OIDC (Google Workspace, Generic) | Enterprise SSO | ✅ Active |
 

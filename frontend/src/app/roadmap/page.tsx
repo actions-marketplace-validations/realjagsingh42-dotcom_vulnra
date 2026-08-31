@@ -42,7 +42,7 @@ const PHASES: { phase: string; version: string; quarter: string; items: RoadmapI
     quarter: "Feb 2026",
     items: [
       { title: "Multi-engine scan (Garak + DeepTeam)", description: "First production scan combining two open-source LLM security engines with unified risk scoring.", status: "shipped", tags: ["Core"], version: "v0.1.0", date: "Feb 2026" },
-      { title: "Claude AI Judge", description: "Per-finding AI classification using Claude 3 Haiku — is_vulnerable, confidence score, reasoning.", status: "shipped", tags: ["Core", "AI Judge"], version: "v0.1.0", date: "Feb 2026" },
+      { title: "Gemini Guardian Judge", description: "Per-finding AI classification using Gemini — is_vulnerable, confidence score, reasoning.", status: "shipped", tags: ["Core", "AI Judge"], version: "v0.1.0", date: "Feb 2026" },
       { title: "Multi-turn attacks (Crescendo, GOAT)", description: "Iterative attack chains that escalate over multiple conversation turns to bypass model guardrails.", status: "shipped", tags: ["Attacks"], version: "v0.2.0", date: "Feb 2026" },
       { title: "MCP Server Scanner", description: "Security scanning for Model Context Protocol servers — tool poisoning, prompt injection via tool responses.", status: "shipped", tags: ["Agentic AI"], version: "v0.2.0", date: "Feb 2026" },
     ],
@@ -65,7 +65,7 @@ const PHASES: { phase: string; version: string; quarter: string; items: RoadmapI
     quarter: "Mar–Apr 2026",
     items: [
       { title: "PyRIT 10-converter engine", description: "Native PyRIT-style encoding converters: Base64, ROT13, leetspeak, Caesar cipher, Unicode math, Morse code, character-space, reverse, zero-width, binary.", status: "shipped", tags: ["Attacks", "Pro"], version: "v0.5.0", date: "Mar 2026" },
-      { title: "EasyJailbreak PAIR/TAP/CIPHER", description: "Claude Haiku as attacker model. PAIR: iterative refinement. TAP: tree-of-attacks with pruning. CIPHER: encoding-based evasion.", status: "shipped", tags: ["Attacks", "Pro/Ent"], version: "v0.5.0", date: "Mar 2026" },
+      { title: "EasyJailbreak PAIR/TAP/CIPHER", description: "Gemini as attacker model. PAIR: iterative refinement. TAP: tree-of-attacks with pruning. CIPHER: encoding-based evasion.", status: "shipped", tags: ["Attacks", "Pro/Ent"], version: "v0.5.0", date: "Mar 2026" },
       { title: "RAG Security Scanner (RAG-01–05)", description: "Dedicated scanner for Retrieval-Augmented Generation pipelines: corpus poisoning, cross-tenant leakage, query injection, unauth ingestion, embedding leakage.", status: "shipped", tags: ["RAG", "Pro/Ent"], version: "v0.5.0", date: "Mar 2026" },
       { title: "Enterprise org management + audit logs", description: "Org creation, member invite, role assignment (Admin/Member), org-wide scan history, paginated audit log.", status: "shipped", tags: ["Enterprise"], version: "v0.6.0", date: "Mar 2026" },
       { title: "Analytics dashboard", description: "Risk trend charts, findings breakdown by severity/category, OWASP coverage heatmap, scan cadence metrics.", status: "shipped", tags: ["Platform"], version: "v0.6.0", date: "Mar 2026" },

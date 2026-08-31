@@ -10,21 +10,30 @@ from app.core.security import get_current_user
 from app.core.utils import is_safe_url
 from app.core.rate_limiter import limiter, RATE_LIMITS
 from app.middleware.tier_enforcement import require_tier
+from app.models.audit_event import AuditEvent, InterceptEvent
 from app.services.supabase_service import check_scan_quota, get_scan_result, get_user_scans, create_share_token, get_scan_by_share_token, get_prev_scan_risk_for_url, create_scan_record, save_scan_result
 from app.services.scan_service import run_scan_internal
 from app.services.mcp_scanner import scan_mcp_server, MCPScanResult
 
-router = APIRouter()
+router = APIRouter(tags=["Scans"])
 
 _CATEGORY_BUCKET: dict = {
-    "PROMPT_INJECTION":      "injection",
-    "JAILBREAK":             "jailbreak",
-    "PII_LEAK":              "leakage",
-    "DATA_EXFIL":            "leakage",
-    "SYSTEM_PROMPT_LEAKAGE": "leakage",
-    "VECTOR_WEAKNESS":       "leakage",
-    "POLICY_BYPASS":         "compliance",
-    "UNBOUNDED_CONSUMPTION": "compliance",
+    "PROMPT_INJECTION":         "injection",
+    "jailbreak_dan":            "jailbreak",
+    "JAILBREAK":                "jailbreak",
+    "PII_LEAK":                 "leakage",
+    "DATA_EXFIL":               "leakage",
+    "data_exfil":               "leakage",
+    "SYSTEM_PROMPT_LEAKAGE":    "leakage",
+    "system_leak":              "leakage",
+    "VECTOR_WEAKNESS":          "leakage",
+    "POLICY_BYPASS":            "compliance",
+    "UNBOUNDED_CONSUMPTION":    "compliance",
+    "prompt_injection_direct":  "injection",
+    "role_play_bypass":         "jailbreak",
+    "encoding_base64":          "injection",
+    "multi_turn_crescendo":     "jailbreak",
+    "amplification":            "jailbreak",
 }
 
 def compute_category_scores(findings: list) -> dict:
@@ -60,7 +69,9 @@ async def list_scans(
 
 
 @router.post("/scan/{scan_id}/share")
+@limiter.limit(RATE_LIMITS["free"])
 async def share_scan(
+    request: Request,
     scan_id: str,
     current_user: dict = Depends(get_current_user),
 ):
@@ -82,7 +93,8 @@ async def share_scan(
 
 
 @router.get("/report/{token}")
-async def get_public_report(token: str):
+@limiter.limit(RATE_LIMITS["free"])
+async def get_public_report(request: Request, token: str):
     """Public endpoint — returns scan data for a shared report link. No auth required."""
     from fastapi.responses import JSONResponse
 
@@ -100,6 +112,65 @@ async def get_public_report(token: str):
         "findings": scan.get("findings", []),
         "compliance": scan.get("compliance", {}),
         "completed_at": scan.get("completed_at"),
+    })
+
+
+@router.get("/scan/{scan_id}/audit-trail")
+async def get_scan_audit_trail(
+    scan_id: str,
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=500),
+    current_user: dict = Depends(get_current_user),
+):
+    """Return ordered audit trail for a scan. Requires auth."""
+    from app.services.audit_log_service import audit_log
+    from fastapi.responses import JSONResponse
+
+    scan_data = get_scan_result(scan_id)
+    if not scan_data or scan_data.get("user_id") != current_user["id"]:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+
+    events = await audit_log.get_audit_trail(scan_id, limit=limit)
+    return JSONResponse(content={
+        "scan_id": scan_id,
+        "events": [e.model_dump(exclude_none=True) for e in events],
+        "count": len(events),
+    })
+
+
+@router.get("/scan/{scan_id}/intercept-events")
+async def list_intercept_events(
+    scan_id: str,
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    current_user: dict = Depends(get_current_user),
+):
+    """Return paginated intercept events for a scan. Requires auth."""
+    from app.core.deps import require_db
+    from fastapi.responses import JSONResponse
+
+    sb = require_db()
+
+    scan_data = get_scan_result(scan_id)
+    if not scan_data or scan_data.get("user_id") != current_user["id"]:
+        raise HTTPException(status_code=404, detail="Scan not found.")
+
+    rows = (
+        sb.table("intercept_events")
+        .select("*")
+        .eq("scan_id", scan_id)
+        .order("probe_index", ascending=True)
+        .range(offset, offset + limit - 1)
+        .execute()
+    )
+
+    events = [InterceptEvent(**r) for r in (rows.data or [])]
+    return JSONResponse(content={
+        "events": [e.model_dump() for e in events],
+        "limit": limit,
+        "offset": offset,
+        "total": len(events),
     })
 
 
@@ -456,6 +527,93 @@ async def start_multi_turn_scan(
         "attack_type": scan_data.attack_type,
         "message": f"Multi-turn {scan_data.attack_type} scan started at {scan_data.tier} tier."
     }
+
+
+class GuardianCycleRequest(BaseModel):
+    target_description: str
+    target_url: Optional[str] = None
+
+    @validator("target_description")
+    def validate_description(cls, v):
+        if not v or not v.strip():
+            raise ValueError("target_description must be a non-empty string")
+        if len(v) > 2000:
+            raise ValueError("target_description must not exceed 2000 characters")
+        return v.strip()
+
+
+@router.post("/scans/guardian-cycle")
+@limiter.limit(RATE_LIMITS["free"])
+async def run_guardian_cycle(
+    request: Request,
+    payload: GuardianCycleRequest,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    current_user: dict = Depends(get_current_user),
+):
+    """Run an autonomous GuardianForge cycle: attack → evaluate → fix → hot-reload."""
+    from fastapi.responses import JSONResponse
+    from app.guardian.orchestrator import guardian_orchestrator
+
+    user_id = current_user["id"]
+    user_tier = current_user["tier"]
+
+    # Enforce tier — guardian requires at least Pro
+    if user_tier == "free":
+        raise HTTPException(
+            status_code=402,
+            detail="Guardian autonomous cycle requires Pro or Enterprise tier.",
+        )
+
+    # Quota check
+    quota = check_scan_quota(user_id, user_tier)
+    if not quota["allowed"]:
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "quota_exceeded",
+                "message": quota["reason"],
+                "upgrade": "https://vulnra.lemonsqueezy.com/checkout",
+            },
+            headers={
+                "X-RateLimit-Limit": str(RATE_LIMITS.get(user_tier, RATE_LIMITS["free"]).split("/")[0]),
+                "X-RateLimit-Remaining": "0",
+                "X-RateLimit-Reset": str(int(time.time()) + 60),
+            },
+        )
+
+    scan_id = str(uuid.uuid4())
+
+    # Create initial DB row for polling
+    create_scan_record(scan_id, payload.target_description, user_tier, user_id, scan_type="guardian_forge")
+
+    def _run_and_save():
+        import asyncio
+
+        result = asyncio.run(guardian_orchestrator.run_full_cycle(
+            target_description=payload.target_description,
+            target_url=payload.target_url,
+        ))
+        result["user_id"] = user_id
+        save_scan_result(scan_id, payload.target_description, user_tier, result)
+
+    background_tasks.add_task(_run_and_save)
+
+    rate_limit_str = RATE_LIMITS.get(user_tier, RATE_LIMITS["free"])
+    rate_limit_count = int(rate_limit_str.split("/")[0])
+
+    return JSONResponse(
+        content={
+            "scan_id": scan_id,
+            "status": "queued",
+            "message": "Guardian autonomous cycle started.",
+            "target_description": payload.target_description,
+        },
+        headers={
+            "X-RateLimit-Limit": str(rate_limit_count),
+            "X-RateLimit-Remaining": str(max(0, rate_limit_count - 1)),
+            "X-RateLimit-Reset": str(int(time.time()) + 60),
+        },
+    )
 
 
 class MCPServerRequest(BaseModel):

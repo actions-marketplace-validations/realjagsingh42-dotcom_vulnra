@@ -22,7 +22,7 @@ from app.services.supabase_service import (
 
 logger = logging.getLogger("vulnra.billing")
 
-router = APIRouter()
+router = APIRouter(tags=["Billing"])
 
 _LS_API_BASE = "https://api.lemonsqueezy.com/v1"
 _LS_HEADERS = {

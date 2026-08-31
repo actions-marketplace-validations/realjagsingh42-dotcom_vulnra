@@ -10,7 +10,7 @@ from app.services.supabase_service import (
     delete_sentinel_watch, _SENTINEL_LIMITS,
 )
 
-router = APIRouter()
+router = APIRouter(tags=["Monitor"])
 
 
 class CreateWatchRequest(BaseModel):

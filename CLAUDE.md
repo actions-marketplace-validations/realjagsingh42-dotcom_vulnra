@@ -39,7 +39,7 @@ celery -A app.worker worker --loglevel=info
 - ✅ DeepTeam Engine (40+ vulnerability types)
 - ✅ AI Judge (Claude 3 Haiku)
 - ✅ SSRF Protection & Rate Limiting
-- ✅ Supabase Auth (email/password, GitHub, Google OAuth)
+- ✅ Supabase Auth (email/password)
 - ✅ Next.js Dashboard with Cyberpunk Theme
 - ✅ MCP Server Security Scanner
 - ✅ Multi-Turn Attack Chains (Crescendo, GOAT)

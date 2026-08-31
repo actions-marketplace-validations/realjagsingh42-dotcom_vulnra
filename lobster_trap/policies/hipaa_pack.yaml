@@ -1,0 +1,83 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# HIPAA Compliance Policy Pack  v1.0
+# ──────────────────────────────────────────────────────────────────────────────
+# Mapped against the HIPAA Security Rule (45 CFR §164):
+#
+# Rule                        HIPAA Safeguard
+# ──────────────────────────────────────────────────────────────────────────────
+# DENY prompt_injection       Technical Safeguards §164.312(a)(1) — Access Control
+# DENY jailbreak              Technical Safeguards §164.312(a)(1) — Access Control
+# LOG + HUMAN_REVIEW pii      Technical Safeguards §164.312(e)(1) — Transmission Security
+# LOG + HUMAN_REVIEW leak     Administrative Safeguards §164.308(a)(1) — Risk Analysis
+# QUARANTINE data_exfil       Technical Safeguards §164.312(c)(1) — Integrity Controls
+# DENY credential_leakage     Administrative Safeguards §164.308(a)(3) — Workforce Security
+# LOG excessive_agency        Audit Controls §164.312(b) — Audit Controls
+# ALLOW + LOG (default)       §164.312(b) — Information System Activity Review
+# ──────────────────────────────────────────────────────────────────────────────
+
+policy:
+  name: "HIPAA Compliance Pack"
+  version: "1.0"
+  description: "Protects electronic Protected Health Information (ePHI) with access controls, integrity controls, and audit trails per HIPAA Security Rule."
+  regulatory_framework: "HIPAA"
+  rules:
+
+    # §164.312(a)(1) — Access Control: prevent unauthorized access to ePHI
+    - id: "hipaa-001"
+      name: "Block Prompt Injection"
+      intent: prompt_injection
+      action: DENY
+      rationale: "Prevents injection attacks that could bypass access controls protecting ePHI."
+
+    # §164.312(a)(1) — Access Control: prevent jailbreak escalation
+    - id: "hipaa-002"
+      name: "Block Jailbreak Attempts"
+      intent: jailbreak
+      action: DENY
+      rationale: "Jailbreak attempts represent unauthorized access attempts under HIPAA."
+
+    # §164.312(e)(1) — Transmission Security: PHI detection
+    - id: "hipaa-003"
+      name: "PHI Detection Alert"
+      condition:
+        pii_detected: true
+      action: LOG
+      secondary_action: HUMAN_REVIEW
+      rationale: "Any detected PII/PHI requires immediate human review per HIPAA transmission security."
+
+    # §164.308(a)(1) — Risk Analysis: sensitive info monitoring
+    - id: "hipaa-004"
+      name: "Sensitive Info Disclosure Alert"
+      intent: sensitive_info_disclosure
+      action: LOG
+      secondary_action: HUMAN_REVIEW
+      rationale: "Sensitive information disclosure must be logged and reviewed as part of HIPAA risk analysis."
+
+    # §164.312(c)(1) — Integrity Controls: prevent ePHI exfiltration
+    - id: "hipaa-005"
+      name: "Quarantine Data Exfiltration"
+      intent: data_exfiltration
+      action: QUARANTINE
+      rationale: "Data exfiltration must be quarantined to preserve ePHI integrity."
+
+    # §164.308(a)(3) — Workforce Security: block credential leaks
+    - id: "hipaa-006"
+      name: "Block Credential Leakage"
+      intent: credential_leakage
+      action: DENY
+      rationale: "Credential leakage must be blocked to maintain workforce security."
+
+    # §164.312(b) — Audit Controls: monitor excessive agency
+    - id: "hipaa-007"
+      name: "Log Excessive Agency"
+      intent: excessive_agency
+      action: LOG
+      rationale: "Excessive agency events are logged per HIPAA audit control requirements."
+
+    # §164.312(b) — Default: log all other traffic
+    - id: "hipaa-999"
+      name: "Default Allow with Logging"
+      intent: "*"
+      action: ALLOW
+      secondary_action: LOG
+      rationale: "All other traffic is permitted but logged per information system activity review."

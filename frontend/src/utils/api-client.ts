@@ -2,7 +2,7 @@
 // Centralised fetch wrapper with auth, timeouts, request IDs, and typed errors.
 // Use apiRequest() for every backend call instead of raw fetch().
 
-import type { ApiResponse, ApiError } from "@/types/api";
+import type { ApiResponse, ApiError, InterceptEvent, AuditEvent, PolicyPack, ComplianceSummary } from "@/types/api";
 import { API_BASE, REQUEST_TIMEOUT_MS } from "./constants";
 import { getAccessToken } from "./auth-storage";
 import { logger } from "./logger";
@@ -153,4 +153,58 @@ export async function apiRequest<T>(
       error: { detail: message, code: "NETWORK_ERROR" },
     };
   }
+}
+
+// ── Shield / Lobster Trap API ───────────────────────────────────────────────
+
+export async function getInterceptEvents(
+  scanId: string,
+  limit = 50,
+  offset = 0
+): Promise<InterceptEvent[]> {
+  const { data, error } = await apiRequest<InterceptEvent[]>(
+    `/scan/${scanId}/intercept-events?limit=${limit}&offset=${offset}`
+  );
+  if (error) throw new Error(error.detail);
+  return data ?? [];
+}
+
+export async function getAuditTrail(
+  scanId: string,
+  limit = 100
+): Promise<AuditEvent[]> {
+  const { data, error } = await apiRequest<AuditEvent[]>(
+    `/scan/${scanId}/audit-trail?limit=${limit}`
+  );
+  if (error) throw new Error(error.detail);
+  return data ?? [];
+}
+
+export async function getPolicyPacks(): Promise<PolicyPack[]> {
+  const { data, error } = await apiRequest<PolicyPack[]>("/api/policy-packs");
+  if (error) throw new Error(error.detail);
+  return data ?? [];
+}
+
+export async function activatePolicyPack(
+  packName: string
+): Promise<{ success: boolean }> {
+  const { data, error } = await apiRequest<{ success: boolean }>(
+    `/api/policy-packs/${packName}/activate`,
+    { method: "POST" }
+  );
+  if (error) throw new Error(error.detail);
+  return data ?? { success: false };
+}
+
+export async function getComplianceSummary(
+  startDate: string,
+  endDate: string,
+  format: "json" | "summary" = "summary"
+): Promise<ComplianceSummary> {
+  const { data, error } = await apiRequest<ComplianceSummary>(
+    `/api/compliance/audit-export?start_date=${startDate}&end_date=${endDate}&format=${format}`
+  );
+  if (error) throw new Error(error.detail);
+  return data ?? { by_event_type: {}, by_owasp_category: {} };
 }

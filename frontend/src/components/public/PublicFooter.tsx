@@ -190,6 +190,25 @@ export default function PublicFooter() {
                   X
                 </a>
               </div>
+
+              {/* Powered by badge */}
+              <div
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+                  fontSize: 9, letterSpacing: "0.12em",
+                  color: "rgba(184,255,87,0.6)",
+                  border: "1px solid rgba(184,255,87,0.15)",
+                  background: "rgba(184,255,87,0.04)",
+                  padding: "4px 8px", borderRadius: 2,
+                  marginTop: 4,
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span>VEEA LOBSTER TRAP + GEMINI</span>
+              </div>
             </div>
 
             {/* Link columns */}

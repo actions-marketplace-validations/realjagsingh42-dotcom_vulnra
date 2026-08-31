@@ -467,7 +467,7 @@ print(f"Scan started: {scan_id}")`}
               <Endpoint
                 method="POST"
                 path="/api/multi-turn-scan"
-                description="Launch a Crescendo or GOAT attack. Uses Claude Haiku as the attacker model with up to 10 turns."
+                description="Launch a Crescendo or GOAT attack. Uses Gemini as the attacker model with up to 10 turns."
                 tiers={["pro", "enterprise"]}
               >
                 <CodeBlock

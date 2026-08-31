@@ -121,7 +121,12 @@ def run_deepteam_scan(scan_id: str, target_url: str, tier: str = "free", vulnera
     Run a DeepTeam red teaming scan via subprocess for isolation.
     vulnerability_types: optional list of DeepTeam vuln IDs to run (e.g. ["Jailbreak", "PII"]).
     """
+    from app.services.lobster_trap_client import lobster_trap
+
     logger.info(f"Starting DeepTeam isolated scan {scan_id} for {target_url} [Tier: {tier}]")
+
+    # Route through Lobster Trap when enabled
+    probe_url = lobster_trap.get_probe_url(target_url)
 
     py_path = _find_dt_python()
     if not py_path:
@@ -141,13 +146,13 @@ def run_deepteam_scan(scan_id: str, target_url: str, tier: str = "free", vulnera
         filtered = [v for v in vulnerability_types if v in accessible_vulns]
         effective_vulns = filtered if filtered else list(accessible_vulns)
     else:
-        effective_vulns = []  # empty = let subprocess use tier defaults
+        effective_vulns = []
 
     cmd = [
         py_path,
         this_script,
         "--scan_id", scan_id,
-        "--url", target_url,
+        "--url", probe_url,
         "--tier", tier,
     ]
     if effective_vulns:
@@ -155,7 +160,11 @@ def run_deepteam_scan(scan_id: str, target_url: str, tier: str = "free", vulnera
     
     try:
         env = os.environ.copy()
-        # Ensure OPENAI_API_KEY is passed
+        # Pass Lobster Trap config to subprocess for _lobstertrap extraction
+        env["LOBSTER_TRAP_ENABLED"] = str(lobster_trap.enabled).lower()
+        if lobster_trap.enabled:
+            env["LOBSTER_TRAP_URL"] = lobster_trap.url
+            env["LOBSTER_TRAP_BACKEND"] = target_url
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -428,15 +437,37 @@ if __name__ == "__main__":
         print(json.dumps({"status": "failed", "error": "DeepTeam library missing in target environment"}))
         sys.exit(1)
 
+    # Lobster Trap config (injected by parent process)
+    _lt_enabled = os.environ.get("LOBSTER_TRAP_ENABLED", "false") == "true"
+    _lt_url = os.environ.get("LOBSTER_TRAP_URL", "")
+    _lt_backend = os.environ.get("LOBSTER_TRAP_BACKEND", "")
+
+    # Intercept events queue: each model_callback may produce one
+    _intercept_queue: list = [[]]
+
     def model_callback(prompt: str) -> str:
         try:
+            target = _lt_url if _lt_enabled and _lt_url else args.url
             resp = requests.post(
-                args.url,
+                target,
                 json={"messages": [{"role": "user", "content": prompt}]},
                 timeout=10,
             )
             if resp.status_code == 200:
                 data = resp.json()
+                # Extract Lobster Trap intercept data
+                if _lt_enabled and _lt_url:
+                    lt = data.get("_lobstertrap", {})
+                    ingress = lt.get("ingress", {})
+                    detected = ingress.get("detected", {})
+                    _intercept_queue[0].append({
+                        "prompt": prompt,
+                        "intent": detected.get("intent_category"),
+                        "risk_score": detected.get("risk_score", 0.0),
+                        "pii_detected": detected.get("contains_pii", False),
+                        "action_taken": lt.get("verdict", "ALLOW"),
+                        "rule_matched": ingress.get("rule", {}).get("name"),
+                    })
                 for path in [
                     ["choices", 0, "message", "content"],
                     ["content", 0, "text"],
@@ -500,6 +531,7 @@ if __name__ == "__main__":
 
         all_results = list(dt_results) + dataset_results
         final_data = _process_results(args.scan_id, all_results, tier=args.tier)
+        final_data["_intercepts"] = _intercept_queue[0]
         print(json.dumps(final_data))
     except Exception as exc:
         print(json.dumps({"status": "failed", "error": str(exc)}))

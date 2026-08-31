@@ -125,7 +125,7 @@ const RELEASES = [
     features: [
       { cat: "Sprint 5 — Engine Depth", items: [
         "PyRIT converter engine — 10 encoding transformations (Base64, ROT13, Morse, Binary, Unicode…)",
-        "EasyJailbreak — PAIR, TAP, CIPHER recipes using Claude Haiku as attacker",
+        "EasyJailbreak — PAIR, TAP, CIPHER recipes using Gemini as attacker",
         "Open-source probe datasets — JailbreakBench (20), AdvBench (50), GPTFuzzer (25)",
         "Pro: 5 converters + PAIR + CIPHER; Enterprise: all 10 + TAP",
       ]},
@@ -200,7 +200,7 @@ const RELEASES = [
     features: [
       { cat: "Multi-Turn", items: [
         "POST /api/multi-turn-scan — Crescendo + GOAT attack strategies",
-        "Claude Haiku as attacker model, up to 10 turns",
+        "Gemini as attacker model, up to 10 turns",
         "Conversation replay in the scanner findings panel",
       ]},
       { cat: "MCP Scanner", items: [
@@ -221,11 +221,11 @@ const RELEASES = [
       { cat: "Scan Engines", items: [
         "Garak 0.14.0 subprocess integration (DAN, AutoDAN, prompt injection probes)",
         "DeepTeam 0.1.0 SDK — 40+ vulnerability types",
-        "Claude 3 Haiku AI Judge — is_vulnerable, confidence, reasoning per finding",
+        "Gemini Guardian Judge — is_vulnerable, confidence, reasoning per finding",
         "Multi-engine result merging + deduplication",
       ]},
       { cat: "Platform", items: [
-        "Supabase Auth — email/password, GitHub OAuth, Google OAuth",
+        "Supabase Auth — email/password",
         "SlowAPI tier-based rate limiting (1/10/100 req/min)",
         "OWASP LLM Top 10 + MITRE ATLAS + EU AI Act compliance mappings",
         "Cyberpunk scanner dashboard with real-time polling",

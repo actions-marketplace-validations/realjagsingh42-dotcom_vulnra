@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Globe, Timer, AlertTriangle, ChevronDown, ChevronRight, SlidersHorizontal, CheckSquare, Square, Zap, Lock } from "lucide-react";
+import { Globe, Timer, AlertTriangle, ChevronDown, ChevronRight, SlidersHorizontal, CheckSquare, Square, Zap, Lock, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Probe catalogue (mirrors backend PROBE_CATALOGUE) ────────────────────────
@@ -255,7 +255,7 @@ export default function ScanConfig({ onStart, isScanning, defaultTier }: ScanCon
       <div className="flex flex-col gap-1.5">
         <label className="text-[8.5px] font-mono tracking-widest uppercase text-v-muted2">Attack Type</label>
         <div className="flex gap-1">
-          {["crescendo", "goat"].map((type) => (
+          {["crescendo", "goat", "guardian"].map((type) => (
             <button
               key={type}
               type="button"
@@ -266,10 +266,27 @@ export default function ScanConfig({ onStart, isScanning, defaultTier }: ScanCon
                 attackType === type ? "border-acid text-acid bg-acid/10" : "text-v-muted2 hover:border-white/10 hover:text-v-muted"
               )}
             >
-              {type.toUpperCase()}
+              {type === "guardian" ? "GUARDIAN" : type.toUpperCase()}
             </button>
           ))}
         </div>
+        {attackType === "guardian" && (
+          <div className="mt-1.5 p-3 bg-acid/5 border border-acid/25 rounded-sm">
+            <div className="flex items-start gap-2">
+              <Shield className="w-4 h-4 text-acid shrink-0 mt-0.5" />
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-mono font-bold text-acid tracking-wider">GUARDIANFORGE</span>
+                <p className="text-[8px] font-mono text-v-muted leading-relaxed">
+                  Autonomous self-healing governance cycle: generates adversarial attacks, evaluates responses,
+                  fixes vulnerabilities with Lobster Trap YAML policies, and auto-deploys them.
+                </p>
+                <span className="inline-flex items-center gap-1 self-start mt-1 text-[7px] font-mono tracking-widest px-1.5 py-0.5 bg-acid/10 border border-acid/20 rounded text-acid/80">
+                  POWERED BY VEEA LOBSTER TRAP + GEMINI
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="h-[1px] bg-v-border2" />

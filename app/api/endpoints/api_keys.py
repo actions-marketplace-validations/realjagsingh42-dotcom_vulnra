@@ -8,7 +8,7 @@ from app.services.supabase_service import (
     create_api_key, list_api_keys, revoke_api_key, _API_KEY_LIMITS
 )
 
-router = APIRouter()
+router = APIRouter(tags=["API Keys"])
 
 
 class CreateKeyRequest(BaseModel):

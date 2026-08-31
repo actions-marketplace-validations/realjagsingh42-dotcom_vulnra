@@ -14,7 +14,7 @@ def test_goat_attack_initialization():
     """Test GOAT attack initializes correctly."""
     attack = GOATAttack()
     assert attack.max_turns == 10
-    assert attack.attacker_model == "claude-3-haiku-20240307"
+    assert attack.model_name == "gemini-1.5-flash"
 
 
 def test_crescendo_prompt_sequence():
@@ -47,7 +47,7 @@ def test_crescendo_process_response():
 
 
 def test_goat_attack_generation():
-    """Test GOAT generates attack prompts using Claude."""
+    """Test GOAT generates attack prompts using Gemini."""
     attack = GOATAttack()
     
     # Mock target response

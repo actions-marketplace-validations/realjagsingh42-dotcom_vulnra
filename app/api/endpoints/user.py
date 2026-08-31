@@ -16,7 +16,7 @@ from app.core.security import get_current_user
 from app.core.deps import require_db
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(tags=["User"])
 
 
 # ── Models ────────────────────────────────────────────────────────────────────
@@ -81,14 +81,14 @@ async def update_profile(
     if body.display_name is not None:
         name = body.display_name.strip()
         if len(name) > 64:
-            raise HTTPException(400, "display_name must be ≤ 64 characters")
+            raise HTTPException(status_code=400, detail="display_name must be ≤ 64 characters")
         fields["display_name"] = name
 
     if body.notification_email is not None:
         fields["notification_email"] = body.notification_email.strip() or None
 
     if not fields:
-        raise HTTPException(400, "Nothing to update")
+        raise HTTPException(status_code=400, detail="Nothing to update")
 
     _upsert_profile(user_id, fields)
     return {"status": "ok", **fields}
@@ -107,7 +107,7 @@ async def update_notifications(
     if body.alert_threshold is not None:
         v = body.alert_threshold
         if not (0 <= v <= 100):
-            raise HTTPException(400, "alert_threshold must be 0–100")
+            raise HTTPException(status_code=400, detail="alert_threshold must be 0–100")
         fields["alert_threshold"] = v
     if body.alert_new_high is not None:
         fields["alert_new_high"] = body.alert_new_high
@@ -115,7 +115,7 @@ async def update_notifications(
         fields["alert_scan_complete"] = body.alert_scan_complete
 
     if not fields:
-        raise HTTPException(400, "Nothing to update")
+        raise HTTPException(status_code=400, detail="Nothing to update")
 
     _upsert_profile(user_id, fields)
     return {"status": "ok", **fields}
@@ -148,4 +148,4 @@ async def delete_account(current_user: dict = Depends(get_current_user)):
         return {"status": "deleted"}
     except Exception as exc:
         logger.error("delete_account error: %s", exc)
-        raise HTTPException(500, "Account deletion failed — contact support@vulnra.ai")
+        raise HTTPException(status_code=500, detail="Account deletion failed — contact support@vulnra.ai")

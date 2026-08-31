@@ -117,7 +117,7 @@ const USE_CASES = [
     badge: "EARLY STAGE",
     badgeColor: "text-v-amber border-v-amber/40 bg-v-amber/8",
     description:
-      "AI startups building on foundation models — via OpenAI, Anthropic, or open-source — are responsible for the security of their own system prompt layer, tool integrations, and output handling. Investors and enterprise customers increasingly require security evidence before signing deals. VULNRA gives you that evidence on the free tier.",
+      "AI startups building on foundation models — via Google Gemini or open-source — are responsible for the security of their own system prompt layer, tool integrations, and output handling. Investors and enterprise customers increasingly require security evidence before signing deals. VULNRA gives you that evidence on the free tier.",
     threats: [
       "Prompt injection via system prompt override in early-stage products",
       "Jailbreaks in demos exploited by security researchers before launch",

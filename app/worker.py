@@ -3,6 +3,7 @@ app/worker.py - Celery worker for VULNRA.
 Consolidated and hardened version.
 """
 
+import os
 import time
 import pathlib
 import sys
@@ -60,7 +61,7 @@ app = Celery(
     backend=settings.redis_url
 )
 
-app.conf.update(
+conf = dict(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
@@ -73,17 +74,22 @@ app.conf.update(
         "socket_connect_timeout": 5,
         "socket_timeout": 5,
     },
-    beat_schedule={
+)
+
+celery_enabled = os.environ.get("CELERY_ENABLED", "false").lower() == "true"
+if celery_enabled:
+    conf["beat_schedule"] = {
         "sentinel-check-every-15-minutes": {
             "task": "app.worker.check_due_sentinel_watches",
-            "schedule": 900,  # every 15 minutes
+            "schedule": 900,
         },
         "scheduled-scan-check-every-minute": {
             "task": "app.worker.check_due_scheduled_scans",
-            "schedule": 60,  # every minute
+            "schedule": 60,
         },
-    },
-)
+    }
+
+app.conf.update(**conf)
 
 # ── Tasks ─────────────────────────────────────────────────────────────────────
 
